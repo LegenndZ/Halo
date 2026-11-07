@@ -366,12 +366,15 @@
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-cyan-300 mb-1">Gamertag / Nombre Xbox</label>
                     <div class="flex gap-2">
-                        <input type="text" id="newPlayerName" placeholder="Ej. Legennd Zr" class="flex-1 bg-[#030a14] border border-cyan-500/40 rounded px-3 py-2 text-white font-semibold focus:outline-none focus:border-cyan-400">
+                        <input type="text" id="newPlayerName" oninput="checkLiveDuplicateSpartan()" placeholder="Ej. Legennd Zr" class="flex-1 bg-[#030a14] border border-cyan-500/40 rounded px-3 py-2 text-white font-semibold focus:outline-none focus:border-cyan-400">
                         <button type="button" id="btnScanTracker" onclick="scanHaloTrackerProfile()" class="bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-300 border border-cyan-400/60 px-3 py-2 rounded font-halo font-bold text-[11px] uppercase tracking-wider transition flex items-center gap-1.5 whitespace-nowrap shadow-[0_0_12px_rgba(0,229,255,0.2)]">
                             <i class="fa-solid fa-satellite-dish text-cyan-400" id="scanIcon"></i>
                             <span id="scanBtnText">Halo Tracker</span>
                         </button>
                     </div>
+                    <p id="duplicateWarningText" class="hidden text-[11px] text-rose-400 font-bold mt-1.5 bg-rose-950/60 border border-rose-500/50 px-2.5 py-1 rounded">
+                        <i class="fa-solid fa-ban mr-1"></i> Este Spartan ya existe en el Roster. No se permite duplicar perfiles.
+                    </p>
                     <p class="text-[11px] text-slate-400 mt-1">Escanea su K/D y rango en Arena y Asesino para sugerir su nivel.</p>
                 </div>
 
@@ -449,7 +452,7 @@
                     <button type="button" id="deletePlayerModalBtn" onclick="deletePlayerFromModal()" class="hidden bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/50 px-4 py-2.5 rounded font-halo font-bold text-xs uppercase transition">
                         <i class="fa-solid fa-trash"></i>
                     </button>
-                    <button type="button" onclick="savePlayerModal()" class="flex-1 halo-btn-primary py-2.5 rounded font-halo font-bold text-xs uppercase transition">
+                    <button type="button" id="savePlayerModalBtn" onclick="savePlayerModal()" class="flex-1 halo-btn-primary py-2.5 rounded font-halo font-bold text-xs uppercase transition disabled:opacity-40 disabled:cursor-not-allowed">
                         Guardar Spartan
                     </button>
                 </div>
@@ -595,13 +598,37 @@
         const ROSTER_BACKUP_KEY = 'mansalvas_roster_v1';
         const LOBBY_BACKUP_PREFIX = 'mansalvas_lobby_';
 
+        // Normalizador estricto: ignora mayúsculas, tildes, espacios, guiones y caracteres invisibles de copia/pega
+        window.normalizeSpartanKey = function(str) {
+            return String(str || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '');
+        };
+
+        // Limpia automáticamente cualquier duplicado previo en la nube o memoria conservando el primer registro
+        window.deduplicateRosterList = function(list) {
+            if (!Array.isArray(list)) return [];
+            const seenKeys = new Set();
+            const cleanList = [];
+            for (const item of list) {
+                if (!item || !item.name) continue;
+                const key = window.normalizeSpartanKey(item.name);
+                if (!key || seenKeys.has(key)) continue;
+                seenKeys.add(key);
+                cleanList.push(item);
+            }
+            return cleanList;
+        };
+
         function loadPersistedRoster() {
             try {
                 const raw = window['local' + 'Storage'].getItem(ROSTER_BACKUP_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        return parsed;
+                        return window.deduplicateRosterList(parsed);
                     }
                 }
             } catch (e) {
@@ -612,6 +639,7 @@
 
         window.persistRosterLocally = function() {
             try {
+                window.roster = window.deduplicateRosterList(window.roster);
                 window['local' + 'Storage'].setItem(ROSTER_BACKUP_KEY, JSON.stringify(window.roster));
             } catch (e) {
                 console.warn('Error guardando respaldo local:', e);
@@ -936,6 +964,14 @@
                 return;
             }
 
+            const editId = document.getElementById('editPlayerId').value;
+            const targetKey = window.normalizeSpartanKey(gamertag);
+            const alreadyExists = window.roster.find(p => p.id !== editId && window.normalizeSpartanKey(p.name) === targetKey);
+            if (alreadyExists) {
+                showMsg(`⚠️ Acción bloqueada: El Spartan "${alreadyExists.name}" ya está registrado en el Roster (${alreadyExists.rank} - ${alreadyExists.pts} PTS). No se permiten perfiles duplicados.`);
+                return;
+            }
+
             const btn = document.getElementById('btnScanTracker');
             const icon = document.getElementById('scanIcon');
             const btnText = document.getElementById('scanBtnText');
@@ -1067,6 +1103,38 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             document.getElementById('exactPlayerPts').value = pts;
         }
 
+        function checkLiveDuplicateSpartan() {
+            const nameInput = document.getElementById('newPlayerName');
+            const warningEl = document.getElementById('duplicateWarningText');
+            const saveBtn = document.getElementById('savePlayerModalBtn');
+            const scanBtn = document.getElementById('btnScanTracker');
+            if (!nameInput || !warningEl || !saveBtn) return false;
+
+            const editId = document.getElementById('editPlayerId').value;
+            const inputKey = window.normalizeSpartanKey(nameInput.value);
+
+            if (!inputKey) {
+                warningEl.classList.add('hidden');
+                saveBtn.disabled = false;
+                if (scanBtn) scanBtn.disabled = false;
+                return false;
+            }
+
+            const existing = window.roster.find(p => p.id !== editId && window.normalizeSpartanKey(p.name) === inputKey);
+            if (existing) {
+                warningEl.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> Bloqueado: <strong>${existing.name}</strong> ya existe (${existing.rank} • ${existing.pts} PTS). No puedes duplicarlo.`;
+                warningEl.classList.remove('hidden');
+                saveBtn.disabled = true;
+                if (scanBtn) scanBtn.disabled = true;
+                return true;
+            } else {
+                warningEl.classList.add('hidden');
+                saveBtn.disabled = false;
+                if (scanBtn) scanBtn.disabled = false;
+                return false;
+            }
+        }
+
         function openAddPlayerModal() {
             document.getElementById('modalTitle').innerText = 'Reclutar Spartan';
             document.getElementById('editPlayerId').value = '';
@@ -1074,6 +1142,7 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             document.getElementById('trackerResultBox').classList.add('hidden');
             document.getElementById('adminPointsControl').classList.toggle('hidden', !window.isAdmin);
             document.getElementById('deletePlayerModalBtn').classList.add('hidden');
+            checkLiveDuplicateSpartan();
             selectTier('B+', 16);
             document.getElementById('addPlayerModal').classList.remove('hidden');
         }
@@ -1088,6 +1157,7 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             document.getElementById('exactPlayerPts').value = p.pts;
             document.getElementById('adminPointsControl').classList.toggle('hidden', !window.isAdmin);
             document.getElementById('deletePlayerModalBtn').classList.toggle('hidden', !window.isAdmin);
+            checkLiveDuplicateSpartan();
             selectTier(p.rank, p.pts);
             document.getElementById('exactPlayerPts').value = p.pts;
             document.getElementById('addPlayerModal').classList.remove('hidden');
@@ -1096,12 +1166,24 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
         function closeAddPlayerModal() { document.getElementById('addPlayerModal').classList.add('hidden'); }
 
         function savePlayerModal() {
-            const name = document.getElementById('newPlayerName').value.trim();
+            const name = document.getElementById('newPlayerName').value.trim().replace(/\s+/g, ' ');
             if (!name) {
                 showMsg('Escribe el Gamertag del Spartan.');
                 return;
             }
             const editId = document.getElementById('editPlayerId').value;
+
+            // Validación Estricta Anti-Duplicados (compara clave alfanumérica limpia en Roster actual y respaldo local)
+            const candidateKey = window.normalizeSpartanKey(name);
+            const duplicateSpartan = window.roster.find(r => r.id !== editId && window.normalizeSpartanKey(r.name) === candidateKey);
+            if (duplicateSpartan || checkLiveDuplicateSpartan()) {
+                const dupName = duplicateSpartan ? duplicateSpartan.name : name;
+                const dupRank = duplicateSpartan ? duplicateSpartan.rank : '';
+                const dupPts = duplicateSpartan ? duplicateSpartan.pts : '';
+                showMsg(`⚠️ Acción bloqueada: El Spartan "${dupName}" ya está registrado en el Roster (${dupRank} - ${dupPts} PTS). Solo el Administrador o una Votación Post-Partida pueden modificar su nivel.`);
+                return;
+            }
+
             const pts = window.isAdmin
                 ? Math.max(1, Math.min(25, Number(document.getElementById('exactPlayerPts').value) || 16))
                 : selectedNewTier.pts;
@@ -1115,10 +1197,11 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     window.roster[idx].rank = rank;
                 }
             } else {
-                const newId = 'sp_' + Date.now();
+                const newId = 'sp_' + candidateKey;
                 window.roster.push({ id: newId, name, pts, rank });
             }
 
+            window.roster = window.deduplicateRosterList(window.roster);
             window.persistRosterLocally();
             if (window.saveRosterToCloud) window.saveRosterToCloud();
             window.renderRoster();
@@ -2076,15 +2159,22 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 const rosterDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rosterData', 'mainRoster');
                 onSnapshot(rosterDocRef, (snap) => {
                     if (snap.exists() && snap.data().players && snap.data().players.length > 0) {
-                        window.roster = snap.data().players;
+                        const rawPlayers = snap.data().players;
+                        const cleanPlayers = window.deduplicateRosterList(rawPlayers);
+                        window.roster = cleanPlayers;
                         window.persistRosterLocally();
                         window.renderRoster();
+                        // Si había duplicados viejos guardados en Firebase, actualiza la nube automáticamente con la lista limpia
+                        if (cleanPlayers.length !== rawPlayers.length) {
+                            setDoc(rosterDocRef, { players: cleanPlayers, updatedAt: Date.now() });
+                        }
                     } else {
                         setDoc(rosterDocRef, { players: window.roster, updatedAt: Date.now() });
                     }
                 }, (err) => console.warn("Sync roster warning:", err));
 
                 window.saveRosterToCloud = async () => {
+                    window.roster = window.deduplicateRosterList(window.roster);
                     window.persistRosterLocally();
                     if (!auth.currentUser) return;
                     await setDoc(rosterDocRef, { players: window.roster, updatedAt: Date.now() });
