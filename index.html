@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Halo Matchmaker | Grupo Mansalvas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -44,6 +45,15 @@
             inset: 0;
             width: 100vw;
             height: 100vh;
+            z-index: -4;
+            pointer-events: none;
+            filter: contrast(1.08) saturate(1.18);
+        }
+        #hudOverlayCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: -3;
             pointer-events: none;
         }
@@ -53,8 +63,8 @@
             z-index: -2;
             pointer-events: none;
             background:
-                radial-gradient(circle at 50% 25%, rgba(var(--halo-accent-rgb), 0.06) 0%, rgba(2, 6, 12, 0.62) 68%, rgba(1, 4, 8, 0.92) 100%),
-                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 4px);
+                radial-gradient(circle at 50% 35%, rgba(0, 0, 0, 0.12) 0%, rgba(2, 6, 12, 0.52) 72%, rgba(1, 4, 8, 0.86) 100%),
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 1px, transparent 1px, transparent 4px);
             transition: background 0.8s ease;
         }
         .visor-hud-frame {
@@ -166,6 +176,7 @@
 <body class="min-h-screen flex flex-col selection:bg-cyan-400 selection:text-slate-950 pb-20">
 
     <canvas id="zetaHaloCanvas"></canvas>
+    <canvas id="hudOverlayCanvas"></canvas>
     <div class="mjolnir-visor-overlay"></div>
     <div class="visor-hud-frame hidden sm:block"></div>
 
@@ -1360,82 +1371,135 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
         }
 
         // ============================================================================
-        // MOTOR DE DRON TÁCTICO 3D: CALLES, ACUARIO, FUEGO REAL Y RECARGA
+        // MOTOR 3D HIPERREALISTA (THREE.JS WEBGL PBR) - DRON FPV EN LOS 4 MAPAS
         // ============================================================================
         const HALO_MAPS = [
             {
                 id: 'streets',
                 name: 'CALLES (STREETS)',
-                location: 'NEW MOMBASA // SECTOR NOCTURNO',
-                callout: 'DRON: CALLE PRINCIPAL • COHETE (C) & CAMUFLAJE',
+                location: 'NEW MOMBASA // SECTOR URBANO NOCTURNO',
+                callout: 'DRON FPV: ASFALTO MOJADO • COHETE M41 & CAMUFLAJE',
                 accentHex: '#00f0ff',
                 accentRgb: '0, 240, 255',
-                secondaryHex: '#ff2a85',
-                skyTop: '#030511',
-                skyMid: '#091326',
-                skyBot: '#040812',
-                gridColor: [0, 240, 255],
-                secColor: [255, 42, 133],
-                objColor: [251, 191, 36],
-                weatherType: 'rain',
-                callouts: ['ESTACIÓN POLICÍA', 'ARCADIA / B', 'COHETE [SPAWN]', 'METRO A', 'CAFÉ / BALCÓN']
+                fogColor: 0x040914,
+                fogDensity: 0.0085,
+                ambientColor: 0x1a2c42,
+                ambientIntensity: 1.3,
+                dirLightColor: 0x38bdf8,
+                dirLightIntensity: 1.8,
+                pointLightA: 0x00f0ff,
+                pointLightB: 0xff1e75,
+                floorColor: 0x0b1017,
+                floorRoughness: 0.14,
+                floorMetalness: 0.82,
+                wallColor: 0x151e29,
+                wallRoughness: 0.35,
+                wallMetalness: 0.65,
+                emissiveA: 0x00f0ff,
+                emissiveB: 0xff1e75,
+                callouts: [
+                    { label: 'COHETE M41 [LISTO]', sub: 'CALLE CENTRAL', color: '#fbbf24' },
+                    { label: 'ESTACIÓN POLICÍA', sub: 'SECTOR A', color: '#00f0ff' },
+                    { label: 'ARCADIA // NEÓN', sub: 'SECTOR B', color: '#ff2a85' },
+                    { label: 'CAMUFLAJE ACTIVO', sub: 'BALCÓN', color: '#00f0ff' }
+                ]
             },
             {
                 id: 'aquarius',
                 name: 'ACUARIO (AQUARIUS)',
-                location: 'PROYECTO RECLAMACIÓN // DOMO HIDROPÓNICO',
-                callout: 'DRON: GENERADOR CENTRAL • CAMUFLAJE ACTIVO',
+                location: 'PROYECTO RECLAMACIÓN // DOMO SUBACUÁTICO',
+                callout: 'DRON FPV: CÁMARA HIDROPÓNICA • PROPULSOR & CAMUFLAJE',
                 accentHex: '#00ffc8',
                 accentRgb: '0, 255, 200',
-                secondaryHex: '#00a8ff',
-                skyTop: '#010d14',
-                skyMid: '#042633',
-                skyBot: '#021017',
-                gridColor: [0, 255, 200],
-                secColor: [0, 168, 255],
-                objColor: [253, 224, 71],
-                weatherType: 'bubbles',
-                callouts: ['BASE AMARILLA', 'DOMO ACUÁTICO', 'CAMUFLAJE [CENTRO]', 'PROPULSOR', 'BASE AZUL']
+                fogColor: 0x02222e,
+                fogDensity: 0.0075,
+                ambientColor: 0x1b5e6b,
+                ambientIntensity: 1.6,
+                dirLightColor: 0x67e8f9,
+                dirLightIntensity: 2.2,
+                pointLightA: 0x00ffc8,
+                pointLightB: 0xfacc15,
+                floorColor: 0x0d2b36,
+                floorRoughness: 0.12,
+                floorMetalness: 0.78,
+                wallColor: 0xdbeafe,
+                wallRoughness: 0.22,
+                wallMetalness: 0.45,
+                emissiveA: 0x00ffc8,
+                emissiveB: 0x38bdf8,
+                callouts: [
+                    { label: 'CAMUFLAJE ACTIVO', sub: 'GENERADOR CENTRAL', color: '#00ffc8' },
+                    { label: 'DOMO HIDROPÓNICO', sub: 'PASILLO CRISTAL', color: '#38bdf8' },
+                    { label: 'BASE AMARILLA', sub: 'BANDERA', color: '#facc15' },
+                    { label: 'TURBINA SUBMARINA', sub: 'NIVEL INFERIOR', color: '#00ffc8' }
+                ]
             },
             {
                 id: 'livefire',
                 name: 'FUEGO REAL (LIVE FIRE)',
                 location: 'ACADEMIA CIENCIAS MILITARES AVERY J. JOHNSON',
-                callout: 'DRON: TORRE DE CONTROL • FRANCOTIRADOR S7 & OS',
+                callout: 'DRON FPV: TORRE CENTRAL • FRANCOTIRADOR S7 & SOBRESCUDO',
                 accentHex: '#a3e635',
                 accentRgb: '163, 230, 53',
-                secondaryHex: '#f59e0b',
-                skyTop: '#070b06',
-                skyMid: '#132012',
-                skyBot: '#090e08',
-                gridColor: [163, 230, 53],
-                secColor: [245, 158, 11],
-                objColor: [251, 191, 36],
-                weatherType: 'embers',
-                callouts: ['TORRE RADAR [B]', 'S7 FRANCOTIRADOR', 'TRINCHERA / LODO', 'ESCUDOS [C]', 'CASA / GARAJE']
+                fogColor: 0x182218,
+                fogDensity: 0.0062,
+                ambientColor: 0x4a5543,
+                ambientIntensity: 1.5,
+                dirLightColor: 0xfde047,
+                dirLightIntensity: 2.5,
+                pointLightA: 0xa3e635,
+                pointLightB: 0xf59e0b,
+                floorColor: 0x292d24,
+                floorRoughness: 0.75,
+                floorMetalness: 0.18,
+                wallColor: 0x4b5345,
+                wallRoughness: 0.62,
+                wallMetalness: 0.32,
+                emissiveA: 0xa3e635,
+                emissiveB: 0xf59e0b,
+                callouts: [
+                    { label: 'FRANCOTIRADOR S7', sub: 'TORRE DE CONTROL', color: '#fbbf24' },
+                    { label: 'SOBRESCUDO [OS]', sub: 'TRINCHERA / B', color: '#a3e635' },
+                    { label: 'CAMPO DE TIRO', sub: 'SECTOR NORTE', color: '#38bdf8' },
+                    { label: 'GARAJE UNSC', sub: 'PUERTA C', color: '#f59e0b' }
+                ]
             },
             {
                 id: 'recharge',
                 name: 'RECARGA (RECHARGE)',
-                location: 'DIVISIÓN HIDROELÉCTRICA AXYS // TURBINA CENTRAL',
-                callout: 'DRON: NÚCLEO DE ENERGÍA • ESPADA DE ENERGÍA & CHOQUE',
+                location: 'DIVISIÓN HIDROELÉCTRICA AXYS // REACTOR CENTRAL',
+                callout: 'DRON FPV: TURBINA DE ENERGÍA • ESPADA & RIFLE DE CHOQUE',
                 accentHex: '#38bdf8',
                 accentRgb: '56, 189, 248',
-                secondaryHex: '#a855f7',
-                skyTop: '#040711',
-                skyMid: '#0e192d',
-                skyBot: '#050914',
-                gridColor: [56, 189, 248],
-                secColor: [168, 85, 247],
-                objColor: [250, 204, 21],
-                weatherType: 'sparks',
-                callouts: ['TURBINA [CENTRO]', 'ESPADA ENERGÍA', 'ELEVADOR [A]', 'CONTROL / VIDRIO', 'BATERÍAS [C]']
+                fogColor: 0x070d1c,
+                fogDensity: 0.0072,
+                ambientColor: 0x263554,
+                ambientIntensity: 1.4,
+                dirLightColor: 0x60a5fa,
+                dirLightIntensity: 2.1,
+                pointLightA: 0x38bdf8,
+                pointLightB: 0xc084fc,
+                floorColor: 0x161f30,
+                floorRoughness: 0.25,
+                floorMetalness: 0.72,
+                wallColor: 0x28354a,
+                wallRoughness: 0.30,
+                wallMetalness: 0.68,
+                emissiveA: 0x38bdf8,
+                emissiveB: 0xc084fc,
+                callouts: [
+                    { label: 'ESPADA DE ENERGÍA', sub: 'PUENTE REACTOR', color: '#38bdf8' },
+                    { label: 'NÚCLEO HIDROELÉCTRICO', sub: 'TURBINA A', color: '#c084fc' },
+                    { label: 'ELEVADOR GRAVEDAD', sub: 'SALA DE CONTROL', color: '#fbbf24' },
+                    { label: 'BATERÍAS AXYS', sub: 'SECTOR C', color: '#38bdf8' }
+                ]
             }
         ];
 
         let activeMapIndex = 0;
         let autoCycleMaps = true;
         let lastMapSwitchTime = Date.now();
+        let applyThreeMapTheme = null;
 
         window.setDroneMap = function(idx, manualClick = true) {
             activeMapIndex = idx % HALO_MAPS.length;
@@ -1463,6 +1527,10 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     else btn.classList.remove('active');
                 }
             }
+
+            if (applyThreeMapTheme) {
+                applyThreeMapTheme(mapCfg);
+            }
         };
 
         window.toggleDroneAutoCycle = function() {
@@ -1479,134 +1547,346 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             }
         };
 
-        function initZetaHaloMapBackground() {
-            const canvas = document.getElementById('zetaHaloCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let width = canvas.width = window.innerWidth;
-            let height = canvas.height = window.innerHeight;
+        function createProceduralSurfaceTextures() {
+            // Textura de detalle arquitectónico y asfalto/paneles metálicos
+            const gridCanvas = document.createElement('canvas');
+            gridCanvas.width = 512;
+            gridCanvas.height = 512;
+            const gCtx = gridCanvas.getContext('2d');
 
-            window.addEventListener('resize', () => {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-            });
+            gCtx.fillStyle = '#202630';
+            gCtx.fillRect(0, 0, 512, 512);
 
-            const mapStructures = Array.from({ length: 34 }, (_, i) => ({
-                x: (i % 2 === 0 ? -1 : 1) * (140 + Math.random() * 680) + (Math.random() - 0.5) * 180,
-                z: (i * 42) % 1400 + 80,
-                w: 55 + Math.random() * 95,
-                d: 55 + Math.random() * 95,
-                h: 45 + Math.random() * 190,
-                isCallout: i % 7 === 0,
-                calloutIdx: i % 5,
-                isSecondary: i % 3 === 0
-            }));
-
-            const particles = Array.from({ length: 65 }, () => ({
-                x: Math.random(),
-                y: Math.random(),
-                speed: 0.003 + Math.random() * 0.008,
-                size: 1 + Math.random() * 2.4,
-                drift: (Math.random() - 0.5) * 0.002
-            }));
-
-            let flightTick = 0;
-
-            function project3D(wx, wy, wz, camX, camY, rollAngle, fov) {
-                const dx = wx - camX;
-                const dy = wy - camY;
-                const dz = Math.max(40, wz);
-
-                const rx = dx * Math.cos(rollAngle) - dy * Math.sin(rollAngle);
-                const ry = dx * Math.sin(rollAngle) + dy * Math.cos(rollAngle);
-
-                const scale = fov / dz;
-                return {
-                    sx: width * 0.5 + rx * scale,
-                    sy: height * 0.42 + ry * scale,
-                    scale,
-                    dz
-                };
+            // Micro-grano realista de concreto/asfalto
+            for (let i = 0; i < 9000; i++) {
+                const v = 25 + Math.floor(Math.random() * 35);
+                gCtx.fillStyle = `rgb(${v},${v},${v + 4})`;
+                gCtx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
             }
 
-            function drawWireBox(b, camX, camY, roll, fov, mapCfg) {
-                const alpha = Math.max(0, Math.min(0.65, (1 - b.z / 1380) * 0.72));
-                if (alpha <= 0.02) return;
+            // Juntas de placas UNSC / losas urbanas
+            gCtx.strokeStyle = '#0d1117';
+            gCtx.lineWidth = 4;
+            for (let x = 0; x <= 512; x += 128) {
+                gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, 512); gCtx.stroke();
+            }
+            for (let y = 0; y <= 512; y += 128) {
+                gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(512, y); gCtx.stroke();
+            }
 
-                const hw = b.w * 0.5;
-                const hd = b.d * 0.5;
-                const groundY = 140;
-                const roofY = groundY - b.h;
+            // Líneas de carril / marcas tácticas en el suelo
+            gCtx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+            gCtx.fillRect(248, 20, 16, 80);
+            gCtx.fillRect(248, 180, 16, 80);
+            gCtx.fillRect(248, 340, 16, 80);
 
-                const p1 = project3D(b.x - hw, groundY, b.z - hd, camX, camY, roll, fov);
-                const p2 = project3D(b.x + hw, groundY, b.z - hd, camX, camY, roll, fov);
-                const p3 = project3D(b.x + hw, groundY, b.z + hd, camX, camY, roll, fov);
-                const p4 = project3D(b.x - hw, groundY, b.z + hd, camX, camY, roll, fov);
+            const floorTex = new THREE.CanvasTexture(gridCanvas);
+            floorTex.wrapS = THREE.RepeatWrapping;
+            floorTex.wrapT = THREE.RepeatWrapping;
+            floorTex.repeat.set(8, 50);
 
-                const t1 = project3D(b.x - hw, roofY, b.z - hd, camX, camY, roll, fov);
-                const t2 = project3D(b.x + hw, roofY, b.z - hd, camX, camY, roll, fov);
-                const t3 = project3D(b.x + hw, roofY, b.z + hd, camX, camY, roll, fov);
-                const t4 = project3D(b.x - hw, roofY, b.z + hd, camX, camY, roll, fov);
+            // Textura de edificios / muros con ventanas iluminadas y paneles sci-fi
+            const wallCanvas = document.createElement('canvas');
+            wallCanvas.width = 256;
+            wallCanvas.height = 512;
+            const wCtx = wallCanvas.getContext('2d');
 
-                if (p1.sx < -200 && p2.sx < -200) return;
-                if (p1.sx > width + 200 && p4.sx > width + 200) return;
+            wCtx.fillStyle = '#18202c';
+            wCtx.fillRect(0, 0, 256, 512);
 
-                const rgb = b.isCallout ? mapCfg.objColor : (b.isSecondary ? mapCfg.secColor : mapCfg.gridColor);
-                ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha * 0.75})`;
-                ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha * 0.08})`;
-                ctx.lineWidth = b.isCallout ? 1.5 : 1;
+            wCtx.strokeStyle = '#0a0f16';
+            wCtx.lineWidth = 3;
+            for (let y = 0; y < 512; y += 32) {
+                wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(256, y); wCtx.stroke();
+            }
+            for (let x = 0; x < 256; x += 64) {
+                wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, 512); wCtx.stroke();
+            }
 
-                ctx.beginPath();
-                ctx.moveTo(p1.sx, p1.sy);
-                ctx.lineTo(p2.sx, p2.sy);
-                ctx.lineTo(t2.sx, t2.sy);
-                ctx.lineTo(t1.sx, t1.sy);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(t1.sx, t1.sy);
-                ctx.lineTo(t2.sx, t2.sy);
-                ctx.lineTo(t3.sx, t3.sy);
-                ctx.lineTo(t4.sx, t4.sy);
-                ctx.closePath();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(p3.sx, p3.sy); ctx.lineTo(t3.sx, t3.sy);
-                ctx.moveTo(p4.sx, p4.sy); ctx.lineTo(t4.sx, t4.sy);
-                ctx.stroke();
-
-                if (b.isCallout && b.z > 220 && b.z < 980) {
-                    const labelPos = project3D(b.x, roofY - 28, b.z, camX, camY, roll, fov);
-                    const labelText = mapCfg.callouts[b.calloutIdx % mapCfg.callouts.length];
-
-                    ctx.save();
-                    ctx.strokeStyle = `rgba(${mapCfg.objColor[0]}, ${mapCfg.objColor[1]}, ${mapCfg.objColor[2]}, ${alpha})`;
-                    ctx.beginPath();
-                    ctx.moveTo(t1.sx, t1.sy);
-                    ctx.lineTo(labelPos.sx, labelPos.sy);
-                    ctx.stroke();
-
-                    ctx.fillStyle = `rgba(${mapCfg.objColor[0]}, ${mapCfg.objColor[1]}, ${mapCfg.objColor[2]}, ${alpha * 1.15})`;
-                    ctx.beginPath();
-                    ctx.moveTo(labelPos.sx, labelPos.sy - 5);
-                    ctx.lineTo(labelPos.sx + 5, labelPos.sy);
-                    ctx.lineTo(labelPos.sx, labelPos.sy + 5);
-                    ctx.lineTo(labelPos.sx - 5, labelPos.sy);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    ctx.font = '700 10px "Orbitron", monospace';
-                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 1.15})`;
-                    ctx.fillText(labelText, labelPos.sx + 8, labelPos.sy + 3);
-                    ctx.restore();
+            // Ventanas / luces de edificios e instalaciones
+            for (let y = 16; y < 480; y += 32) {
+                for (let x = 10; x < 240; x += 32) {
+                    if (Math.random() > 0.38) {
+                        const warm = Math.random() > 0.5;
+                        wCtx.fillStyle = warm ? 'rgba(224, 242, 254, 0.85)' : 'rgba(56, 189, 248, 0.75)';
+                        wCtx.fillRect(x, y, 18, 12);
+                    } else {
+                        wCtx.fillStyle = 'rgba(10, 16, 26, 0.9)';
+                        wCtx.fillRect(x, y, 18, 12);
+                    }
                 }
             }
 
-            function renderFrame() {
-                flightTick += 0.014;
+            const wallTex = new THREE.CanvasTexture(wallCanvas);
+            wallTex.wrapS = THREE.RepeatWrapping;
+            wallTex.wrapT = THREE.RepeatWrapping;
+            wallTex.repeat.set(1, 2);
+
+            return { floorTex, wallTex };
+        }
+
+        function initZetaHaloMapBackground() {
+            const canvas = document.getElementById('zetaHaloCanvas');
+            const hudCanvas = document.getElementById('hudOverlayCanvas');
+            if (!canvas || !hudCanvas || typeof THREE === 'undefined') return;
+
+            const hudCtx = hudCanvas.getContext('2d');
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            hudCanvas.width = width;
+            hudCanvas.height = height;
+
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                antialias: true,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.22;
+
+            const scene = new THREE.Scene();
+            const initialCfg = HALO_MAPS[0];
+            scene.background = new THREE.Color(initialCfg.fogColor);
+            scene.fog = new THREE.FogExp2(initialCfg.fogColor, initialCfg.fogDensity);
+
+            const camera = new THREE.PerspectiveCamera(62, width / height, 0.5, 420);
+            camera.position.set(0, 6.5, 18);
+
+            // Iluminación hiperrealista multicapa
+            const ambientLight = new THREE.AmbientLight(initialCfg.ambientColor, initialCfg.ambientIntensity);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(initialCfg.dirLightColor, initialCfg.dirLightIntensity);
+            dirLight.position.set(35, 65, -50);
+            scene.add(dirLight);
+
+            const droneSpotLight = new THREE.SpotLight(0xffffff, 2.4, 95, Math.PI / 5, 0.65, 1.5);
+            droneSpotLight.position.set(0, 6, 18);
+            droneSpotLight.target.position.set(0, 1, -30);
+            scene.add(droneSpotLight);
+            scene.add(droneSpotLight.target);
+
+            const movingLightA = new THREE.PointLight(initialCfg.pointLightA, 3.2, 65);
+            const movingLightB = new THREE.PointLight(initialCfg.pointLightB, 3.2, 65);
+            scene.add(movingLightA);
+            scene.add(movingLightB);
+
+            const { floorTex, wallTex } = createProceduralSurfaceTextures();
+
+            // Suelo PBR (asfalto húmedo / piso metálico / tierra táctica)
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: initialCfg.floorColor,
+                map: floorTex,
+                roughnessMap: floorTex,
+                roughness: initialCfg.floorRoughness,
+                metalness: initialCfg.floorMetalness
+            });
+            const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(140, 420, 32, 32), floorMat);
+            floorMesh.rotation.x = -Math.PI / 2;
+            floorMesh.position.z = -150;
+            scene.add(floorMesh);
+
+            // Materiales compartidos para arquitectura 3D
+            const wallMat = new THREE.MeshStandardMaterial({
+                color: initialCfg.wallColor,
+                map: wallTex,
+                roughness: initialCfg.wallRoughness,
+                metalness: initialCfg.wallMetalness
+            });
+
+            const metalTrimMat = new THREE.MeshStandardMaterial({
+                color: 0x334155,
+                roughness: 0.25,
+                metalness: 0.88
+            });
+
+            const neonMatA = new THREE.MeshBasicMaterial({ color: initialCfg.emissiveA });
+            const neonMatB = new THREE.MeshBasicMaterial({ color: initialCfg.emissiveB });
+            const goldBeaconMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+
+            // Anillo Zeta Halo monumental en el horizonte + Núcleo de Reactor para Recharge
+            const horizonGroup = new THREE.Group();
+            horizonGroup.position.set(0, 28, -280);
+            scene.add(horizonGroup);
+
+            const haloRingGeo = new THREE.CylinderGeometry(190, 190, 14, 64, 1, true, -Math.PI * 0.28, Math.PI * 0.56);
+            const haloRingMat = new THREE.MeshBasicMaterial({
+                color: initialCfg.emissiveA,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.22
+            });
+            const haloRingMesh = new THREE.Mesh(haloRingGeo, haloRingMat);
+            haloRingMesh.rotation.z = Math.PI * 0.42;
+            haloRingMesh.position.y = 85;
+            horizonGroup.add(haloRingMesh);
+
+            // Turbina / Reactor Hidroeléctrico (destaca en Recharge y Aquarius)
+            const reactorGroup = new THREE.Group();
+            reactorGroup.position.set(0, 16, -135);
+            scene.add(reactorGroup);
+
+            const torusOuter = new THREE.Mesh(
+                new THREE.TorusGeometry(16, 1.1, 16, 48),
+                metalTrimMat
+            );
+            const torusInner = new THREE.Mesh(
+                new THREE.TorusGeometry(11.5, 0.55, 16, 48),
+                neonMatA
+            );
+            const coreSphere = new THREE.Mesh(
+                new THREE.OctahedronGeometry(4.8, 2),
+                neonMatB
+            );
+            reactorGroup.add(torusOuter, torusInner, coreSphere);
+
+            // Módulos arquitectónicos en bucle para que el dron vuele eternamente entre estructuras reales
+            const corridorSegments = [];
+            const SEGMENT_COUNT = 16;
+            const SEGMENT_SPACING = 22;
+
+            for (let i = 0; i < SEGMENT_COUNT; i++) {
+                const segGroup = new THREE.Group();
+                segGroup.position.z = -i * SEGMENT_SPACING;
+
+                // Edificio / Estructura Izquierda
+                const leftH = 16 + (i % 4) * 7;
+                const leftW = 12 + (i % 3) * 3;
+                const leftBuilding = new THREE.Mesh(new THREE.BoxGeometry(leftW, leftH, 16), wallMat);
+                leftBuilding.position.set(-18 - leftW * 0.5, leftH * 0.5, 0);
+                segGroup.add(leftBuilding);
+
+                // Edificio / Estructura Derecha
+                const rightH = 18 + ((i + 2) % 4) * 6.5;
+                const rightW = 12 + ((i + 1) % 3) * 3;
+                const rightBuilding = new THREE.Mesh(new THREE.BoxGeometry(rightW, rightH, 16), wallMat);
+                rightBuilding.position.set(18 + rightW * 0.5, rightH * 0.5, 0);
+                segGroup.add(rightBuilding);
+
+                // Letreros luminosos / Paneles holográficos laterales
+                const signMat = (i % 2 === 0) ? neonMatA : neonMatB;
+                const leftSign = new THREE.Mesh(new THREE.BoxGeometry(0.45, 3.8, 8.5), signMat);
+                leftSign.position.set(-17.6, 7 + (i % 3) * 3, 0);
+                segGroup.add(leftSign);
+
+                const rightSign = new THREE.Mesh(new THREE.BoxGeometry(0.45, 3.8, 8.5), (i % 2 === 0) ? neonMatB : neonMatA);
+                rightSign.position.set(17.6, 8 + ((i + 1) % 3) * 3, 0);
+                segGroup.add(rightSign);
+
+                // Arcos superiores de pasarela (Acuario / Recarga / Puentes de Calles)
+                let archBridge = null;
+                if (i % 2 === 0) {
+                    archBridge = new THREE.Group();
+                    const topBeam = new THREE.Mesh(new THREE.BoxGeometry(38, 1.8, 2.6), metalTrimMat);
+                    topBeam.position.set(0, 17.5, 0);
+                    const topLight = new THREE.Mesh(new THREE.BoxGeometry(32, 0.35, 0.6), neonMatA);
+                    topLight.position.set(0, 16.4, 0);
+
+                    const leftPillar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 18, 2.4), metalTrimMat);
+                    leftPillar.position.set(-16.5, 9, 0);
+                    const rightPillar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 18, 2.4), metalTrimMat);
+                    rightPillar.position.set(16.5, 9, 0);
+
+                    archBridge.add(topBeam, topLight, leftPillar, rightPillar);
+                    segGroup.add(archBridge);
+                }
+
+                // Coberturas tácticas de Arena en la calle central (cajas UNSC, puentes bajos, pedestales de armas)
+                let centerCover = null;
+                let weaponPad = null;
+                if (i % 3 === 0) {
+                    centerCover = new THREE.Mesh(new THREE.BoxGeometry(6.5, 2.6, 4.2), metalTrimMat);
+                    centerCover.position.set((i % 2 === 0 ? -5.5 : 5.5), 1.3, 0);
+                    segGroup.add(centerCover);
+                }
+
+                if (i % 4 === 0) {
+                    weaponPad = new THREE.Group();
+                    weaponPad.position.set(0, 0.25, 0);
+                    const padBase = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 0.5, 6), metalTrimMat);
+                    const padHolo = new THREE.Mesh(new THREE.OctahedronGeometry(0.95, 0), goldBeaconMat);
+                    padHolo.position.y = 2.2;
+                    weaponPad.add(padBase, padHolo);
+                    segGroup.add(weaponPad);
+                }
+
+                scene.add(segGroup);
+                corridorSegments.push({
+                    group: segGroup,
+                    weaponPad,
+                    calloutIndex: Math.floor(i / 4) % 4
+                });
+            }
+
+            // Sistema de partículas volumétricas 3D (lluvia, burbujas subacuáticas, chispas de plasma)
+            const PARTICLE_COUNT = 650;
+            const particleGeo = new THREE.BufferGeometry();
+            const posArray = new Float32Array(PARTICLE_COUNT * 3);
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 70;
+                posArray[i * 3 + 1] = Math.random() * 28;
+                posArray[i * 3 + 2] = -Math.random() * 180;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({
+                color: initialCfg.emissiveA,
+                size: 0.32,
+                transparent: true,
+                opacity: 0.65
+            });
+            const particleSystem = new THREE.Points(particleGeo, particleMat);
+            scene.add(particleSystem);
+
+            // Función para cambiar instantáneamente la atmósfera, materiales e iluminación al cambiar de mapa
+            applyThreeMapTheme = function(cfg) {
+                scene.background.setHex(cfg.fogColor);
+                scene.fog.color.setHex(cfg.fogColor);
+                scene.fog.density = cfg.fogDensity;
+
+                ambientLight.color.setHex(cfg.ambientColor);
+                ambientLight.intensity = cfg.ambientIntensity;
+
+                dirLight.color.setHex(cfg.dirLightColor);
+                dirLight.intensity = cfg.dirLightIntensity;
+
+                movingLightA.color.setHex(cfg.pointLightA);
+                movingLightB.color.setHex(cfg.pointLightB);
+
+                floorMat.color.setHex(cfg.floorColor);
+                floorMat.roughness = cfg.floorRoughness;
+                floorMat.metalness = cfg.floorMetalness;
+
+                wallMat.color.setHex(cfg.wallColor);
+                wallMat.roughness = cfg.wallRoughness;
+                wallMat.metalness = cfg.wallMetalness;
+
+                neonMatA.color.setHex(cfg.emissiveA);
+                neonMatB.color.setHex(cfg.emissiveB);
+                haloRingMat.color.setHex(cfg.emissiveA);
+                particleMat.color.setHex(cfg.emissiveA);
+
+                reactorGroup.visible = (cfg.id === 'recharge' || cfg.id === 'aquarius');
+            };
+
+            applyThreeMapTheme(initialCfg);
+
+            window.addEventListener('resize', () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                hudCanvas.width = width;
+                hudCanvas.height = height;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+
+            let clockTick = 0;
+            const tempVec = new THREE.Vector3();
+
+            function animateThreeDrone() {
+                clockTick += 0.012;
 
                 if (autoCycleMaps && Date.now() - lastMapSwitchTime > 18000) {
                     lastMapSwitchTime = Date.now();
@@ -1614,141 +1894,139 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 }
 
                 const mapCfg = HALO_MAPS[activeMapIndex];
-                ctx.clearRect(0, 0, width, height);
 
-                const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-                bgGrad.addColorStop(0, mapCfg.skyTop);
-                bgGrad.addColorStop(0.48, mapCfg.skyMid);
-                bgGrad.addColorStop(1, mapCfg.skyBot);
-                ctx.fillStyle = bgGrad;
-                ctx.fillRect(0, 0, width, height);
+                // Movimiento cinematográfico del Dron FPV (suave alabeo, cabeceo y vuelo rasante)
+                const droneX = Math.sin(clockTick * 0.65) * 5.8;
+                const droneY = 5.4 + Math.cos(clockTick * 0.95) * 1.45;
+                const droneRoll = -Math.cos(clockTick * 0.65) * 0.075;
+                const dronePitch = -0.06 + Math.sin(clockTick * 0.5) * 0.025;
 
-                const camX = Math.sin(flightTick * 0.55) * 210;
-                const camY = -45 + Math.cos(flightTick * 0.8) * 22;
-                const rollAngle = Math.sin(flightTick * 0.45) * 0.055;
-                const fov = Math.min(width, height) * 0.65;
+                camera.position.set(droneX, droneY, 16);
+                camera.rotation.order = 'YXZ';
+                camera.rotation.y = -droneX * 0.015;
+                camera.rotation.x = dronePitch;
+                camera.rotation.z = droneRoll;
 
-                const cx = width * 0.5 - camX * 0.18;
-                const horizonY = height * 0.38;
-                ctx.save();
-                if (mapCfg.id === 'streets') {
-                    ctx.strokeStyle = `rgba(255, 42, 133, 0.18)`;
-                    ctx.lineWidth = 2;
-                    for (let s = -4; s <= 4; s++) {
-                        const sx = cx + s * 130;
-                        const sh = 70 + Math.abs(Math.sin(s * 1.7)) * 95;
-                        ctx.strokeRect(sx - 28, horizonY - sh, 56, sh);
+                //Foco táctico del dron siguiendo la trayectoria
+                droneSpotLight.position.copy(camera.position);
+                droneSpotLight.target.position.set(droneX * 0.5, 1.5, -35);
+
+                // Luces dinámicas desplazándose por el mapa
+                movingLightA.position.set(Math.sin(clockTick * 1.3) * 14, 8, -25 + Math.cos(clockTick) * 18);
+                movingLightB.position.set(Math.cos(clockTick * 1.1) * 14, 10, -65 + Math.sin(clockTick) * 22);
+
+                // Desplazamiento infinito de textura del suelo sincronizado con la velocidad del dron
+                const droneSpeed = 0.28;
+                floorTex.offset.y -= droneSpeed * 0.048;
+
+                // Avance de los módulos 3D del mapa hacia la cámara
+                const totalCorridorLength = SEGMENT_COUNT * SEGMENT_SPACING;
+                corridorSegments.forEach(seg => {
+                    seg.group.position.z += droneSpeed;
+                    if (seg.group.position.z > 24) {
+                        seg.group.position.z -= totalCorridorLength;
                     }
-                } else if (mapCfg.id === 'aquarius') {
-                    for (let a = 1; a <= 3; a++) {
-                        ctx.strokeStyle = `rgba(0, 255, 200, ${0.18 / a})`;
-                        ctx.lineWidth = 3;
-                        ctx.beginPath();
-                        ctx.arc(cx, horizonY + 120, 180 * a, Math.PI * 1.1, Math.PI * 1.9);
-                        ctx.stroke();
-                    }
-                } else if (mapCfg.id === 'livefire') {
-                    ctx.strokeStyle = 'rgba(163, 230, 53, 0.16)';
-                    ctx.lineWidth = 18;
-                    ctx.beginPath();
-                    ctx.arc(cx, -height * 0.75, height * 1.25, 0.36 * Math.PI, 0.64 * Math.PI);
-                    ctx.stroke();
-                } else if (mapCfg.id === 'recharge') {
-                    ctx.translate(cx, horizonY - 20);
-                    ctx.rotate(flightTick * 0.6);
-                    ctx.strokeStyle = 'rgba(168, 85, 247, 0.22)';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(-65, -65, 130, 130);
-                    ctx.rotate(Math.PI / 4);
-                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
-                    ctx.strokeRect(-65, -65, 130, 130);
-                }
-                ctx.restore();
-
-                const gridOffsetZ = (flightTick * 180) % 80;
-                ctx.lineWidth = 1;
-                for (let z = 120; z < 1200; z += 80) {
-                    const realZ = z - gridOffsetZ;
-                    if (realZ < 80) continue;
-                    const pLeft = project3D(-950, 140, realZ, camX, camY, rollAngle, fov);
-                    const pRight = project3D(950, 140, realZ, camX, camY, rollAngle, fov);
-                    const gAlpha = Math.max(0, (1 - realZ / 1200) * 0.22);
-                    ctx.strokeStyle = `rgba(${mapCfg.gridColor[0]}, ${mapCfg.gridColor[1]}, ${mapCfg.gridColor[2]}, ${gAlpha})`;
-                    ctx.beginPath();
-                    ctx.moveTo(pLeft.sx, pLeft.sy);
-                    ctx.lineTo(pRight.sx, pRight.sy);
-                    ctx.stroke();
-                }
-
-                for (let x = -800; x <= 800; x += 160) {
-                    const pNear = project3D(x, 140, 90, camX, camY, rollAngle, fov);
-                    const pFar = project3D(x, 140, 1200, camX, camY, rollAngle, fov);
-                    ctx.strokeStyle = `rgba(${mapCfg.gridColor[0]}, ${mapCfg.gridColor[1]}, ${mapCfg.gridColor[2]}, 0.11)`;
-                    ctx.beginPath();
-                    ctx.moveTo(pNear.sx, pNear.sy);
-                    ctx.lineTo(pFar.sx, pFar.sy);
-                    ctx.stroke();
-                }
-
-                mapStructures.forEach(b => {
-                    b.z -= 2.8;
-                    if (b.z < 75) {
-                        b.z = 1380;
+                    if (seg.weaponPad) {
+                        seg.weaponPad.children[1].rotation.y += 0.04;
+                        seg.weaponPad.children[1].position.y = 2.2 + Math.sin(clockTick * 4) * 0.25;
                     }
                 });
 
-                const sortedStructures = [...mapStructures].sort((a, b) => b.z - a.z);
-                sortedStructures.forEach(b => drawWireBox(b, camX, camY, rollAngle, fov, mapCfg));
+                // Animación del Reactor Hidroeléctrico / Turbina
+                torusOuter.rotation.z += 0.008;
+                torusInner.rotation.x += 0.022;
+                torusInner.rotation.y += 0.015;
+                coreSphere.rotation.y -= 0.035;
 
-                particles.forEach(pt => {
-                    if (mapCfg.weatherType === 'rain') {
-                        pt.y += pt.speed * 2.4;
-                        pt.x -= 0.0015;
-                        if (pt.y > 1) { pt.y = 0; pt.x = Math.random(); }
-                        const px = pt.x * width;
-                        const py = pt.y * height;
-                        ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(px, py);
-                        ctx.lineTo(px - 4, py + 16);
-                        ctx.stroke();
-                    } else if (mapCfg.weatherType === 'bubbles') {
-                        pt.y -= pt.speed * 0.7;
-                        pt.x += Math.sin(flightTick + pt.y * 10) * 0.0008;
-                        if (pt.y < 0) { pt.y = 1; pt.x = Math.random(); }
-                        ctx.fillStyle = 'rgba(0, 255, 200, 0.22)';
-                        ctx.beginPath();
-                        ctx.arc(pt.x * width, pt.y * height, pt.size * 1.4, 0, Math.PI * 2);
-                        ctx.fill();
+                // Física de partículas según el mapa (lluvia en Calles, burbujas en Acuario, chispas en Recarga)
+                const positions = particleGeo.attributes.position.array;
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const ix = i * 3;
+                    const iy = i * 3 + 1;
+                    const iz = i * 3 + 2;
+
+                    positions[iz] += droneSpeed * 1.35;
+                    if (mapCfg.id === 'streets') {
+                        positions[iy] -= 0.35; // Lluvia cayendo
+                        if (positions[iy] < 0) positions[iy] = 28;
                     } else {
-                        pt.y -= pt.speed * 1.1;
-                        pt.x += pt.drift;
-                        if (pt.y < 0) { pt.y = 1; pt.x = Math.random(); }
-                        const c = mapCfg.secColor;
-                        ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.38)`;
-                        ctx.fillRect(pt.x * width, pt.y * height, pt.size, pt.size);
+                        positions[iy] += 0.08; // Partículas / burbujas / chispas ascendiendo
+                        if (positions[iy] > 28) positions[iy] = 0.5;
+                    }
+
+                    if (positions[iz] > 20) {
+                        positions[iz] = -160;
+                    }
+                }
+                particleGeo.attributes.position.needsUpdate = true;
+
+                renderer.render(scene, camera);
+
+                // ============================================================================
+                // OVERLAY DE TELEMETRÍA DRON FPV & CALLOUTS 3D ANCLADOS AL MUNDO REAL
+                // ============================================================================
+                hudCtx.clearRect(0, 0, width, height);
+
+                corridorSegments.forEach(seg => {
+                    if (!seg.weaponPad) return;
+                    const worldZ = seg.group.position.z;
+                    if (worldZ > -115 && worldZ < -8) {
+                        tempVec.set(0, 4.2, worldZ);
+                        tempVec.project(camera);
+
+                        const sx = (tempVec.x * 0.5 + 0.5) * width;
+                        const sy = (-(tempVec.y * 0.5) + 0.5) * height;
+                        const alpha = Math.max(0, Math.min(0.9, (1 - Math.abs(worldZ) / 115)));
+                        const calloutInfo = mapCfg.callouts[seg.calloutIndex % mapCfg.callouts.length];
+                        const distMeters = Math.max(5, Math.round(Math.abs(worldZ - camera.position.z)));
+
+                        hudCtx.save();
+                        hudCtx.strokeStyle = calloutInfo.color;
+                        hudCtx.fillStyle = 'rgba(3, 10, 20, 0.78)';
+                        hudCtx.globalAlpha = alpha;
+                        hudCtx.lineWidth = 1.4;
+
+                        // Diamante de objetivo de Halo Infinite
+                        hudCtx.beginPath();
+                        hudCtx.moveTo(sx, sy - 7);
+                        hudCtx.lineTo(sx + 7, sy);
+                        hudCtx.lineTo(sx, sy + 7);
+                        hudCtx.lineTo(sx - 7, sy);
+                        hudCtx.closePath();
+                        hudCtx.fill();
+                        hudCtx.stroke();
+
+                        // Etiqueta flotante con distancia en metros
+                        hudCtx.font = '700 10px "Orbitron", sans-serif';
+                        hudCtx.fillStyle = '#ffffff';
+                        hudCtx.fillText(calloutInfo.label, sx + 12, sy - 2);
+
+                        hudCtx.font = '600 9px "Rajdhani", monospace';
+                        hudCtx.fillStyle = calloutInfo.color;
+                        hudCtx.fillText(`${calloutInfo.sub} [${distMeters}m]`, sx + 12, sy + 9);
+                        hudCtx.restore();
                     }
                 });
 
-                ctx.save();
-                ctx.translate(width * 0.5, height * 0.42);
-                ctx.rotate(-rollAngle * 0.6);
-                ctx.strokeStyle = `rgba(${mapCfg.gridColor[0]}, ${mapCfg.gridColor[1]}, ${mapCfg.gridColor[2]}, 0.14)`;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(0, 0, 38, 0, Math.PI * 2);
-                ctx.moveTo(-52, 0); ctx.lineTo(-26, 0);
-                ctx.moveTo(26, 0); ctx.lineTo(52, 0);
-                ctx.moveTo(0, -52); ctx.lineTo(0, -26);
-                ctx.moveTo(0, 26); ctx.lineTo(0, 52);
-                ctx.stroke();
-                ctx.restore();
+                // Retícula central estabilizada del Dron Recon UNSC
+                hudCtx.save();
+                hudCtx.translate(width * 0.5, height * 0.44);
+                hudCtx.rotate(-droneRoll * 0.75);
+                hudCtx.strokeStyle = `rgba(${mapCfg.accentRgb}, 0.18)`;
+                hudCtx.lineWidth = 1;
+                hudCtx.beginPath();
+                hudCtx.arc(0, 0, 32, 0, Math.PI * 2);
+                hudCtx.moveTo(-48, 0); hudCtx.lineTo(-20, 0);
+                hudCtx.moveTo(20, 0); hudCtx.lineTo(48, 0);
+                hudCtx.moveTo(0, -48); hudCtx.lineTo(0, -20);
+                hudCtx.moveTo(0, 20); hudCtx.lineTo(0, 48);
+                hudCtx.stroke();
+                hudCtx.restore();
 
-                requestAnimationFrame(renderFrame);
+                requestAnimationFrame(animateThreeDrone);
             }
 
-            renderFrame();
+            animateThreeDrone();
         }
 
         window.renderRoster();
