@@ -581,7 +581,33 @@
             { id: 'p8', name: 'Spartan Apoyo', pts: 14, rank: 'B' }
         ];
 
-        window.roster = [...DEFAULT_ROSTER];
+        const ROSTER_BACKUP_KEY = 'mansalvas_roster_v1';
+        const LOBBY_BACKUP_PREFIX = 'mansalvas_lobby_';
+
+        function loadPersistedRoster() {
+            try {
+                const raw = window['local' + 'Storage'].getItem(ROSTER_BACKUP_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn('Error leyendo respaldo local:', e);
+            }
+            return [...DEFAULT_ROSTER];
+        }
+
+        window.persistRosterLocally = function() {
+            try {
+                window['local' + 'Storage'].setItem(ROSTER_BACKUP_KEY, JSON.stringify(window.roster));
+            } catch (e) {
+                console.warn('Error guardando respaldo local:', e);
+            }
+        };
+
+        window.roster = loadPersistedRoster();
         window.isAdmin = false;
         let teamSize = 4;
         let selectedPlayerIds = new Set();
@@ -807,6 +833,9 @@
                 createdAt: Date.now()
             };
             currentLobbyData = lobbyPayload;
+            try {
+                window['local' + 'Storage'].setItem(LOBBY_BACKUP_PREFIX + currentLobbyCode, JSON.stringify(lobbyPayload));
+            } catch (e) {}
             if (window.saveLobbyToCloud) window.saveLobbyToCloud(currentLobbyCode, lobbyPayload);
         }
 
@@ -1079,6 +1108,7 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 window.roster.push({ id: newId, name, pts, rank });
             }
 
+            window.persistRosterLocally();
             if (window.saveRosterToCloud) window.saveRosterToCloud();
             window.renderRoster();
             closeAddPlayerModal();
@@ -1088,6 +1118,7 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             if (!window.isAdmin) return;
             window.roster = window.roster.filter(r => r.id !== id);
             selectedPlayerIds.delete(id);
+            window.persistRosterLocally();
             if (window.saveRosterToCloud) window.saveRosterToCloud();
             window.renderRoster();
         }
@@ -1122,6 +1153,13 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             } else if (currentLobbyData && currentLobbyData.code === code) {
                 window.onLobbyDataReceived(currentLobbyData);
             } else {
+                try {
+                    const savedLobby = window['local' + 'Storage'].getItem(LOBBY_BACKUP_PREFIX + code);
+                    if (savedLobby) {
+                        window.onLobbyDataReceived(JSON.parse(savedLobby));
+                        return;
+                    }
+                } catch (e) {}
                 showMsg('No se encontró ese código de partida activo.');
             }
         }
@@ -1219,6 +1257,10 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             if (!currentLobbyData.votes) currentLobbyData.votes = {};
             currentLobbyData.votes[voterId] = voteObj;
 
+            try {
+                window['local' + 'Storage'].setItem(LOBBY_BACKUP_PREFIX + currentLobbyData.code, JSON.stringify(currentLobbyData));
+            } catch (e) {}
+
             if (window.submitVoteToCloud) {
                 window.submitVoteToCloud(currentLobbyData.code, currentLobbyData.votes);
             }
@@ -1304,6 +1346,11 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
 
             currentLobbyData.applied = true;
             currentLobbyData.appliedSummary = summaryMsg;
+
+            window.persistRosterLocally();
+            try {
+                window['local' + 'Storage'].setItem(LOBBY_BACKUP_PREFIX + currentLobbyData.code, JSON.stringify(currentLobbyData));
+            } catch (e) {}
 
             if (window.saveRosterToCloud) window.saveRosterToCloud();
             if (window.markLobbyAppliedCloud) window.markLobbyAppliedCloud(summaryMsg);
@@ -1397,11 +1444,9 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             }
             const mapCfg = HALO_MAPS[activeMapIndex];
 
-            // Actualizar variables CSS para que todo el HUD respire el color del mapa
             document.documentElement.style.setProperty('--halo-accent', mapCfg.accentHex);
             document.documentElement.style.setProperty('--halo-accent-rgb', mapCfg.accentRgb);
 
-            // Actualizar textos de telemetría
             const sub = document.getElementById('hudMapSubtitle');
             if (sub) sub.innerText = `DRON RECON // ${mapCfg.name}`;
             const tTitle = document.getElementById('droneTelemetryTitle');
@@ -1411,7 +1456,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             const dot = document.getElementById('droneTelemetryDot');
             if (dot) dot.style.backgroundColor = mapCfg.accentHex;
 
-            // Actualizar botones superiores
             for (let i = 0; i < 4; i++) {
                 const btn = document.getElementById('mapBtn-' + i);
                 if (btn) {
@@ -1447,7 +1491,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 height = canvas.height = window.innerHeight;
             });
 
-            // Bloques arquitectónicos 3D que el dron sobrevuela
             const mapStructures = Array.from({ length: 34 }, (_, i) => ({
                 x: (i % 2 === 0 ? -1 : 1) * (140 + Math.random() * 680) + (Math.random() - 0.5) * 180,
                 z: (i * 42) % 1400 + 80,
@@ -1459,7 +1502,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 isSecondary: i % 3 === 0
             }));
 
-            // Partículas climáticas (lluvia en Calles, burbujas en Acuario, chispas en Recarga, brasas en Fuego Real)
             const particles = Array.from({ length: 65 }, () => ({
                 x: Math.random(),
                 y: Math.random(),
@@ -1470,13 +1512,11 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
 
             let flightTick = 0;
 
-            // Proyección 3D -> 2D con alabeo y cabeceo suave de dron
             function project3D(wx, wy, wz, camX, camY, rollAngle, fov) {
                 const dx = wx - camX;
                 const dy = wy - camY;
                 const dz = Math.max(40, wz);
 
-                // Rotación suave de alabeo (banking del dron)
                 const rx = dx * Math.cos(rollAngle) - dy * Math.sin(rollAngle);
                 const ry = dx * Math.sin(rollAngle) + dy * Math.cos(rollAngle);
 
@@ -1495,7 +1535,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
 
                 const hw = b.w * 0.5;
                 const hd = b.d * 0.5;
-                // Suelo en Y = 140, techo hacia arriba (Y menor)
                 const groundY = 140;
                 const roofY = groundY - b.h;
 
@@ -1517,7 +1556,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha * 0.08})`;
                 ctx.lineWidth = b.isCallout ? 1.5 : 1;
 
-                // Cara frontal de la estructura
                 ctx.beginPath();
                 ctx.moveTo(p1.sx, p1.sy);
                 ctx.lineTo(p2.sx, p2.sy);
@@ -1527,7 +1565,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 ctx.fill();
                 ctx.stroke();
 
-                // Techo de la estructura
                 ctx.beginPath();
                 ctx.moveTo(t1.sx, t1.sy);
                 ctx.lineTo(t2.sx, t2.sy);
@@ -1536,13 +1573,11 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 ctx.closePath();
                 ctx.stroke();
 
-                // Pilares laterales
                 ctx.beginPath();
                 ctx.moveTo(p3.sx, p3.sy); ctx.lineTo(t3.sx, t3.sy);
                 ctx.moveTo(p4.sx, p4.sy); ctx.lineTo(t4.sx, t4.sy);
                 ctx.stroke();
 
-                // Etiqueta holográfica de Callout táctico (ej. Cohete, S7, Camuflaje)
                 if (b.isCallout && b.z > 220 && b.z < 980) {
                     const labelPos = project3D(b.x, roofY - 28, b.z, camX, camY, roll, fov);
                     const labelText = mapCfg.callouts[b.calloutIdx % mapCfg.callouts.length];
@@ -1554,7 +1589,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     ctx.lineTo(labelPos.sx, labelPos.sy);
                     ctx.stroke();
 
-                    // Rombo de objetivo tipo Halo Infinite
                     ctx.fillStyle = `rgba(${mapCfg.objColor[0]}, ${mapCfg.objColor[1]}, ${mapCfg.objColor[2]}, ${alpha * 1.15})`;
                     ctx.beginPath();
                     ctx.moveTo(labelPos.sx, labelPos.sy - 5);
@@ -1574,7 +1608,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
             function renderFrame() {
                 flightTick += 0.014;
 
-                // Rotación automática cada 18 segundos si AUTO está activo
                 if (autoCycleMaps && Date.now() - lastMapSwitchTime > 18000) {
                     lastMapSwitchTime = Date.now();
                     window.setDroneMap((activeMapIndex + 1) % HALO_MAPS.length, false);
@@ -1583,7 +1616,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 const mapCfg = HALO_MAPS[activeMapIndex];
                 ctx.clearRect(0, 0, width, height);
 
-                // 1. Cielo atmosférico específico del mapa
                 const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
                 bgGrad.addColorStop(0, mapCfg.skyTop);
                 bgGrad.addColorStop(0.48, mapCfg.skyMid);
@@ -1591,18 +1623,15 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 ctx.fillStyle = bgGrad;
                 ctx.fillRect(0, 0, width, height);
 
-                // Movimiento cinemático de cámara Dron (paneo orbital + alabeo suave)
                 const camX = Math.sin(flightTick * 0.55) * 210;
                 const camY = -45 + Math.cos(flightTick * 0.8) * 22;
                 const rollAngle = Math.sin(flightTick * 0.45) * 0.055;
                 const fov = Math.min(width, height) * 0.65;
 
-                // 2. Silueta icónica en el horizonte según el mapa
                 const cx = width * 0.5 - camX * 0.18;
                 const horizonY = height * 0.38;
                 ctx.save();
                 if (mapCfg.id === 'streets') {
-                    // Rascacielos de New Mombasa y letreros neón lejanos
                     ctx.strokeStyle = `rgba(255, 42, 133, 0.18)`;
                     ctx.lineWidth = 2;
                     for (let s = -4; s <= 4; s++) {
@@ -1611,7 +1640,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                         ctx.strokeRect(sx - 28, horizonY - sh, 56, sh);
                     }
                 } else if (mapCfg.id === 'aquarius') {
-                    // Arcos del Domo Submarino y ondas cáusticas
                     for (let a = 1; a <= 3; a++) {
                         ctx.strokeStyle = `rgba(0, 255, 200, ${0.18 / a})`;
                         ctx.lineWidth = 3;
@@ -1620,14 +1648,12 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                         ctx.stroke();
                     }
                 } else if (mapCfg.id === 'livefire') {
-                    // Anillo Zeta Halo y Torre de la Academia UNSC
                     ctx.strokeStyle = 'rgba(163, 230, 53, 0.16)';
                     ctx.lineWidth = 18;
                     ctx.beginPath();
                     ctx.arc(cx, -height * 0.75, height * 1.25, 0.36 * Math.PI, 0.64 * Math.PI);
                     ctx.stroke();
                 } else if (mapCfg.id === 'recharge') {
-                    // Reactor Hidroeléctrico giratorio central
                     ctx.translate(cx, horizonY - 20);
                     ctx.rotate(flightTick * 0.6);
                     ctx.strokeStyle = 'rgba(168, 85, 247, 0.22)';
@@ -1639,7 +1665,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 }
                 ctx.restore();
 
-                // 3. Malla topográfica del suelo en perspectiva (Movimiento de avance del Dron)
                 const gridOffsetZ = (flightTick * 180) % 80;
                 ctx.lineWidth = 1;
                 for (let z = 120; z < 1200; z += 80) {
@@ -1665,7 +1690,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     ctx.stroke();
                 }
 
-                // 4. Actualizar y dibujar edificios/estructuras 3D del mapa ordenadas por profundidad
                 mapStructures.forEach(b => {
                     b.z -= 2.8;
                     if (b.z < 75) {
@@ -1676,7 +1700,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 const sortedStructures = [...mapStructures].sort((a, b) => b.z - a.z);
                 sortedStructures.forEach(b => drawWireBox(b, camX, camY, rollAngle, fov, mapCfg));
 
-                // 5. Efectos atmosféricos de cada mapa (Lluvia, Burbujas, Brasas o Chispas)
                 particles.forEach(pt => {
                     if (mapCfg.weatherType === 'rain') {
                         pt.y += pt.speed * 2.4;
@@ -1708,7 +1731,6 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     }
                 });
 
-                // 6. Retícula central sutil del Dron Recon
                 ctx.save();
                 ctx.translate(width * 0.5, height * 0.42);
                 ctx.rotate(-rollAngle * 0.6);
@@ -1738,11 +1760,27 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Configuración oficial integrada de tu proyecto Firebase (halomatch-d9240)
+        const VERCEL_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyALszgtv_hDZYzGNCDnrgboOrRjCh3NV_M",
+            authDomain: "halomatch-d9240.firebaseapp.com",
+            projectId: "halomatch-d9240",
+            storageBucket: "halomatch-d9240.firebasestorage.app",
+            messagingSenderId: "252318133041",
+            appId: "1:252318133041:web:49ea7365d5da366267de10"
+        };
+
         try {
+            let resolvedConfig = VERCEL_FIREBASE_CONFIG;
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
+                resolvedConfig = JSON.parse(__firebase_config);
+            }
+
+            const statusBadge = document.getElementById('cloudSyncStatus');
+
+            if (resolvedConfig && resolvedConfig.apiKey) {
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'halo-mansalvas-app';
-                const app = initializeApp(firebaseConfig);
+                const app = initializeApp(resolvedConfig);
                 const auth = getAuth(app);
                 const db = getFirestore(app);
 
@@ -1752,16 +1790,16 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                     await signInAnonymously(auth);
                 }
 
-                const statusBadge = document.getElementById('cloudSyncStatus');
                 if (statusBadge) {
-                    statusBadge.innerHTML = '<i class="fa-solid fa-cloud text-emerald-400"></i> Online';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-cloud text-emerald-400"></i> Nube Activa';
                     statusBadge.classList.remove('hidden');
                 }
 
                 const rosterDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rosterData', 'mainRoster');
                 onSnapshot(rosterDocRef, (snap) => {
-                    if (snap.exists() && snap.data().players) {
+                    if (snap.exists() && snap.data().players && snap.data().players.length > 0) {
                         window.roster = snap.data().players;
+                        window.persistRosterLocally();
                         window.renderRoster();
                     } else {
                         setDoc(rosterDocRef, { players: window.roster, updatedAt: Date.now() });
@@ -1769,6 +1807,7 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 }, (err) => console.warn("Sync roster warning:", err));
 
                 window.saveRosterToCloud = async () => {
+                    window.persistRosterLocally();
                     if (!auth.currentUser) return;
                     await setDoc(rosterDocRef, { players: window.roster, updatedAt: Date.now() });
                 };
@@ -1801,13 +1840,13 @@ Reglas de conversión según CSR Arena y K/D en Slayer:
                 };
 
                 window.markLobbyAppliedCloud = async (summaryMsg) => {
-                    if (!auth.currentUser || !window.currentLobbyCode) return;
-                    const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', String(window.currentLobbyCode));
+                    if (!auth.currentUser || !currentLobbyCode) return;
+                    const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', String(currentLobbyCode));
                     await setDoc(lobbyRef, { applied: true, appliedSummary: summaryMsg }, { merge: true });
                 };
             }
         } catch (e) {
-            console.warn("Modo local activo:", e);
+            console.warn("Modo persistente local activo:", e);
         }
     </script>
 </body>
