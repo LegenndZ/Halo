@@ -782,18 +782,18 @@
                             <div class="text-[10px] text-sky-200/90 font-bold truncate">COMANDO ONI</div>
                             <div class="text-[11px] text-slate-400">11 - 13 PTS</div>
                         </button>
-                        <button type="button" id="tier-C" onclick="selectTier('C', 9)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
-                            <div class="font-orbitron font-black text-sm text-slate-200">Rango C</div>
+                        <button type="button" id="tier-B" onclick="selectTier('B', 9)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
+                            <div class="font-orbitron font-black text-sm text-slate-200">Rango B</div>
                             <div class="text-[10px] text-slate-300/90 font-bold truncate">SHOCK TROOPER ODST</div>
                             <div class="text-[11px] text-slate-400">8 - 10 PTS</div>
                         </button>
-                        <button type="button" id="tier-D" onclick="selectTier('D', 6)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
-                            <div class="font-orbitron font-black text-sm text-orange-300">Rango D</div>
+                        <button type="button" id="tier-C" onclick="selectTier('C', 6)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
+                            <div class="font-orbitron font-black text-sm text-orange-300">Rango C</div>
                             <div class="text-[10px] text-orange-200/90 font-bold truncate">ARTILLERO UNSC</div>
                             <div class="text-[11px] text-slate-400">5 - 7 PTS</div>
                         </button>
-                        <button type="button" id="tier-E" onclick="selectTier('E', 3)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
-                            <div class="font-orbitron font-black text-sm text-rose-300">Rango E</div>
+                        <button type="button" id="tier-D" onclick="selectTier('D', 3)" class="tier-btn p-2 rounded border border-cyan-500/30 bg-[#051324] text-left hover:border-cyan-400 transition">
+                            <div class="font-orbitron font-black text-sm text-rose-300">Rango D</div>
                             <div class="text-[10px] text-rose-200/90 font-bold truncate">CADETE DE ACADEMIA</div>
                             <div class="text-[11px] text-slate-400">1 - 4 PTS</div>
                         </button>
@@ -987,7 +987,7 @@
             { id: 'sp-9', name: 'Dani', pts: 13, rank: 'B+' },
             { id: 'sp-10', name: 'Julian', pts: 11, rank: 'B+' },
             { id: 'sp-11', name: 'Tato', pts: 11, rank: 'B+' },
-            { id: 'sp-12', name: 'Gabo', pts: 10, rank: 'C' }
+            { id: 'sp-12', name: 'Gabo', pts: 10, rank: 'B' }
         ];
 
         // Perfiles verificados de respaldo rápido
@@ -1149,9 +1149,9 @@
             if (p >= 17) return 'A+';
             if (p >= 14) return 'A';
             if (p >= 11) return 'B+';
-            if (p >= 8) return 'C';
-            if (p >= 5) return 'D';
-            return 'E';
+            if (p >= 8) return 'B';
+            if (p >= 5) return 'C';
+            return 'D';
         }
 
         // Cargar Roster desde LocalStorage al arrancar
@@ -1296,9 +1296,9 @@
                 { key: 'A+', label: 'RANGO A+ • DEMONIO LETAL (17-19 PTS)',            color: 'text-cyan-300 border-cyan-400/40 bg-cyan-500/10' },
                 { key: 'A',  label: 'RANGO A • HIPERLETAL SPARTAN (14-16 PTS)',        color: 'text-emerald-300 border-emerald-400/40 bg-emerald-500/10' },
                 { key: 'B+', label: 'RANGO B+ • COMANDO ONI (11-13 PTS)',              color: 'text-sky-300 border-sky-400/40 bg-sky-500/10' },
-                { key: 'C',  label: 'RANGO C • SHOCK TROOPER ODST (8-10 PTS)',         color: 'text-slate-200 border-slate-500/40 bg-slate-500/10' },
-                { key: 'D',  label: 'RANGO D • ARTILLERO UNSC (5-7 PTS)',              color: 'text-orange-300 border-orange-400/40 bg-orange-500/10' },
-                { key: 'E',  label: 'RANGO E • CADETE DE ACADEMIA (1-4 PTS)',          color: 'text-rose-300 border-rose-400/40 bg-rose-500/10' }
+                { key: 'B',  label: 'RANGO B • SHOCK TROOPER ODST (8-10 PTS)',         color: 'text-slate-200 border-slate-500/40 bg-slate-500/10' },
+                { key: 'C',  label: 'RANGO C • ARTILLERO UNSC (5-7 PTS)',              color: 'text-orange-300 border-orange-400/40 bg-orange-500/10' },
+                { key: 'D',  label: 'RANGO D • CADETE DE ACADEMIA (1-4 PTS)',          color: 'text-rose-300 border-rose-400/40 bg-rose-500/10' }
             ];
 
             let html = '';
@@ -2256,9 +2256,9 @@ ${cobraLines}`;
             'A+': 'DEMONIO LETAL',
             'A':  'HIPERLETAL SPARTAN',
             'B+': 'COMANDO ONI',
-            'C':  'SHOCK TROOPER ODST',
-            'D':  'ARTILLERO UNSC',
-            'E':  'CADETE DE ACADEMIA'
+            'B':  'SHOCK TROOPER ODST',
+            'C':  'ARTILLERO UNSC',
+            'D':  'CADETE DE ACADEMIA'
         };
 
         window.openHowItWorksModal = function() {
