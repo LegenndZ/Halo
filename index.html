@@ -189,7 +189,7 @@
         }
 
         /* =========================================================
-           INTRO CINEMÁTICA HALO INFINITE (DESVANECIMIENTO ORGÁNICO)
+           INTRO CINEMÁTICA HALO INFINITE (10 SEGUNDOS OFICIAL)
            ========================================================= */
         #haloInfiniteIntroOverlay {
             position: fixed;
@@ -199,43 +199,45 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            background: #020710;
+            background: #02060d;
             overflow: hidden;
             opacity: 1;
-            transition: opacity 2.2s cubic-bezier(0.22, 1, 0.36, 1), transform 2.4s cubic-bezier(0.22, 1, 0.36, 1), filter 2.2s ease;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1), transform 2.0s cubic-bezier(0.22, 1, 0.36, 1), filter 1.8s ease;
         }
 
         #haloInfiniteIntroOverlay.intro-fading-out {
             opacity: 0;
-            transform: scale(1.06);
-            filter: blur(8px) brightness(1.25);
+            transform: scale(1.05);
+            filter: blur(10px) brightness(1.3);
             pointer-events: none;
         }
 
         .halo-intro-bg-layer {
             position: absolute;
-            inset: -5%;
+            inset: -4%;
             background:
-                radial-gradient(circle at 50% 38%, rgba(0, 229, 255, 0.24) 0%, rgba(12, 42, 78, 0.45) 35%, rgba(2, 7, 16, 0.96) 78%),
-                linear-gradient(180deg, rgba(2, 10, 22, 0.35) 0%, rgba(3, 18, 36, 0.55) 55%, rgba(2, 6, 14, 0.98) 100%);
-            animation: haloIntroSlowZoom 7.5s ease-out forwards;
+                radial-gradient(circle at 50% 42%, rgba(0, 215, 255, 0.22) 0%, rgba(8, 36, 68, 0.52) 38%, rgba(2, 6, 13, 0.98) 78%),
+                linear-gradient(180deg, rgba(2, 9, 20, 0.4) 0%, rgba(4, 22, 42, 0.45) 52%, rgba(1, 5, 12, 0.98) 100%);
+            animation: haloIntroSlowZoom 10.5s ease-out forwards;
             z-index: 0;
         }
 
-        /* Anillo Zeta Halo monumental y paisaje en el horizonte */
+        /* Anillo Zeta Halo monumental en el horizonte */
         .zeta-halo-horizon {
             position: absolute;
-            top: -28vh;
+            top: -30vh;
             left: 50%;
-            transform: translateX(-50%) rotate(-14deg);
-            width: 115vw;
-            height: 95vh;
+            transform: translateX(-50%) rotate(-12deg);
+            width: 120vw;
+            height: 96vh;
             border-radius: 50%;
-            border-bottom: 5px solid rgba(165, 243, 252, 0.55);
+            border-bottom: 4px solid rgba(165, 243, 252, 0.65);
             box-shadow:
-                0 18px 65px rgba(0, 229, 255, 0.38),
-                inset 0 -14px 45px rgba(0, 229, 255, 0.25);
-            opacity: 0.85;
+                0 20px 75px rgba(0, 229, 255, 0.42),
+                inset 0 -16px 50px rgba(0, 229, 255, 0.28);
+            opacity: 0.9;
             pointer-events: none;
             z-index: 1;
         }
@@ -244,10 +246,27 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse at 50% 80%, rgba(0, 195, 255, 0.16) 0%, transparent 65%),
-                repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+                radial-gradient(ellipse at 50% 78%, rgba(0, 210, 255, 0.14) 0%, transparent 65%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
             z-index: 2;
             pointer-events: none;
+        }
+
+        /* Destello anamórfico horizontal estilo menú de Halo Infinite */
+        .halo-anamorphic-flare {
+            width: min(82vw, 520px);
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 229, 255, 0.85) 25%, #ffffff 50%, rgba(0, 229, 255, 0.85) 75%, transparent 100%);
+            box-shadow: 0 0 24px #00e5ff, 0 0 48px rgba(0, 229, 255, 0.6);
+        }
+
+        /* Firma Verde Neón Halo Infinite */
+        .halo-neon-green-sig {
+            color: #39ff14;
+            text-shadow:
+                0 0 8px rgba(57, 255, 20, 0.95),
+                0 0 20px rgba(57, 255, 20, 0.65),
+                0 0 36px rgba(16, 185, 129, 0.45);
         }
 
         @keyframes haloIntroSlowZoom {
@@ -269,81 +288,61 @@
 <body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
 
     <!-- ========================================================= -->
-    <!-- PANTALLA DE INICIO INMERSIVA HALO INFINITE (5-7 SEGUNDOS) -->
+    <!-- PANTALLA DE INICIO OFICIAL HALO INFINITE (10 SEGUNDOS)    -->
     <!-- ========================================================= -->
     <div id="haloInfiniteIntroOverlay" onclick="triggerHaloIntroAudioAndContinue()">
         <div class="halo-intro-bg-layer"></div>
         <div class="zeta-halo-horizon"></div>
         <div class="halo-intro-mist"></div>
 
-        <!-- Reproductor invisible de respaldo para el tema de YouTube z8PbS7-mm4A -->
+        <!-- Reproductor invisible para el tema oficial de Halo Infinite (z8PbS7-mm4A) -->
         <div id="ytAudioContainer" class="fixed -top-96 -left-96 w-1 h-1 opacity-0 pointer-events-none overflow-hidden"></div>
 
-        <!-- Barra superior estilo menú de campaña/multijugador Halo Infinite -->
-        <div class="relative z-10 w-full max-w-6xl mx-auto px-6 pt-6 flex items-center justify-between text-[11px] font-orbitron tracking-[0.25em] text-cyan-300/80 uppercase">
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                <span>UNSC INFINITY // TAC-NET LINK</span>
+        <!-- Cabecera minimalista estilo Halo Infinite -->
+        <div class="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 sm:pt-7 flex items-center justify-between text-[10px] sm:text-xs font-orbitron tracking-[0.28em] text-cyan-200/80 uppercase">
+            <div class="flex items-center gap-2.5">
+                <span id="haloIntroStatusDot" class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>ZETA HALO</span>
             </div>
-            <div class="hidden sm:flex items-center gap-6 text-slate-300/80">
-                <span class="text-white border-b-2 border-cyan-400 pb-1">MULTIJUGADOR</span>
-                <span>ACADEMIA</span>
-                <span>PERSONALIZAR</span>
-                <span>COMUNIDAD</span>
+            <div id="haloIntroCountdownBadge" class="px-3 py-1 rounded-full bg-slate-950/70 border border-cyan-400/35 text-cyan-300 font-bold tracking-[0.2em]">
+                5s
             </div>
-            <div class="text-cyan-400/90">ZETA HALO • 2560</div>
         </div>
 
-        <!-- Centro: Logotipo y Menú de Interfaz Halo Infinite -->
-        <div class="relative z-10 flex flex-col items-center justify-center text-center px-4 my-auto">
-            <div class="mb-3 px-3.5 py-1 rounded-full border border-cyan-400/40 bg-cyan-950/50 backdrop-blur-md text-[10px] sm:text-xs font-orbitron tracking-[0.3em] text-cyan-300 uppercase">
-                SINCRONIZANDO VISOR MJOLNIR GEN3
-            </div>
-
-            <h1 class="font-orbitron font-black text-4xl sm:text-6xl md:text-7xl tracking-[0.22em] text-white halo-infinite-title-glow uppercase select-none">
+        <!-- Centro Minimalista y Cinematográfico tipo Halo Infinite -->
+        <div class="relative z-10 flex flex-col items-center justify-center text-center px-4 my-auto w-full max-w-3xl">
+            <h1 class="font-orbitron font-black text-4xl sm:text-6xl md:text-7xl tracking-[0.26em] text-white halo-infinite-title-glow uppercase select-none leading-none">
                 HALO <span class="font-light text-cyan-300">INFINITE</span>
             </h1>
 
-            <div class="w-56 sm:w-80 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent my-4 shadow-[0_0_20px_#00e5ff]"></div>
+            <div class="halo-anamorphic-flare my-4 sm:my-5"></div>
 
-            <p class="font-orbitron font-bold text-xs sm:text-base tracking-[0.35em] text-cyan-100/90 uppercase mb-6">
-                MANSALVAS TAC-BALANCER
+            <p class="font-orbitron font-bold text-xs sm:text-sm tracking-[0.42em] text-slate-200/90 uppercase">
+                MANSALVAS
             </p>
 
-            <!-- Opciones clásicas del menú de Halo Infinite que se desvanecen hacia la app -->
-            <div class="w-64 sm:w-72 space-y-2 text-left font-orbitron text-xs tracking-[0.18em]">
-                <div class="px-4 py-2.5 bg-cyan-500/25 border-l-4 border-cyan-300 text-white font-bold flex items-center justify-between shadow-[0_0_20px_rgba(0,229,255,0.25)]">
-                    <span>INGRESANDO AL ROSTER</span>
-                    <i class="fa-solid fa-chevron-right text-cyan-300 text-[10px] animate-pulse"></i>
-                </div>
-                <div class="px-4 py-2 bg-slate-900/50 border-l-2 border-slate-600/60 text-slate-300/75 flex items-center justify-between">
-                    <span>ESCÁNER HALODATAHIVE</span>
-                    <span class="text-[9px] text-emerald-400">ONLINE</span>
-                </div>
-                <div class="px-4 py-2 bg-slate-900/50 border-l-2 border-slate-600/60 text-slate-300/75 flex items-center justify-between">
-                    <span>SERVIDOR FIREBASE</span>
-                    <span class="text-[9px] text-cyan-300">CONECTADO</span>
-                </div>
+            <!-- Firma solicitada en Verde Neón Halo Infinite -->
+            <div class="mt-3 font-orbitron font-black text-xs sm:text-sm md:text-base tracking-[0.28em] halo-neon-green-sig uppercase">
+                Desing By Legennd Zr
             </div>
 
-            <!-- Barra de progreso de inmersión (5.5 segundos) -->
-            <div class="mt-7 w-60 sm:w-72 bg-slate-900/80 h-1 rounded-full overflow-hidden border border-cyan-500/30">
-                <div id="haloIntroProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-sky-300 to-white w-0 transition-all duration-300 shadow-[0_0_12px_#00e5ff]"></div>
-            </div>
+            <!-- Botón / Indicador de Inicio estilo "PRESS TO START" de Halo Infinite -->
+            <button type="button" id="haloIntroStartPromptBtn" onclick="event.stopPropagation(); triggerHaloIntroAudioAndContinue();" class="mt-8 sm:mt-10 px-6 py-2.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-300/60 text-white font-orbitron font-bold text-[11px] sm:text-xs tracking-[0.25em] uppercase transition shadow-[0_0_25px_rgba(0,229,255,0.28)] flex items-center gap-2.5">
+                <i id="haloIntroAudioIcon" class="fa-solid fa-volume-high text-cyan-300 animate-pulse"></i>
+                <span id="haloIntroAudioHint">PRESIONA PARA INICIAR</span>
+            </button>
 
-            <div class="mt-3 flex items-center gap-2 text-[11px] font-orbitron text-cyan-200/90 tracking-wider">
-                <i class="fa-solid fa-volume-high text-cyan-400 animate-pulse"></i>
-                <span id="haloIntroAudioHint">Toca cualquier punto para activar el audio de Halo Infinite</span>
+            <!-- Barra de progreso limpia de 10 segundos -->
+            <div class="mt-6 w-64 sm:w-80 bg-slate-950/85 h-1 rounded-full overflow-hidden border border-cyan-500/30">
+                <div id="haloIntroProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-[#39ff14] to-white w-0 shadow-[0_0_12px_#39ff14]"></div>
             </div>
         </div>
 
-        <!-- Pie de la pantalla de intro con botón para saltar o activar sonido -->
-        <div class="relative z-10 w-full max-w-6xl mx-auto px-6 pb-6 flex items-center justify-between text-xs text-slate-400">
-            <div class="font-orbitron text-[10px] tracking-widest text-cyan-300/70">
-                <i class="fa-solid fa-satellite-dish mr-1"></i> TELEMETRÍA DRON 3D LISTA
-            </div>
-            <button type="button" onclick="event.stopPropagation(); skipHaloIntroNow();" class="px-3 py-1 rounded bg-slate-900/80 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 font-orbitron text-[10px] tracking-wider uppercase transition">
-                Entrar Directo <i class="fa-solid fa-forward-step ml-1"></i>
+        <!-- Pie minimalista -->
+        <div class="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 pb-5 sm:pb-7 flex items-center justify-between text-[10px] font-orbitron tracking-[0.2em] text-slate-400">
+            <span class="text-[#39ff14]/90 font-bold">UNSC // TAC-OS</span>
+            <button type="button" onclick="event.stopPropagation(); skipHaloIntroNow();" class="px-3 py-1.5 rounded bg-slate-950/75 hover:bg-cyan-500/20 border border-cyan-500/35 text-cyan-200 uppercase transition">
+                Saltar <i class="fa-solid fa-forward-step ml-1"></i>
             </button>
         </div>
     </div>
@@ -393,16 +392,16 @@
                     </h1>
                 </div>
             </div>
-
-            <!-- Derecha en Móvil / Extremo Derecho en PC: Modo 4v4 / 3v3 y Tribunal (Solo visible si Admin lo dispara o es Admin) -->
+            <!-- Derecha en Móvil / Extremo Derecho en PC: Modo 4v4 / 3v3 / 2v2 y Tribunal (Solo visible si Admin lo dispara o es Admin) -->
             <div class="flex items-center gap-2 ml-auto lg:order-3">
                 <button id="btnReplayIntroAudio" onclick="replayHaloImmersionIntro()" class="px-2.5 py-1.5 rounded bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-orbitron font-bold flex items-center gap-1.5 transition" title="Escuchar Tema Halo Infinite (10s)">
                     <i class="fa-solid fa-music text-cyan-400"></i>
                     <span class="hidden xl:inline text-[10px]">INTRO</span>
                 </button>
                 <div class="inline-flex rounded bg-[#020813] p-1 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.15)]">
-                    <button id="btn4v4" onclick="setMode(8)" class="px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4 (8)</button>
-                    <button id="btn3v3" onclick="setMode(6)" class="px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3 (6)</button>
+                    <button id="btn4v4" onclick="setMode(8)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4 (8)</button>
+                    <button id="btn3v3" onclick="setMode(6)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3 (6)</button>
+                    <button id="btn2v2" onclick="setMode(4)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">2v2 (4)</button>
                 </div>
 
                 <button id="headerTribunalBtn" onclick="openTribunalModal()" class="hidden hud-btn px-2.5 sm:px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 text-amber-300 font-orbitron font-bold text-xs items-center gap-1.5">
@@ -508,7 +507,7 @@
         <!-- COLUMNA ROSTER OFICIAL -->
         <section id="rosterSectionCol" class="w-full flex flex-col gap-4">
             <div class="hud-panel p-3.5 sm:p-5">
-                <!-- PASO 1 VISUAL: Elegir modalidad 3v3 o 4v4 y Reclutar Spartan -->
+                <!-- PASO 1 VISUAL: Elegir modalidad 2v2, 3v3 o 4v4 y Reclutar Spartan -->
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-500/30 pb-3.5 mb-3.5">
                     <div>
                         <div class="flex items-center gap-2">
@@ -518,15 +517,16 @@
                             </span>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-200 mt-0.5">
-                            Elige <strong class="text-cyan-300">4v4</strong> o <strong class="text-cyan-300">3v3</strong> y toca a los <strong id="targetCountText" class="text-cyan-300 font-orbitron">8</strong> jugadores que van a entrar a la partida.
+                            Elige <strong class="text-cyan-300">4v4</strong>, <strong class="text-cyan-300">3v3</strong> o <strong class="text-cyan-300">2v2</strong> y toca a los <strong id="targetCountText" class="text-cyan-300 font-orbitron">8</strong> jugadores que van a entrar a la partida.
                         </p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                         <!-- Selector rápido de modalidad dentro del Roster -->
                         <div class="inline-flex rounded bg-[#020813] p-1 border border-cyan-500/40">
-                            <button id="btnRoster4v4" onclick="setMode(8)" class="px-3 py-1.5 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4 (8)</button>
-                            <button id="btnRoster3v3" onclick="setMode(6)" class="px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3 (6)</button>
+                            <button id="btnRoster4v4" onclick="setMode(8)" class="px-2.5 sm:px-3 py-1.5 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4 (8)</button>
+                            <button id="btnRoster3v3" onclick="setMode(6)" class="px-2.5 sm:px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3 (6)</button>
+                            <button id="btnRoster2v2" onclick="setMode(4)" class="px-2.5 sm:px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">2v2 (4)</button>
                         </div>
 
                         <button onclick="openPlayerModal()" class="flex-1 sm:flex-initial justify-center hud-btn px-3.5 py-2.5 sm:py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,229,255,0.4)]">
@@ -1267,23 +1267,41 @@
             }
         }
 
+        function getModeLabel(count) {
+            if (count === 8) return '4v4';
+            if (count === 6) return '3v3';
+            if (count === 4) return '2v2';
+            return `${count / 2}v${count / 2}`;
+        }
+
         function setMode(count) {
             maxPlayers = count;
-            const btn4 = document.getElementById('btn4v4');
-            const btn3 = document.getElementById('btn3v3');
-            const btnR4 = document.getElementById('btnRoster4v4');
-            const btnR3 = document.getElementById('btnRoster3v3');
-            if (count === 8) {
-                if (btn4) btn4.className = 'px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow';
-                if (btn3) btn3.className = 'px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
-                if (btnR4) btnR4.className = 'px-3 py-1.5 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow';
-                if (btnR3) btnR3.className = 'px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
-            } else {
-                if (btn3) btn3.className = 'px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow';
-                if (btn4) btn4.className = 'px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
-                if (btnR3) btnR3.className = 'px-3 py-1.5 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow';
-                if (btnR4) btnR4.className = 'px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
-            }
+            const headerBtns = [
+                { id: 'btn4v4', val: 8 },
+                { id: 'btn3v3', val: 6 },
+                { id: 'btn2v2', val: 4 }
+            ];
+            headerBtns.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (!el) return;
+                el.className = (b.val === count)
+                    ? 'px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow'
+                    : 'px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
+            });
+
+            const rosterBtns = [
+                { id: 'btnRoster4v4', val: 8 },
+                { id: 'btnRoster3v3', val: 6 },
+                { id: 'btnRoster2v2', val: 4 }
+            ];
+            rosterBtns.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (!el) return;
+                el.className = (b.val === count)
+                    ? 'px-2.5 sm:px-3 py-1.5 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow'
+                    : 'px-2.5 sm:px-3 py-1.5 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white';
+            });
+
             if (selectedIds.length > maxPlayers) {
                 selectedIds = selectedIds.slice(0, maxPlayers);
             }
@@ -1291,6 +1309,9 @@
             document.getElementById('maxCounter').innerText = maxPlayers;
             renderRoster();
             updateBalancedTeamsUI();
+            if (selectedIds.length === maxPlayers) {
+                setTimeout(() => scrollToTeamsSection(), 150);
+            }
         }
 
         function clearSelection() {
@@ -1417,16 +1438,17 @@
             if (!titleEl || !subEl || !dotEl || !btnEl) return;
 
             const count = selectedIds.length;
+            const modeText = getModeLabel(maxPlayers);
             if (count === maxPlayers) {
                 dotEl.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
-                titleEl.innerText = `¡Equipos ${maxPlayers === 8 ? '4v4' : '3v3'} Listos!`;
+                titleEl.innerText = `¡Equipos ${modeText} Listos!`;
                 subEl.innerText = 'Toca el botón para bajar a ver las escuadras';
                 btnEl.classList.remove('hidden');
                 btnEl.classList.add('flex');
             } else {
                 const missing = maxPlayers - count;
                 dotEl.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
-                titleEl.innerText = `Partida ${maxPlayers === 8 ? '4v4' : '3v3'}: ${count} de ${maxPlayers} elegidos`;
+                titleEl.innerText = `Partida ${modeText}: ${count} de ${maxPlayers} elegidos`;
                 subEl.innerText = `Falta${missing === 1 ? '' : 'n'} ${missing} jugador${missing === 1 ? '' : 'es'} para armar equipos`;
                 btnEl.classList.add('hidden');
                 btnEl.classList.remove('flex');
@@ -1621,9 +1643,10 @@
             if (!currentMatchData) return;
             const eagleLines = currentMatchData.eagle.map(p => `• ${p.name} (${p.pts} pts - ${p.rank})`).join('\n');
             const cobraLines = currentMatchData.cobra.map(p => `• ${p.name} (${p.pts} pts - ${p.rank})`).join('\n');
+            const modeText = getModeLabel(currentMatchData.mode);
             const text =
 `⚡ *UNSC TAC-BALANCER | MATCH #${currentMatchData.code} (OPCIÓN ${currentMatchData.optionNumber || 1})* ⚡
-Modo: ${currentMatchData.mode === 8 ? '4v4' : '3v3'} | Dif: ${currentMatchData.diff} PTS
+Modo: ${modeText} | Dif: ${currentMatchData.diff} PTS
 
 🦅 *UNSC EAGLE (${currentMatchData.eaglePts} PTS):*
 ${eagleLines}
@@ -2140,76 +2163,123 @@ ${cobraLines}`;
         }
 
         // =========================================================
-        // MOTOR DE INMERSIÓN INICIAL: MENÚ HALO INFINITE (5-7s)
-        // + TEMA MUSICAL CORAL/AMBIENTAL DE 10 SEGUNDOS (z8PbS7-mm4A)
+        // MOTOR DE INMERSIÓN INICIAL: MENÚ HALO INFINITE (10 SEGUNDOS)
+        // GARANTIZA AUDIO EN EL 100% DE EQUIPOS (PC, ANDROID, iOS)
         // =========================================================
         let haloAudioCtx = null;
         let haloMusicPlaying = false;
         let haloIntroCompleted = false;
         let ytIframeInjected = false;
+        let haloIntroCountdownTimer = null;
+        let haloIntroFadeTimeout = null;
+        let haloIntroSecondsLeft = 5;
+        let haloIntroTimerRunning = false;
 
-        // Sintetizador Polifónico Coral / Pad de Halo Infinite (10 segundos con fade-out orgánico)
+        // Sintetizador Polifónico Coral / Piano / Orquestal de Halo Infinite (10 segundos completos)
         function playHaloInfiniteTheme10Seconds() {
-            if (haloMusicPlaying) return;
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContextClass) return;
+                if (!AudioContextClass) return false;
                 if (!haloAudioCtx) haloAudioCtx = new AudioContextClass();
+
                 if (haloAudioCtx.state === 'suspended') {
                     haloAudioCtx.resume();
                 }
 
+                // Si el navegador aún mantiene suspendido el contexto (esperando el primer toque del usuario), no marcamos como reproducido aún
+                if (haloAudioCtx.state !== 'running') {
+                    return false;
+                }
+
+                if (haloMusicPlaying) return true;
                 haloMusicPlaying = true;
+
                 const now = haloAudioCtx.currentTime;
 
-                // Ganancia maestra: entra suave (0 -> 1.5s), se mantiene mística hasta los 7.5s y se desvanece orgánicamente hasta los 10.5s
-                const masterGain = haloAudioCtx.createGain();
-                masterGain.gain.setValueAtTime(0.001, now);
-                masterGain.gain.linearRampToValueAtTime(0.28, now + 1.4);
-                masterGain.gain.setValueAtTime(0.28, now + 7.2);
-                masterGain.gain.exponentialRampToValueAtTime(0.0008, now + 10.4);
-                masterGain.connect(haloAudioCtx.destination);
+                // Compresor dinámico para que suene potente y claro tanto en celulares como en PC
+                const compressor = haloAudioCtx.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-18, now);
+                compressor.knee.setValueAtTime(24, now);
+                compressor.ratio.setValueAtTime(6, now);
+                compressor.attack.setValueAtTime(0.005, now);
+                compressor.release.setValueAtTime(0.25, now);
+                compressor.connect(haloAudioCtx.destination);
 
-                // Filtro paso-bajo cálido para recrear el coro reverberante del menú de Halo Infinite
+                // Ganancia maestra de 10 segundos exactos con fade-out en el último segundo
+                const masterGain = haloAudioCtx.createGain();
+                masterGain.gain.setValueAtTime(0.01, now);
+                masterGain.gain.linearRampToValueAtTime(0.55, now + 0.8);
+                masterGain.gain.setValueAtTime(0.55, now + 8.6);
+                masterGain.gain.exponentialRampToValueAtTime(0.001, now + 10.2);
+                masterGain.connect(compressor);
+
+                // Filtro formante coral para el cántico gregoriano de Halo
                 const choirFilter = haloAudioCtx.createBiquadFilter();
                 choirFilter.type = 'lowpass';
-                choirFilter.frequency.setValueAtTime(620, now);
-                choirFilter.frequency.linearRampToValueAtTime(1250, now + 4.0);
-                choirFilter.frequency.linearRampToValueAtTime(480, now + 10.2);
+                choirFilter.frequency.setValueAtTime(950, now);
+                choirFilter.frequency.linearRampToValueAtTime(1650, now + 4.5);
+                choirFilter.frequency.linearRampToValueAtTime(750, now + 10.0);
+                choirFilter.Q.setValueAtTime(1.8, now);
                 choirFilter.connect(masterGain);
 
-                // Progresión gregoriana / atmosférica característica de Halo (Mi menor dórico)
-                const notesSequence = [
-                    { freqs: [164.81, 246.94, 329.63, 493.88], start: 0.0, dur: 3.6 }, // E3, B3, E4, B4
-                    { freqs: [196.00, 293.66, 392.00, 587.33], start: 3.2, dur: 3.5 }, // G3, D4, G4, D5
-                    { freqs: [220.00, 329.63, 440.00, 659.25], start: 6.2, dur: 4.2 }  // A3, E4, A4, E5 -> resolución Zeta Halo
+                // 1. Coro Gregoriano + Cuerdas Halo Infinite (Mi Dórico: E -> G -> A -> B -> E)
+                const choirChords = [
+                    { freqs: [164.81, 246.94, 329.63, 493.88, 659.25], start: 0.0, dur: 3.4 }, // Em
+                    { freqs: [196.00, 293.66, 392.00, 587.33, 783.99], start: 3.1, dur: 3.2 }, // G
+                    { freqs: [220.00, 329.63, 440.00, 659.25, 880.00], start: 6.0, dur: 2.3 }, // A
+                    { freqs: [164.81, 246.94, 329.63, 659.25, 987.77], start: 8.0, dur: 2.2 }  // Em resolución
                 ];
 
-                notesSequence.forEach(chord => {
+                choirChords.forEach(chord => {
                     chord.freqs.forEach((f, idx) => {
                         const osc = haloAudioCtx.createOscillator();
                         const noteGain = haloAudioCtx.createGain();
-                        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-                        // Leve desafinación orgánica para efecto de coro humano + cuerdas
-                        osc.frequency.setValueAtTime(f * (1 + (idx - 1.5) * 0.0025), now + chord.start);
+                        osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+                        osc.frequency.setValueAtTime(f * (1 + (idx - 2) * 0.0022), now + chord.start);
 
                         noteGain.gain.setValueAtTime(0.001, now + chord.start);
-                        noteGain.gain.linearRampToValueAtTime(0.18 / chord.freqs.length, now + chord.start + 0.9);
+                        noteGain.gain.linearRampToValueAtTime(0.22 / chord.freqs.length, now + chord.start + 0.65);
                         noteGain.gain.exponentialRampToValueAtTime(0.001, now + chord.start + chord.dur);
 
                         osc.connect(noteGain);
                         noteGain.connect(choirFilter);
                         osc.start(now + chord.start);
-                        osc.stop(now + chord.start + chord.dur + 0.1);
+                        osc.stop(now + chord.start + chord.dur + 0.08);
                     });
                 });
 
-                // También activamos el stream de YouTube (z8PbS7-mm4A) durante los primeros 10 segundos y lo retiramos suavemente
+                // 2. Notas icónicas de Piano Reverberante de Halo Infinite (audibles en cualquier altavoz móvil)
+                const pianoNotes = [
+                    { f: 659.25, t: 0.4, d: 1.8 }, // E5
+                    { f: 739.99, t: 1.9, d: 1.5 }, // F#5
+                    { f: 783.99, t: 3.3, d: 2.0 }, // G5
+                    { f: 880.00, t: 5.5, d: 1.6 }, // A5
+                    { f: 783.99, t: 7.0, d: 1.4 }, // G5
+                    { f: 659.25, t: 8.2, d: 2.0 }  // E5
+                ];
+
+                pianoNotes.forEach(n => {
+                    const pOsc = haloAudioCtx.createOscillator();
+                    const pGain = haloAudioCtx.createGain();
+                    pOsc.type = 'sine';
+                    pOsc.frequency.setValueAtTime(n.f, now + n.t);
+
+                    pGain.gain.setValueAtTime(0.001, now + n.t);
+                    pGain.gain.linearRampToValueAtTime(0.16, now + n.t + 0.04);
+                    pGain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+
+                    pOsc.connect(pGain);
+                    pGain.connect(masterGain);
+                    pOsc.start(now + n.t);
+                    pOsc.stop(now + n.t + n.d + 0.05);
+                });
+
+                // 3. Stream complementario de YouTube (z8PbS7-mm4A) durante los 10 segundos
                 if (!ytIframeInjected) {
                     ytIframeInjected = true;
                     const ytBox = document.getElementById('ytAudioContainer');
                     if (ytBox) {
-                        ytBox.innerHTML = `<iframe width="10" height="10" src="https://www.youtube.com/embed/z8PbS7-mm4A?autoplay=1&controls=0&start=0" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;
+                        ytBox.innerHTML = `<iframe width="10" height="10" src="https://www.youtube.com/embed/z8PbS7-mm4A?autoplay=1&controls=0&start=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;
                         setTimeout(() => {
                             if (ytBox) ytBox.innerHTML = '';
                         }, 10500);
@@ -2218,82 +2288,137 @@ ${cobraLines}`;
 
                 const hintEl = document.getElementById('haloIntroAudioHint');
                 if (hintEl) {
-                    hintEl.innerText = 'Audio de Halo Infinite activo (Inmersión 10s)';
+                    hintEl.innerText = 'SINCRONIZANDO ZETA HALO';
                 }
 
                 setTimeout(() => {
                     haloMusicPlaying = false;
-                }, 10600);
+                }, 10400);
+
+                return true;
             } catch (e) {
                 console.warn('Audio init info:', e);
+                return false;
             }
         }
 
+        // Inicia el conteo visual de 5 segundos para el menú mientras el audio sigue hasta los 10 segundos
+        function begin10SecondIntroCountdown() {
+            if (haloIntroTimerRunning) return;
+            haloIntroTimerRunning = true;
+            haloIntroSecondsLeft = 5;
+
+            const bar = document.getElementById('haloIntroProgressBar');
+            const badge = document.getElementById('haloIntroCountdownBadge');
+
+            if (bar) {
+                bar.style.transition = 'none';
+                bar.style.width = '0%';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        bar.style.transition = 'width 5s linear';
+                        bar.style.width = '100%';
+                    });
+                });
+            }
+
+            if (badge) badge.innerText = '5s';
+
+            clearInterval(haloIntroCountdownTimer);
+            haloIntroCountdownTimer = setInterval(() => {
+                haloIntroSecondsLeft = Math.max(0, haloIntroSecondsLeft - 1);
+                if (badge) badge.innerText = `${haloIntroSecondsLeft}s`;
+                if (haloIntroSecondsLeft <= 0) {
+                    clearInterval(haloIntroCountdownTimer);
+                }
+            }, 1000);
+
+            clearTimeout(haloIntroFadeTimeout);
+            haloIntroFadeTimeout = setTimeout(() => {
+                fadeOutHaloIntroOverlay();
+            }, 5000);
+        }
+
         window.triggerHaloIntroAudioAndContinue = function() {
-            playHaloInfiniteTheme10Seconds();
+            const started = playHaloInfiniteTheme10Seconds();
+            if (started || !haloIntroTimerRunning) {
+                begin10SecondIntroCountdown();
+            }
         };
 
         window.skipHaloIntroNow = function() {
             playHaloInfiniteTheme10Seconds();
+            clearInterval(haloIntroCountdownTimer);
+            clearTimeout(haloIntroFadeTimeout);
             fadeOutHaloIntroOverlay();
         };
 
         window.replayHaloImmersionIntro = function() {
             const overlay = document.getElementById('haloInfiniteIntroOverlay');
-            const bar = document.getElementById('haloIntroProgressBar');
+            const hintEl = document.getElementById('haloIntroAudioHint');
+            clearInterval(haloIntroCountdownTimer);
+            clearTimeout(haloIntroFadeTimeout);
             haloIntroCompleted = false;
+            haloIntroTimerRunning = false;
             ytIframeInjected = false;
             haloMusicPlaying = false;
+
+            if (hintEl) hintEl.innerText = 'SINCRONIZANDO ZETA HALO';
             if (overlay) {
                 overlay.style.display = 'flex';
                 requestAnimationFrame(() => {
                     overlay.classList.remove('intro-fading-out');
                 });
             }
-            if (bar) {
-                bar.style.width = '0%';
-                setTimeout(() => { bar.style.width = '100%'; }, 100);
-            }
             playHaloInfiniteTheme10Seconds();
-            setTimeout(() => {
-                fadeOutHaloIntroOverlay();
-            }, 5600);
+            begin10SecondIntroCountdown();
         };
 
         function fadeOutHaloIntroOverlay() {
             if (haloIntroCompleted) return;
             haloIntroCompleted = true;
+            clearInterval(haloIntroCountdownTimer);
             const overlay = document.getElementById('haloInfiniteIntroOverlay');
             if (!overlay) return;
             overlay.classList.add('intro-fading-out');
             setTimeout(() => {
                 overlay.style.display = 'none';
-            }, 2200);
+            }, 1850);
         }
 
         function startHaloInfiniteBootSequence() {
-            const bar = document.getElementById('haloIntroProgressBar');
-            if (bar) {
-                bar.style.transition = 'width 5.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
-                setTimeout(() => {
-                    bar.style.width = '100%';
-                }, 80);
+            // Intentamos arrancar el audio de 10 segundos automáticamente
+            const audioStartedImmediately = playHaloInfiniteTheme10Seconds();
+
+            if (audioStartedImmediately) {
+                // El equipo permitió autoplay con sonido: corren los 10 segundos de inmediato
+                begin10SecondIntroCountdown();
+            } else {
+                // Si el equipo bloquea el audio hasta el primer toque, esperamos el toque en el menú de Halo Infinite
+                // para que SIEMPRE suenen los 10 segundos completos al interactuar
+                const hintEl = document.getElementById('haloIntroAudioHint');
+                if (hintEl) {
+                    hintEl.innerText = 'TOCA PARA INICIAR (AUDIO 10S)';
+                }
             }
 
-            // Intento inmediato de iniciar los 10s de música + escucha al primer gesto si el navegador pide interacción
-            playHaloInfiniteTheme10Seconds();
             const unlockAudioOnFirstGesture = () => {
-                playHaloInfiniteTheme10Seconds();
-                window.removeEventListener('pointerdown', unlockAudioOnFirstGesture);
-                window.removeEventListener('keydown', unlockAudioOnFirstGesture);
+                const ok = playHaloInfiniteTheme10Seconds();
+                if (!haloIntroTimerRunning) {
+                    begin10SecondIntroCountdown();
+                }
+                if (ok) {
+                    window.removeEventListener('pointerdown', unlockAudioOnFirstGesture);
+                    window.removeEventListener('touchstart', unlockAudioOnFirstGesture);
+                    window.removeEventListener('click', unlockAudioOnFirstGesture);
+                    window.removeEventListener('keydown', unlockAudioOnFirstGesture);
+                }
             };
-            window.addEventListener('pointerdown', unlockAudioOnFirstGesture, { once: true });
-            window.addEventListener('keydown', unlockAudioOnFirstGesture, { once: true });
 
-            // A los 5.5 segundos inicia el desvanecimiento orgánico de 2s (completando ~7s de transición visual mientras la música sigue hasta los 10s)
-            setTimeout(() => {
-                fadeOutHaloIntroOverlay();
-            }, 5500);
+            window.addEventListener('pointerdown', unlockAudioOnFirstGesture);
+            window.addEventListener('touchstart', unlockAudioOnFirstGesture);
+            window.addEventListener('click', unlockAudioOnFirstGesture);
+            window.addEventListener('keydown', unlockAudioOnFirstGesture);
         }
 
         // =========================================================
