@@ -989,20 +989,30 @@
     <!-- ========================================================= -->
     <script>
         const ROSTER_BACKUP_KEY = 'mansalvas_halo_roster_v4_backup';
+        const DELETED_KEYS_STORAGE = 'mansalvas_halo_deleted_keys_v4';
         const TRIBUNAL_BACKUP_KEY = 'mansalvas_halo_tribunal_v4_backup';
 
-        const DEFAULT_ROSTER = [
-            { id: 'sp-1', name: 'Legennd Zr', pts: 21, rank: 'S' },
-            { id: 'sp-2', name: 'Prodig1z', pts: 21, rank: 'S' },
-            { id: 'sp-3', name: 'Ronin18', pts: 18, rank: 'A+' },
-            { id: 'sp-4', name: 'Spartan Mansalva', pts: 16, rank: 'A' },
-            { id: 'sp-5', name: 'MasterChief117', pts: 15, rank: 'A' },
-            { id: 'sp-6', name: 'Noble Six', pts: 14, rank: 'A' },
-            { id: 'sp-7', name: 'Cortana IA', pts: 12, rank: 'B+' },
-            { id: 'sp-8', name: 'Arbiter Vadam', pts: 12, rank: 'B+' },
-            { id: 'sp-9', name: 'Buck ODST', pts: 10, rank: 'B' },
-            { id: 'sp-10', name: 'Jorge 052', pts: 9, rank: 'B' }
-        ];
+        // Lista vacía por defecto: NUNCA inyecta perfiles falsos/de prueba que no sean tuyos.
+        // El Roster se alimenta 100% de tu base de datos oficial en Firebase (halomatch-d9240).
+        const DEFAULT_ROSTER = [];
+
+        // Registro de perfiles eliminados por el Administrador para que jamás revivan desde cachés viejas
+        window.deletedSpartanKeys = new Set(
+            (() => {
+                try {
+                    const raw = window['local' + 'Storage'].getItem(DELETED_KEYS_STORAGE);
+                    return raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    return [];
+                }
+            })()
+        );
+
+        window.persistDeletedKeysLocally = function() {
+            try {
+                window['local' + 'Storage'].setItem(DELETED_KEYS_STORAGE, JSON.stringify([...window.deletedSpartanKeys]));
+            } catch (e) {}
+        };
 
         // Perfiles verificados de respaldo rápido + Base de Profesionales HCS / Top Onyx de Halo Infinite
         const VERIFIED_HALO_PROFILES = {
@@ -1085,6 +1095,8 @@
                 if (!cleanName) continue;
                 const key = window.normalizeSpartanKey(cleanName);
                 if (!key) continue;
+                // Si el perfil fue eliminado por el Administrador, jamás se incluye
+                if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(key)) continue;
                 if (!seenExact.has(key)) {
                     const pts = Math.max(1, Math.min(25, Number(item.pts) || 12));
                     const normalizedItem = {
@@ -1100,17 +1112,17 @@
             return result;
         };
 
-        // Une el roster de la nube con el local sin borrar a ningún jugador existente
-        window.mergeRostersSafely = function(cloudList, localList) {
+        // Une listas respetando estrictamente las eliminaciones hechas por el Administrador
+        window.mergeRostersSafely = function(primaryList, secondaryList = []) {
             const combined = [];
             const mapByKey = new Map();
 
-            // Primero ponemos los de la nube (que tienen los puntos más recientes)
-            if (Array.isArray(cloudList)) {
-                for (const p of cloudList) {
+            if (Array.isArray(primaryList)) {
+                for (const p of primaryList) {
                     if (!p || !p.name) continue;
                     const k = window.normalizeSpartanKey(p.name);
                     if (!k || mapByKey.has(k)) continue;
+                    if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(k)) continue;
                     const pts = Math.max(1, Math.min(25, Number(p.pts) || 12));
                     const entry = {
                         id: p.id || ('sp-' + k),
@@ -1123,12 +1135,12 @@
                 }
             }
 
-            // Si en localStorage había algún perfil recién agregado que aún no subía, lo conservamos
-            if (Array.isArray(localList)) {
-                for (const p of localList) {
+            if (Array.isArray(secondaryList)) {
+                for (const p of secondaryList) {
                     if (!p || !p.name) continue;
                     const k = window.normalizeSpartanKey(p.name);
                     if (!k || mapByKey.has(k)) continue;
+                    if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(k)) continue;
                     const pts = Math.max(1, Math.min(25, Number(p.pts) || 12));
                     const entry = {
                         id: p.id || ('sp-' + k),
@@ -1188,23 +1200,23 @@
             return 'D';
         }
 
-        // Cargar Roster desde LocalStorage al arrancar
+        // Cargar Roster desde LocalStorage al arrancar (en Incógnito inicia vacío esperando a Firebase sin meter perfiles falsos)
         function loadInitialRoster() {
             try {
                 const raw = window['local' + 'Storage'].getItem(ROSTER_BACKUP_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (Array.isArray(parsed)) {
                         return window.deduplicateRosterList(parsed);
                     }
                 }
             } catch (e) {}
-            return window.deduplicateRosterList(DEFAULT_ROSTER);
+            return [];
         }
 
         window.persistRosterLocally = function() {
             try {
-                if (Array.isArray(window.roster) && window.roster.length > 0) {
+                if (Array.isArray(window.roster)) {
                     window['local' + 'Storage'].setItem(ROSTER_BACKUP_KEY, JSON.stringify(window.roster));
                 }
             } catch (e) {}
@@ -1388,7 +1400,11 @@
             }
 
             if (!html) {
-                html = `<div class="text-center py-8 text-slate-400 text-sm">No se encontraron Spartans con ese nombre.</div>`;
+                if (!window.isCloudRosterLoaded) {
+                    html = `<div class="text-center py-8 text-cyan-300 text-sm font-orbitron animate-pulse"><i class="fa-solid fa-satellite-dish mr-2"></i>Sincronizando Roster Oficial desde Firebase...</div>`;
+                } else {
+                    html = `<div class="text-center py-8 text-slate-400 text-sm">No se encontraron Spartans con ese nombre.</div>`;
+                }
             }
             container.innerHTML = html;
         };
@@ -2404,10 +2420,17 @@ ${cobraLines}`;
                 return;
             }
 
+            const candidateKey = window.normalizeSpartanKey(cleanName);
+            // Si el Administrador o jugador vuelve a registrar explícitamente un perfil que antes había sido borrado, lo rehabilitamos
+            if (candidateKey && window.deletedSpartanKeys && window.deletedSpartanKeys.has(candidateKey)) {
+                window.deletedSpartanKeys.delete(candidateKey);
+                window.persistDeletedKeysLocally();
+            }
+
             if (window.pullLatestCloudRosterBeforeWrite) {
                 const cloudList = await window.pullLatestCloudRosterBeforeWrite();
-                if (Array.isArray(cloudList) && cloudList.length > 0) {
-                    window.roster = window.mergeRostersSafely(cloudList, window.roster);
+                if (Array.isArray(cloudList)) {
+                    window.roster = window.deduplicateRosterList(cloudList);
                 }
             }
 
@@ -2443,7 +2466,7 @@ ${cobraLines}`;
             closePlayerModal();
             renderRoster();
             updateBalancedTeamsUI();
-            if (window.saveRosterToCloud) await window.saveRosterToCloud();
+            if (window.saveRosterToCloud) await window.saveRosterToCloud( null, candidateKey );
         };
 
         window.confirmDeletePlayer = async function(id) {
@@ -2451,12 +2474,17 @@ ${cobraLines}`;
             const target = (window.roster || []).find(p => p.id === id);
             if (!target) return;
             const delKey = window.normalizeSpartanKey(target.name);
-            window.roster = window.roster.filter(p => p.id !== id);
+            if (delKey && window.deletedSpartanKeys) {
+                window.deletedSpartanKeys.add(delKey);
+                window.persistDeletedKeysLocally();
+            }
+            window.roster = window.roster.filter(p => p.id !== id && window.normalizeSpartanKey(p.name) !== delKey);
             selectedIds = selectedIds.filter(sid => sid !== id);
+            window.persistRosterLocally();
             renderRoster();
             updateBalancedTeamsUI();
-            if (window.saveRosterToCloud) await window.saveRosterToCloud(delKey);
-            showToast(`Perfil ${target.name} eliminado por el Administrador.`);
+            if (window.saveRosterToCloud) await window.saveRosterToCloud(delKey, null);
+            showToast(`Perfil ${target.name} eliminado permanentemente de Firebase.`);
         };
 
         window.deleteCurrentEditingPlayer = async function() {
@@ -4131,58 +4159,32 @@ ${plan.configAdvice}
 
     <!-- ========================================================= -->
     <!-- CONEXIÓN A FIREBASE (halomatch-d9240) SIN BORRAR ROSTER   -->
-    <!-- ========================================================= -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const VERCEL_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyALszgtv_hDZYzGNCDnrgboOrRjCh3NV_M",
-            authDomain: "halomatch-d9240.firebaseapp.com",
-            projectId: "halomatch-d9240",
-            storageBucket: "halomatch-d9240.firebasestorage.app",
-            messagingSenderId: "252318133041",
-            appId: "1:252318133041:web:49ea7365d5da366267de10"
-        };
-
-        const sanitizeForFirestore = (obj) => JSON.parse(JSON.stringify(obj));
-
-        async function initCloudSync() {
-            try {
-                const configToUse = (typeof __firebase_config !== 'undefined' && __firebase_config)
-                    ? JSON.parse(__firebase_config)
-                    : VERCEL_FIREBASE_CONFIG;
-
-                const appId = (typeof __app_id !== 'undefined' && __app_id) ? __app_id : 'halomatch-d9240';
-                const app = initializeApp(configToUse);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // 1. Sincronización Aditiva y Blindada del Roster:
-                // Jamás sobrescribe ni borra jugadores registrados en la nube cuando entra un dispositivo nuevo.
+                // 1. Sincronización Exacta con Firebase (Fuente Única de Verdad):
+                // Todo lo que agregues, edites o elimines se refleja idéntico en Modo Incógnito y en todos los dispositivos.
                 const rosterDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rosterData', 'mainRoster');
                 window.isCloudRosterLoaded = false;
 
                 const updateCloudBadgeUI = (count) => {
                     const sideCount = document.getElementById('sidebarCloudCount');
-                    if (sideCount) sideCount.innerText = `${count} Spartans Seguros`;
+                    if (sideCount) sideCount.innerText = `${count} Spartans en Firebase`;
                 };
 
-                // Función para consultar la lista más reciente de la nube justo antes de reclutar o guardar
+                // Consulta directa a Firebase antes de escribir
                 window.pullLatestCloudRosterBeforeWrite = async () => {
                     try {
                         const latestSnap = await getDoc(rosterDocRef);
-                        if (latestSnap.exists() && Array.isArray(latestSnap.data().players)) {
-                            window.isCloudRosterLoaded = true;
-                            updateCloudBadgeUI(latestSnap.data().players.length);
-                            return latestSnap.data().players;
+                        if (latestSnap.exists()) {
+                            const data = latestSnap.data() || {};
+                            if (Array.isArray(data.deletedKeys)) {
+                                data.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
+                                window.persistDeletedKeysLocally();
+                            }
+                            if (Array.isArray(data.players)) {
+                                window.isCloudRosterLoaded = true;
+                                const cleanCloud = window.deduplicateRosterList(data.players);
+                                updateCloudBadgeUI(cleanCloud.length);
+                                return cleanCloud;
+                            }
                         }
                     } catch (e) {
                         console.warn("Read before write warning:", e);
@@ -4190,65 +4192,91 @@ ${plan.configAdvice}
                     return null;
                 };
 
-                // Botón manual de verificación de integridad en Firebase
+                // Botón manual de verificación y sincronización forzada con Firebase
                 window.verifyCloudIntegrityManual = async () => {
                     const cloudPlayers = await window.pullLatestCloudRosterBeforeWrite();
-                    if (Array.isArray(cloudPlayers) && cloudPlayers.length > 0) {
-                        window.roster = window.mergeRostersSafely(cloudPlayers, window.roster);
-                        if (window.persistRosterLocally) window.persistRosterLocally();
+                    if (Array.isArray(cloudPlayers)) {
+                        window.roster = window.deduplicateRosterList(cloudPlayers);
+                        window.persistRosterLocally();
                         if (window.renderRoster) window.renderRoster();
-                        showToast(`✅ Firebase verificado: ${window.roster.length} perfiles intactos en la nube.`);
+                        showToast(`✅ Sincronizado con Firebase: ${window.roster.length} perfiles oficiales.`);
                     } else {
-                        showToast(`⚠️ Conectado: ${window.roster.length} perfiles activos en memoria.`);
+                        showToast(`⚠️ Conectado: ${window.roster.length} perfiles activos.`);
                     }
                 };
 
+                // Escucha en tiempo real de Firebase: reemplaza cualquier caché vieja con la verdad oficial de la nube
                 onSnapshot(rosterDocRef, (snap) => {
-                    if (snap.exists() && Array.isArray(snap.data().players) && snap.data().players.length > 0) {
-                        const cloudPlayers = snap.data().players;
-                        window.isCloudRosterLoaded = true;
-                        // Prioridad estricta a los perfiles de Firebase para no revivir datos viejos ni borrar nuevos
-                        const mergedPlayers = window.mergeRostersSafely
-                            ? window.mergeRostersSafely(cloudPlayers, window.roster)
-                            : window.deduplicateRosterList(cloudPlayers);
-
-                        window.roster = mergedPlayers;
-                        updateCloudBadgeUI(window.roster.length);
-                        if (window.persistRosterLocally) window.persistRosterLocally();
-                        if (window.renderRoster) window.renderRoster();
-                    } else if (!snap.exists()) {
-                        // ÚNICAMENTE si la base de datos de Firebase jamás ha sido creada, la inicializa una sola vez
-                        window.isCloudRosterLoaded = true;
-                        if (Array.isArray(window.roster) && window.roster.length > 0) {
-                            setDoc(rosterDocRef, sanitizeForFirestore({ players: window.roster, updatedAt: Date.now() }));
-                            updateCloudBadgeUI(window.roster.length);
+                    window.isCloudRosterLoaded = true;
+                    if (snap.exists()) {
+                        const data = snap.data() || {};
+                        if (Array.isArray(data.deletedKeys)) {
+                            data.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
+                            window.persistDeletedKeysLocally();
                         }
+                        if (Array.isArray(data.players)) {
+                            // Usar exactamente la lista de Firebase (filtrando eliminados) sin mezclar perfiles fantasma locales
+                            window.roster = window.deduplicateRosterList(data.players);
+                            updateCloudBadgeUI(window.roster.length);
+                            window.persistRosterLocally();
+                            if (window.renderRoster) window.renderRoster();
+                            if (typeof updateBalancedTeamsUI === 'function') updateBalancedTeamsUI(true);
+                        }
+                    } else {
+                        if (window.renderRoster) window.renderRoster();
                     }
-                }, (err) => console.warn("Sync roster warning:", err));
+                }, (err) => {
+                    window.isCloudRosterLoaded = true;
+                    if (window.renderRoster) window.renderRoster();
+                    console.warn("Sync roster warning:", err);
+                });
 
-                window.saveRosterToCloud = async (explicitDeletedKey = null) => {
+                window.saveRosterToCloud = async (explicitDeletedKey = null, explicitRestoredKey = null) => {
+                    if (explicitDeletedKey && window.deletedSpartanKeys) {
+                        window.deletedSpartanKeys.add(explicitDeletedKey);
+                    }
+                    if (explicitRestoredKey && window.deletedSpartanKeys) {
+                        window.deletedSpartanKeys.delete(explicitRestoredKey);
+                    }
+                    window.persistDeletedKeysLocally();
+
                     if (window.deduplicateRosterList) {
                         window.roster = window.deduplicateRosterList(window.roster || []);
                     }
-                    if (window.persistRosterLocally) window.persistRosterLocally();
-                    if (!auth.currentUser || !Array.isArray(window.roster) || window.roster.length === 0) return;
+                    window.persistRosterLocally();
+
+                    if (!auth.currentUser) {
+                        try { await signInAnonymously(auth); } catch (e) {}
+                    }
 
                     try {
-                        // Leer SIEMPRE primero la nube antes de escribir para jamás borrar perfiles ya creados en Firebase
                         const currentCloudSnap = await getDoc(rosterDocRef);
-                        if (currentCloudSnap.exists() && Array.isArray(currentCloudSnap.data().players)) {
-                            let cloudList = currentCloudSnap.data().players;
+                        if (currentCloudSnap.exists()) {
+                            const cloudData = currentCloudSnap.data() || {};
+                            if (Array.isArray(cloudData.deletedKeys)) {
+                                cloudData.deletedKeys.forEach(k => {
+                                    if (k !== explicitRestoredKey) window.deletedSpartanKeys.add(k);
+                                });
+                            }
+                            let cloudList = Array.isArray(cloudData.players) ? cloudData.players : [];
                             if (explicitDeletedKey) {
                                 cloudList = cloudList.filter(p => window.normalizeSpartanKey(p.name) !== explicitDeletedKey);
                             }
-                            // Fusionar conservando todos los perfiles existentes en Firebase + el cambio actual
+                            // Unir los cambios actuales con la nube respetando la lista negra de eliminados
                             window.roster = window.mergeRostersSafely(window.roster, cloudList);
-                            if (window.persistRosterLocally) window.persistRosterLocally();
+                            window.persistRosterLocally();
                         }
-                        await setDoc(rosterDocRef, sanitizeForFirestore({ players: window.roster, updatedAt: Date.now() }));
+
+                        const payload = {
+                            players: window.roster,
+                            deletedKeys: [...window.deletedSpartanKeys],
+                            updatedAt: Date.now()
+                        };
+                        await setDoc(rosterDocRef, sanitizeForFirestore(payload));
                         updateCloudBadgeUI(window.roster.length);
                     } catch (e) {
                         console.warn("Error guardando roster en nube:", e);
+                        showToast("⚠️ Error de red al guardar en Firebase. Verifica tu conexión.");
                     }
                 };
 
