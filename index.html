@@ -713,59 +713,70 @@
                 <!-- Resultado del Escáner Triple: SpartanRecord + HaloDataHive + Halo Tracker -->
                 <div id="trackerResultBox" class="hidden p-3.5 rounded bg-[#031022] border border-cyan-400/40 space-y-2.5"></div>
 
-                <!-- Puente de Verificación Manual Triple si el perfil tiene privacidad o Cloudflare -->
-                <div id="humanVerificationBridge" class="hidden p-3.5 rounded bg-amber-950/40 border border-amber-400/50 space-y-3">
+                <!-- CALIBRADOR CONFIABLE POR LAS 3 VARIABLES OFICIALES: RANGO EN ARENA + K/D + DAÑO -->
+                <div id="humanVerificationBridge" class="p-3.5 rounded bg-[#041224] border border-cyan-400/50 space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                        <div class="text-xs text-amber-200">
-                            <strong class="font-orbitron text-amber-300 block mb-0.5"><i class="fa-solid fa-user-check mr-1"></i> Verificación Directa en las 3 Fuentes Oficiales</strong>
-                            Consulta el expediente en vivo en cualquiera de las 3 plataformas o ajusta los parámetros para recalcular su rango exacto:
+                        <div class="text-xs text-slate-200">
+                            <strong class="font-orbitron text-cyan-300 block mb-0.5"><i class="fa-solid fa-scale-balanced mr-1"></i> Calibración Oficial por Rango en Arena (35%) + K/D (40%) + Daño (25%)</strong>
+                            Selecciona o verifica los 3 indicadores reales del jugador para calcular su Rango con precisión matemática:
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                        <a id="directSpartanRecordLink" href="#" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded bg-emerald-500/20 border border-emerald-400/60 text-emerald-200 text-xs font-bold hover:bg-emerald-500/30 flex items-center gap-1">
-                            <i class="fa-solid fa-id-card-clip"></i> Abrir SpartanRecord.com
-                        </a>
-                        <a id="directDataHiveLink" href="#" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded bg-amber-500/20 border border-amber-400/60 text-amber-200 text-xs font-bold hover:bg-amber-500/30 flex items-center gap-1">
-                            <i class="fa-solid fa-database"></i> Abrir HaloDataHive
-                        </a>
-                        <a id="directTrackerLink" href="#" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded bg-cyan-500/20 border border-cyan-400/60 text-cyan-200 text-xs font-bold hover:bg-cyan-500/30 flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Halo Tracker
-                        </a>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                        <div>
+                            <label class="block text-[10px] font-orbitron uppercase text-cyan-300 mb-1">1. Rango en Arena (CSR)</label>
+                            <select id="manualTrackerRankSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-2 rounded bg-[#051324] border border-cyan-500/40 text-xs text-white font-semibold focus:border-cyan-300 focus:outline-none">
+                                <option value="1850">Onyx Élite / Pro (1700+ CSR)</option>
+                                <option value="1560">Onyx (1500 - 1699 CSR)</option>
+                                <option value="1410">Diamante 5 - 6 (1380 - 1499 CSR)</option>
+                                <option value="1300">Diamante 3 - 4 (1280 - 1379 CSR)</option>
+                                <option value="1220">Diamante 1 - 2 (1200 - 1279 CSR)</option>
+                                <option value="1120">Platino 5 - 6 (1100 - 1199 CSR)</option>
+                                <option value="1020" selected>Platino 3 - 4 (1000 - 1099 CSR)</option>
+                                <option value="930">Platino 1 - 2 (900 - 999 CSR)</option>
+                                <option value="810">Oro 4 - 6 (780 - 899 CSR)</option>
+                                <option value="690">Oro 1 - 3 (650 - 779 CSR)</option>
+                                <option value="520">Plata / Bronce (< 650 CSR)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-orbitron uppercase text-amber-300 mb-1">2. K/D Ratio Real</label>
+                            <select id="manualTrackerKdSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-2 rounded bg-[#051324] border border-amber-500/40 text-xs text-white font-semibold focus:border-amber-300 focus:outline-none">
+                                <option value="1.45">1.40+ (Dios / Letal SS)</option>
+                                <option value="1.26">1.20 - 1.39 (Muy Alto S)</option>
+                                <option value="1.12">1.08 - 1.19 (Fuerte A+)</option>
+                                <option value="1.01">0.98 - 1.07 (Positivo A)</option>
+                                <option value="0.93" selected>0.90 - 0.97 (Estándar B+)</option>
+                                <option value="0.84">0.80 - 0.89 (Bajo B)</option>
+                                <option value="0.72">0.68 - 0.79 (Muy Bajo C)</option>
+                                <option value="0.55">Menor a 0.68 (Crítico D)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-orbitron uppercase text-emerald-300 mb-1">3. Daño Promedio / Partida</label>
+                            <select id="manualSpartanRecordSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-2 rounded bg-[#051324] border border-emerald-500/40 text-xs text-white font-semibold focus:border-emerald-300 focus:outline-none">
+                                <option value="5100">4,800+ DMG (Daño Pro SS)</option>
+                                <option value="4450">4,200 - 4,799 DMG (Alto S)</option>
+                                <option value="3950">3,700 - 4,199 DMG (Fuerte A+)</option>
+                                <option value="3500">3,300 - 3,699 DMG (Sólido A)</option>
+                                <option value="3100" selected>2,900 - 3,299 DMG (Medio B+)</option>
+                                <option value="2650">2,450 - 2,899 DMG (Bajo B)</option>
+                                <option value="2200">2,000 - 2,449 DMG (Muy Bajo C)</option>
+                                <option value="1750">Menor a 2,000 DMG (Mínimo D)</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-300 mb-1">1. Liga / CSR (Halo Tracker)</label>
-                            <select id="manualTrackerRankSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-1.5 rounded bg-[#051324] border border-cyan-500/40 text-xs text-white">
-                                <option value="pro_hcs">Pro HCS / Onyx 1800+ CSR (SS)</option>
-                                <option value="onyx_high">Onyx 1600 - 1799 CSR (SS)</option>
-                                <option value="onyx">Onyx 1500 - 1599 CSR (S)</option>
-                                <option value="diamond_high" selected>Diamante 4 - 6 (A+)</option>
-                                <option value="diamond_low">Diamante 1 - 3 (A)</option>
-                                <option value="platinum_high">Platino 4 - 6 (B+)</option>
-                                <option value="platinum">Platino 1 - 3 (B)</option>
-                                <option value="gold">Oro / Plata (C - D)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-300 mb-1">2. Ratio K/D (HaloDataHive)</label>
-                            <select id="manualTrackerKdSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-1.5 rounded bg-[#051324] border border-cyan-500/40 text-xs text-white">
-                                <option value="1.55">1.45+ (Pro / Dios SS)</option>
-                                <option value="1.35">1.25 - 1.44 (Slayer Letal S)</option>
-                                <option value="1.15" selected>1.10 - 1.24 (Fuerte A+)</option>
-                                <option value="1.02">0.98 - 1.09 (Equilibrado A/B+)</option>
-                                <option value="0.90">0.85 - 0.97 (Apoyo B)</option>
-                                <option value="0.75">Menor a 0.85 (C / D)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-emerald-300 mb-1">3. Impacto (SpartanRecord)</label>
-                            <select id="manualSpartanRecordSelect" onchange="calculateFromManualTrackerInputs()" class="w-full p-1.5 rounded bg-[#051324] border border-emerald-500/40 text-xs text-white">
-                                <option value="3">Élite Pro (5200+ DMG / Win 60%+)</option>
-                                <option value="2">Alto Impacto (4500+ DMG / Win 55%+)</option>
-                                <option value="0" selected>Estándar Competitivo (3600-4400 DMG)</option>
-                                <option value="-2">Moderado (2900-3500 DMG)</option>
-                                <option value="-4">Bajo Daño (< 2900 DMG)</option>
-                            </select>
+                    <div id="externalVerifyLinksRow" class="hidden pt-1 border-t border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[10px] text-slate-400">Consultar perfil directo en:</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <a id="directSpartanRecordLink" href="#" target="_blank" rel="noopener" class="px-2 py-1 rounded bg-emerald-500/15 border border-emerald-400/50 text-emerald-200 text-[11px] font-bold hover:bg-emerald-500/30 flex items-center gap-1">
+                                <i class="fa-solid fa-id-card-clip"></i> SpartanRecord
+                            </a>
+                            <a id="directDataHiveLink" href="#" target="_blank" rel="noopener" class="px-2 py-1 rounded bg-amber-500/15 border border-amber-400/50 text-amber-200 text-[11px] font-bold hover:bg-amber-500/30 flex items-center gap-1">
+                                <i class="fa-solid fa-database"></i> HaloDataHive
+                            </a>
+                            <a id="directTrackerLink" href="#" target="_blank" rel="noopener" class="px-2 py-1 rounded bg-cyan-500/15 border border-cyan-400/50 text-cyan-200 text-[11px] font-bold hover:bg-cyan-500/30 flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Halo Tracker
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -988,13 +999,18 @@
     <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN                         -->
     <!-- ========================================================= -->
     <script>
-        const ROSTER_BACKUP_KEY = 'mansalvas_halo_roster_v4_backup';
+        const ROSTER_BACKUP_KEY = 'mansalvas_halo_roster_v5_cloud_verified';
         const DELETED_KEYS_STORAGE = 'mansalvas_halo_deleted_keys_v4';
         const TRIBUNAL_BACKUP_KEY = 'mansalvas_halo_tribunal_v4_backup';
 
         // Lista vacía por defecto: NUNCA inyecta perfiles falsos/de prueba que no sean tuyos.
-        // El Roster se alimenta 100% de tu base de datos oficial en Firebase (halomatch-d9240).
         const DEFAULT_ROSTER = [];
+
+        // Lista negra permanente de nombres de prueba antiguos para que ningún navegador con caché vieja pueda subirlos a Firebase
+        const LEGACY_DEMO_BLOCKLIST = new Set([
+            'masterchief117', 'noblesix', 'cortanaia', 'arbitervadam',
+            'buckodst', 'jorge052', 'kelly087', 'fred104', 'linda058', 'johnsonsgt'
+        ]);
 
         // Registro de perfiles eliminados por el Administrador para que jamás revivan desde cachés viejas
         window.deletedSpartanKeys = new Set(
@@ -1095,7 +1111,8 @@
                 if (!cleanName) continue;
                 const key = window.normalizeSpartanKey(cleanName);
                 if (!key) continue;
-                // Si el perfil fue eliminado por el Administrador, jamás se incluye
+                // Bloquear cualquier perfil de demostración antiguo o eliminado explícitamente por el Admin
+                if (LEGACY_DEMO_BLOCKLIST.has(key)) continue;
                 if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(key)) continue;
                 if (!seenExact.has(key)) {
                     const pts = Math.max(1, Math.min(25, Number(item.pts) || 12));
@@ -1112,7 +1129,7 @@
             return result;
         };
 
-        // Une listas respetando estrictamente las eliminaciones hechas por el Administrador
+        // Une listas dando prioridad absoluta a Firebase y bloqueando perfiles de prueba o eliminados
         window.mergeRostersSafely = function(primaryList, secondaryList = []) {
             const combined = [];
             const mapByKey = new Map();
@@ -1122,6 +1139,7 @@
                     if (!p || !p.name) continue;
                     const k = window.normalizeSpartanKey(p.name);
                     if (!k || mapByKey.has(k)) continue;
+                    if (LEGACY_DEMO_BLOCKLIST.has(k)) continue;
                     if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(k)) continue;
                     const pts = Math.max(1, Math.min(25, Number(p.pts) || 12));
                     const entry = {
@@ -1140,6 +1158,7 @@
                     if (!p || !p.name) continue;
                     const k = window.normalizeSpartanKey(p.name);
                     if (!k || mapByKey.has(k)) continue;
+                    if (LEGACY_DEMO_BLOCKLIST.has(k)) continue;
                     if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(k)) continue;
                     const pts = Math.max(1, Math.min(25, Number(p.pts) || 12));
                     const entry = {
@@ -2480,12 +2499,18 @@ ${cobraLines}`;
             document.getElementById('playerModalTitle').innerText = 'RECLUTAR NUEVO SPARTAN';
             document.getElementById('newPlayerName').value = '';
             document.getElementById('trackerResultBox').classList.add('hidden');
-            document.getElementById('humanVerificationBridge').classList.add('hidden');
+            document.getElementById('externalVerifyLinksRow')?.classList.add('hidden');
             document.getElementById('duplicateWarningBanner').classList.add('hidden');
             document.getElementById('btnDeleteInModal').classList.add('hidden');
             const saveBtn = document.getElementById('btnSavePlayerModal');
             if (saveBtn) saveBtn.disabled = false;
-            selectTier('B+', 12);
+            const rankSel = document.getElementById('manualTrackerRankSelect');
+            const kdSel = document.getElementById('manualTrackerKdSelect');
+            const dmgSel = document.getElementById('manualSpartanRecordSelect');
+            if (rankSel) rankSel.value = '1020';
+            if (kdSel) kdSel.value = '0.93';
+            if (dmgSel) dmgSel.value = '3100';
+            selectTier('B+', 11);
             const modal = document.getElementById('playerModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -2498,7 +2523,7 @@ ${cobraLines}`;
             document.getElementById('playerModalTitle').innerText = `EDITAR SPARTAN: ${p.name}`;
             document.getElementById('newPlayerName').value = p.name;
             document.getElementById('trackerResultBox').classList.add('hidden');
-            document.getElementById('humanVerificationBridge').classList.add('hidden');
+            document.getElementById('externalVerifyLinksRow')?.classList.add('hidden');
             document.getElementById('duplicateWarningBanner').classList.add('hidden');
             document.getElementById('btnDeleteInModal').classList.toggle('hidden', !isAdminMode);
             selectTier(calculateRankFromPts(p.pts), p.pts);
@@ -2546,15 +2571,21 @@ ${cobraLines}`;
             }
 
             const candidateKey = window.normalizeSpartanKey(cleanName);
+            if (!candidateKey || LEGACY_DEMO_BLOCKLIST.has(candidateKey)) {
+                showToast('Gamertag no válido para el Roster Oficial.');
+                return;
+            }
+
             // Si el Administrador o jugador vuelve a registrar explícitamente un perfil que antes había sido borrado, lo rehabilitamos
-            if (candidateKey && window.deletedSpartanKeys && window.deletedSpartanKeys.has(candidateKey)) {
+            if (window.deletedSpartanKeys && window.deletedSpartanKeys.has(candidateKey)) {
                 window.deletedSpartanKeys.delete(candidateKey);
                 window.persistDeletedKeysLocally();
             }
 
+            // 1. Descargar SIEMPRE la lista más reciente de Firebase antes de validar o guardar para no pisar a nadie
             if (window.pullLatestCloudRosterBeforeWrite) {
                 const cloudList = await window.pullLatestCloudRosterBeforeWrite();
-                if (Array.isArray(cloudList)) {
+                if (Array.isArray(cloudList) && cloudList.length > 0) {
                     window.roster = window.deduplicateRosterList(cloudList);
                 }
             }
@@ -2566,8 +2597,9 @@ ${cobraLines}`;
                 return;
             }
 
-            const pts = Math.max(1, Math.min(25, Number(document.getElementById('exactPlayerPts')?.value) || selectedNewTier.pts || 12));
+            const pts = Math.max(1, Math.min(25, Number(document.getElementById('exactPlayerPts')?.value) || selectedNewTier.pts || 11));
             const rank = calculateRankFromPts(pts);
+            let savedSpartanEntry = null;
 
             if (editingPlayerId) {
                 const idx = window.roster.findIndex(p => p.id === editingPlayerId);
@@ -2575,476 +2607,404 @@ ${cobraLines}`;
                     window.roster[idx].name = cleanName;
                     window.roster[idx].pts = pts;
                     window.roster[idx].rank = rank;
+                    savedSpartanEntry = window.roster[idx];
                 }
                 showToast(`Spartan ${cleanName} actualizado (${pts} PTS • ${rank}).`);
             } else {
-                const newPlayer = {
+                savedSpartanEntry = {
                     id: 'sp-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
                     name: cleanName,
                     pts: pts,
                     rank: rank
                 };
-                window.roster.push(newPlayer);
+                window.roster.push(savedSpartanEntry);
                 showToast(`¡Spartan ${cleanName} reclutado en Rango ${rank} (${pts} PTS)!`);
             }
 
             closePlayerModal();
             renderRoster();
             updateBalancedTeamsUI();
-            if (window.saveRosterToCloud) await window.saveRosterToCloud( null, candidateKey );
+            if (window.saveRosterToCloud) {
+                await window.saveRosterToCloud(null, candidateKey, savedSpartanEntry);
+            }
         };
 
         window.confirmDeletePlayer = async function(id) {
-            if (!isAdminMode) return;
-            const target = (window.roster || []).find(p => p.id === id);
-            if (!target) return;
-            const delKey = window.normalizeSpartanKey(target.name);
+            if (!isAdminMode) {
+                showToast('Solo el Administrador puede eliminar perfiles del Roster.');
+                return;
+            }
+            const idx = (window.roster || []).findIndex(p => p.id === id);
+            if (idx === -1) return;
+            const removed = window.roster[idx];
+            const delKey = window.normalizeSpartanKey(removed.name);
             if (delKey && window.deletedSpartanKeys) {
                 window.deletedSpartanKeys.add(delKey);
                 window.persistDeletedKeysLocally();
             }
-            window.roster = window.roster.filter(p => p.id !== id && window.normalizeSpartanKey(p.name) !== delKey);
-            selectedIds = selectedIds.filter(sid => sid !== id);
-            window.persistRosterLocally();
+            window.roster.splice(idx, 1);
+            selectedIds = selectedIds.filter(selId => selId !== id);
             renderRoster();
             updateBalancedTeamsUI();
-            if (window.saveRosterToCloud) await window.saveRosterToCloud(delKey, null);
-            showToast(`Perfil ${target.name} eliminado permanentemente de Firebase.`);
+            showToast(`Spartan ${removed.name} eliminado del Roster.`);
+            if (window.saveRosterToCloud) {
+                await window.saveRosterToCloud(delKey, null, null);
+            }
         };
 
         window.deleteCurrentEditingPlayer = async function() {
-            if (!editingPlayerId || !isAdminMode) return;
-            const idToDel = editingPlayerId;
+            if (!editingPlayerId) return;
+            const targetId = editingPlayerId;
             closePlayerModal();
-            await confirmDeletePlayer(idToDel);
+            await window.confirmDeletePlayer(targetId);
         };
 
-        // =========================================================================
-        // MOTOR DE TRIPLE CONSENSO CALIBRADO AL MILÍMETRO (1 a 25 PTS / D hasta SS)
-        // Evalúa cada fuente con curvas competitivas reales de Halo Infinite (HCS/Ranked)
-        // =========================================================================
-        function computeTripleConsensusPts({ csr, kd, acc, hsPct, dmgPerMatch, winRate }) {
-            // 1. Puntaje Halo Tracker (CSR Competitivo + Precisión de Tiro)
-            let csrPts = 12;
-            if (csr >= 1750) csrPts = 25;
-            else if (csr >= 1620) csrPts = 24;
-            else if (csr >= 1520) csrPts = 23; // Onyx Sólido -> Rango SS
-            else if (csr >= 1450) csrPts = 22; // Onyx Entrada / Diamante 6 Alto -> Rango S
-            else if (csr >= 1380) csrPts = 20 + ((csr - 1380) / 70) * 1.8; // Diamante 5-6 -> Rango S
-            else if (csr >= 1260) csrPts = 17 + ((csr - 1260) / 120) * 2.8; // Diamante 2-4 -> Rango A+
-            else if (csr >= 1120) csrPts = 14 + ((csr - 1120) / 140) * 2.8; // Platino 6 / Diamante 1 -> Rango A
-            else if (csr >= 980)  csrPts = 11 + ((csr - 980) / 140) * 2.8;  // Platino 3-5 -> Rango B+
-            else if (csr >= 840)  csrPts = 8 + ((csr - 840) / 140) * 2.8;   // Oro 6 / Platino 1-2 -> Rango B
-            else if (csr >= 680)  csrPts = 5 + ((csr - 680) / 160) * 2.8;   // Oro -> Rango C
-            else csrPts = Math.max(1, (csr / 680) * 4.5);
+        // Devuelve el nombre legible de la liga de Arena según el CSR
+        window.getArenaLeagueNameFromCsr = function(csr) {
+            const c = Number(csr) || 1000;
+            if (c >= 1700) return 'Onyx Élite / Pro';
+            if (c >= 1500) return 'Onyx';
+            if (c >= 1380) return 'Diamante 5 - 6';
+            if (c >= 1280) return 'Diamante 3 - 4';
+            if (c >= 1200) return 'Diamante 1 - 2';
+            if (c >= 1100) return 'Platino 5 - 6';
+            if (c >= 1000) return 'Platino 3 - 4';
+            if (c >= 900)  return 'Platino 1 - 2';
+            if (c >= 780)  return 'Oro 4 - 6';
+            if (c >= 650)  return 'Oro 1 - 3';
+            return 'Plata / Bronce';
+        };
 
-            // Ajuste fino por precisión de tiro en Halo Tracker
-            const accBonus = acc >= 58 ? 1.4 : acc >= 53 ? 0.8 : acc < 42 ? -1.0 : 0;
-            const htScore = Math.max(1, Math.min(25, Math.round(csrPts + accBonus)));
+        // Calibración estricta por K/D (40%) + Rango en Arena CSR (35%) + Daño por Partida (25%)
+        window.computeTripleConsensusPts = function({ csr = 1020, kd = 0.93, acc = 48, hsPct = 52, dmgPerMatch = 3100, winRate = 50 }) {
+            const safeCsr = Math.max(300, Math.min(2400, Number(csr) || 1020));
+            const safeKd = Math.max(0.30, Math.min(3.00, Number(kd) || 0.93));
+            const safeDmg = Math.max(1200, Math.min(7500, Number(dmgPerMatch) || 3100));
 
-            // 2. Puntaje HaloDataHive (Letalidad K/D Ratio + Conversión de Headshots %)
-            let kdPts = 12;
-            if (kd >= 1.48) kdPts = 25;
-            else if (kd >= 1.38) kdPts = 24;
-            else if (kd >= 1.30) kdPts = 23; // Slayer Nivel Dios SS
-            else if (kd >= 1.18) kdPts = 20 + ((kd - 1.18) / 0.12) * 2.5; // Semidiós S (1.18 - 1.29 KD)
-            else if (kd >= 1.08) kdPts = 17 + ((kd - 1.08) / 0.10) * 2.5; // Demonio Letal A+ (1.08 - 1.17 KD)
-            else if (kd >= 0.99) kdPts = 14 + ((kd - 0.99) / 0.09) * 2.5; // Hiperletal A
-            else if (kd >= 0.90) kdPts = 11 + ((kd - 0.90) / 0.09) * 2.5; // Comando ONI B+
-            else if (kd >= 0.80) kdPts = 8 + ((kd - 0.80) / 0.10) * 2.5;  // Shock Trooper B
-            else if (kd >= 0.68) kdPts = 5 + ((kd - 0.68) / 0.12) * 2.5;  // Artillero C
-            else kdPts = Math.max(1, kd * 6);
+            // 1. Puntaje por K/D Ratio (Peso 40%)
+            let dhScore = 9;
+            if (safeKd >= 1.40) dhScore = 25;
+            else if (safeKd >= 1.30) dhScore = 23;
+            else if (safeKd >= 1.20) dhScore = 21;
+            else if (safeKd >= 1.12) dhScore = 19;
+            else if (safeKd >= 1.05) dhScore = 17;
+            else if (safeKd >= 0.98) dhScore = 15;
+            else if (safeKd >= 0.92) dhScore = 12;
+            else if (safeKd >= 0.85) dhScore = 10;
+            else if (safeKd >= 0.78) dhScore = 8;
+            else if (safeKd >= 0.70) dhScore = 6;
+            else if (safeKd >= 0.62) dhScore = 4;
+            else dhScore = 2;
 
-            const hsBonus = hsPct >= 62 ? 1.3 : hsPct >= 56 ? 0.7 : hsPct < 45 ? -0.8 : 0;
-            const dhScore = Math.max(1, Math.min(25, Math.round(kdPts + hsBonus)));
+            // 2. Puntaje por Rango en Arena / CSR (Peso 35%)
+            let htScore = 9;
+            if (safeCsr >= 1700) htScore = 25;
+            else if (safeCsr >= 1550) htScore = 23;
+            else if (safeCsr >= 1480) htScore = 21;
+            else if (safeCsr >= 1380) htScore = 19;
+            else if (safeCsr >= 1280) htScore = 16;
+            else if (safeCsr >= 1200) htScore = 14;
+            else if (safeCsr >= 1100) htScore = 12;
+            else if (safeCsr >= 1000) htScore = 10;
+            else if (safeCsr >= 900)  htScore = 8;
+            else if (safeCsr >= 780)  htScore = 6;
+            else if (safeCsr >= 650)  htScore = 4;
+            else htScore = 2;
 
-            // 3. Puntaje SpartanRecord.com (Daño por Partida + Win Rate % + Consistencia)
-            let srPts = 12;
-            if (dmgPerMatch >= 5400) srPts = 25;
-            else if (dmgPerMatch >= 5050) srPts = 24;
-            else if (dmgPerMatch >= 4750) srPts = 23; // Daño Pro / Nivel Dios SS
-            else if (dmgPerMatch >= 4350) srPts = 20 + ((dmgPerMatch - 4350) / 400) * 2.5; // Rango S
-            else if (dmgPerMatch >= 3900) srPts = 17 + ((dmgPerMatch - 3900) / 450) * 2.5; // Rango A+
-            else if (dmgPerMatch >= 3450) srPts = 14 + ((dmgPerMatch - 3450) / 450) * 2.5; // Rango A
-            else if (dmgPerMatch >= 3000) srPts = 11 + ((dmgPerMatch - 3000) / 450) * 2.5; // Rango B+
-            else if (dmgPerMatch >= 2550) srPts = 8 + ((dmgPerMatch - 2550) / 450) * 2.5;  // Rango B
-            else if (dmgPerMatch >= 2100) srPts = 5 + ((dmgPerMatch - 2100) / 450) * 2.5;  // Rango C
-            else srPts = Math.max(1, (dmgPerMatch / 2100) * 4.5);
+            // 3. Puntaje por Daño Promedio por Partida (Peso 25%)
+            let srScore = 9;
+            if (safeDmg >= 4900) srScore = 25;
+            else if (safeDmg >= 4550) srScore = 23;
+            else if (safeDmg >= 4200) srScore = 20;
+            else if (safeDmg >= 3800) srScore = 18;
+            else if (safeDmg >= 3450) srScore = 15;
+            else if (safeDmg >= 3050) srScore = 12;
+            else if (safeDmg >= 2650) srScore = 9;
+            else if (safeDmg >= 2250) srScore = 7;
+            else if (safeDmg >= 1900) srScore = 5;
+            else srScore = 3;
 
-            const winBonus = winRate >= 62 ? 1.5 : winRate >= 55 ? 0.8 : winRate < 44 ? -0.8 : 0;
-            const srScore = Math.max(1, Math.min(25, Math.round(srPts + winBonus)));
+            let weightedPts = Math.round(dhScore * 0.40 + htScore * 0.35 + srScore * 0.25);
 
-            // Consenso Ponderado Inteligente:
-            // Si al menos 2 de las 3 herramientas confirman nivel Élite (S o SS), protegemos el techo competitivo
-            // para que nunca sea arrastrado por error a B+
-            const sortedScores = [htScore, dhScore, srScore].sort((a, b) => b - a);
-            let finalPts = Math.round(htScore * 0.40 + dhScore * 0.35 + srScore * 0.25);
-
-            if (sortedScores[0] >= 23 && sortedScores[1] >= 21) {
-                // Perfil claramente Pro / Onyx Alto en múltiples herramientas
-                finalPts = Math.max(finalPts, Math.round((sortedScores[0] + sortedScores[1]) / 2));
-            } else if (sortedScores[0] >= 23 && finalPts < 20) {
-                // Si una fuente detecta Onyx/Pro claro (ej. CSR 1650 o KD 1.45), nunca baja de Rango S
-                finalPts = Math.max(20, Math.round(sortedScores[0] * 0.65 + sortedScores[1] * 0.35));
+            // Candados estrictos de coherencia para que Platino o bajo K/D jamás reciban rangos inflados
+            if (safeKd < 0.68) {
+                weightedPts = Math.min(weightedPts, 4); // Rango D
+            } else if (safeKd < 0.79) {
+                weightedPts = Math.min(weightedPts, 7); // Máximo Rango C
+            } else if (safeKd < 0.89 && safeCsr < 1200) {
+                weightedPts = Math.min(weightedPts, 9); // Platino con bajo KD -> Rango B o C
             }
 
+            if (safeCsr < 900) {
+                weightedPts = Math.min(weightedPts, 8); // Oro o inferior no pasa de Rango B
+            } else if (safeCsr < 1200) {
+                // Jugador en Platino: tope máximo B+ (12 PTS), o A (14 PTS) solo si su K/D es muy alto
+                weightedPts = Math.min(weightedPts, safeKd >= 1.15 ? 14 : 12);
+            } else if (safeCsr < 1500 && weightedPts > 20) {
+                // Diamante no puede subir a SS (23-25) sin ser Onyx
+                weightedPts = 20;
+            }
+
+            // Para ser Rango SS (23-25 PTS) debe cumplir simultáneamente Onyx + K/D alto + Daño alto
+            if (weightedPts >= 23 && (safeCsr < 1520 || safeKd < 1.24 || safeDmg < 4500)) {
+                weightedPts = 21;
+            }
+
+            const finalPts = Math.max(1, Math.min(25, weightedPts));
             return {
-                pts: Math.max(1, Math.min(25, finalPts)),
-                htScore,
+                pts: finalPts,
                 dhScore,
+                htScore,
                 srScore
             };
-        }
+        };
 
-        // Extractor avanzado de telemetría real desde el texto/HTML de SpartanRecord, HaloDataHive y HaloTracker
-        function parseTelemetryFromRawText(txt, sourceId) {
-            if (!txt || typeof txt !== 'string' || txt.length < 80) return null;
-            // Descartar páginas que sean únicamente pantallas de bloqueo Cloudflare sin datos del jugador
-            if (/Attention Required! \| Cloudflare|Just a moment\.\.\.|Verify you are human/i.test(txt) && !/K\/D|CSR|Accuracy|Onyx|Diamond/i.test(txt)) {
-                return null;
-            }
+        window.syncManualDropdownsWithStats = function(csr, kd, dmgPerMatch) {
+            const rankSel = document.getElementById('manualTrackerRankSelect');
+            const kdSel = document.getElementById('manualTrackerKdSelect');
+            const dmgSel = document.getElementById('manualSpartanRecordSelect');
 
-            // Extraer K/D Ratio
-            let kd = null;
-            const kdPatterns = [
-                /K\/D\s*(?:Ratio)?[\s:|\-*]*(\d+\.\d{1,3})/i,
-                /"kd"\s*:\s*(\d+\.\d{1,3})/i,
-                /KD[\s:|\-*]+(\d+\.\d{1,2})/i
-            ];
-            for (const rx of kdPatterns) {
-                const m = txt.match(rx);
-                if (m && parseFloat(m[1]) >= 0.25 && parseFloat(m[1]) <= 4.5) {
-                    kd = parseFloat(m[1]);
-                    break;
-                }
+            if (rankSel) {
+                const csrOpts = [1850, 1560, 1410, 1300, 1220, 1120, 1020, 930, 810, 690, 520];
+                const closestCsr = csrOpts.reduce((prev, curr) => Math.abs(curr - csr) < Math.abs(prev - csr) ? curr : prev);
+                rankSel.value = String(closestCsr);
             }
+            if (kdSel) {
+                const kdOpts = [1.45, 1.26, 1.12, 1.01, 0.93, 0.84, 0.72, 0.55];
+                const closestKd = kdOpts.reduce((prev, curr) => Math.abs(curr - kd) < Math.abs(prev - kd) ? curr : prev);
+                kdSel.value = String(closestKd);
+            }
+            if (dmgSel) {
+                const dmgOpts = [5100, 4450, 3950, 3500, 3100, 2650, 2200, 1750];
+                const closestDmg = dmgOpts.reduce((prev, curr) => Math.abs(curr - dmgPerMatch) < Math.abs(prev - dmgPerMatch) ? curr : prev);
+                dmgSel.value = String(closestDmg);
+            }
+        };
 
-            // Extraer CSR numérico o inferirlo de la liga competitiva (Onyx / Champion / Diamond / Platinum)
-            let csr = null;
-            const csrPatterns = [
-                /(\d{1},\d{3})\s*CSR/i,
-                /CSR[\s:|\-*]*(\d{1},\d{3}|\d{3,4})/i,
-                /(\d{3,4})\s*CSR/i,
-                /Onyx[\s:|\-•]*(\d{1},\d{3}|\d{4})/i
-            ];
-            for (const rx of csrPatterns) {
-                const m = txt.match(rx);
-                if (m) {
-                    const val = parseInt(m[1].replace(/,/g, ''), 10);
-                    if (val >= 300 && val <= 3000) {
-                        csr = val;
-                        break;
-                    }
-                }
-            }
-            if (!csr) {
-                if (/\b(Champion|Top\s*200|HCS\s*Pro)\b/i.test(txt)) csr = 1950;
-                else if (/\bOnyx\b/i.test(txt)) csr = 1580;
-                else if (/\bDiamond\s*(?:6|VI|5|V)\b/i.test(txt)) csr = 1420;
-                else if (/\bDiamond\b/i.test(txt)) csr = 1310;
-            }
-
-            // Extraer Precisión (Accuracy %)
-            let acc = null;
-            const accMatch = txt.match(/(?:Shot\s*)?Accuracy[\s:|\-*]*(\d{2}(?:\.\d{1,2})?)\s*%/i);
-            if (accMatch) {
-                const val = parseFloat(accMatch[1]);
-                if (val >= 20 && val <= 85) acc = val;
-            }
-
-            // Extraer Headshot %
-            let hsPct = null;
-            const hsMatch = txt.match(/Headshots?\s*(?:%|Accuracy|Ratio)?[\s:|\-*]*(\d{2}(?:\.\d{1,2})?)\s*%/i);
-            if (hsMatch) {
-                const val = parseFloat(hsMatch[1]);
-                if (val >= 20 && val <= 90) hsPct = val;
-            }
-
-            // Extraer Win Rate %
-            let winRate = null;
-            const winMatch = txt.match(/Win\s*(?:Rate|%|Ratio|Percentage)[\s:|\-*]*(\d{2}(?:\.\d{1,2})?)\s*%/i);
-            if (winMatch) {
-                const val = parseFloat(winMatch[1]);
-                if (val >= 20 && val <= 95) winRate = val;
-            }
-
-            // Extraer Daño por Partida
-            let dmgPerMatch = null;
-            const dmgMatch = txt.match(/(?:Avg\.?\s*Damage|Damage\s*\/?\s*(?:Game|Match))[\s:|\-*]*(\d{1},\d{3}|\d{4})/i);
-            if (dmgMatch) {
-                const val = parseInt(dmgMatch[1].replace(/,/g, ''), 10);
-                if (val >= 1000 && val <= 12000) dmgPerMatch = val;
-            }
-
-            if (kd === null && csr === null && acc === null && winRate === null && dmgPerMatch === null) {
-                return null;
-            }
-            return { id: sourceId, kd, csr, acc, hsPct, winRate, dmgPerMatch };
-        }
-
-        // Escáner Triple en Paralelo: SpartanRecord.com + HaloDataHive.com + HaloTracker.com
-        async function fetchDualTelemetryForGamertag(rawGamertag) {
+        // Motor de consulta de Triple Fuente (SpartanRecord + HaloDataHive + Halo Tracker)
+        window.fetchDualTelemetryForGamertag = async function(rawGamertag) {
             const cleanTag = String(rawGamertag || '').trim();
+            if (!cleanTag) return null;
             const normKey = window.normalizeSpartanKey(cleanTag);
-            if (!normKey) return null;
 
-            const existingInRoster = (window.roster || []).find(p => window.normalizeSpartanKey(p.name) === normKey);
-
-            // 1. Verificar si está en la base de Profesionales HCS / Perfiles Verificados
-            if (VERIFIED_HALO_PROFILES[normKey]) {
-                const v = VERIFIED_HALO_PROFILES[normKey];
-                const consensus = computeTripleConsensusPts({
-                    csr: v.csr,
-                    kd: v.kd,
-                    acc: v.acc,
-                    hsPct: v.hsPct || 60.0,
-                    dmgPerMatch: v.dmgPerMatch || 5100,
-                    winRate: v.winRate
-                });
-                const pts = existingInRoster ? existingInRoster.pts : (v.pts || consensus.pts);
-                const rank = calculateRankFromPts(pts);
-                const killsPerMatch = Number((10.5 + v.kd * 5.2).toFixed(1));
-                const deathsPerMatch = Number((killsPerMatch / Math.max(0.8, v.kd)).toFixed(1));
-                const assistsPerMatch = Number((6.2 + (pts / 4.5)).toFixed(1));
-                const dmgPerMatch = v.dmgPerMatch || Math.round(3200 + pts * 105);
-
+            // 1. Verificar si está en la base de perfiles verificados o HCS Pro
+            if (VERIFIED_HALO_PROFILES[normKey] || VERIFIED_HALO_PROFILES[cleanTag.toLowerCase()]) {
+                const base = VERIFIED_HALO_PROFILES[normKey] || VERIFIED_HALO_PROFILES[cleanTag.toLowerCase()];
+                const consensus = computeTripleConsensusPts(base);
+                const killsPerMatch = Number((10.5 + base.kd * 4.2).toFixed(1));
+                const deathsPerMatch = Number((killsPerMatch / Math.max(0.5, base.kd)).toFixed(1));
+                const assistsPerMatch = Number((5.2 + (base.dmgPerMatch / 900)).toFixed(1));
                 return {
+                    ...base,
                     gamertag: cleanTag,
-                    csr: v.csr,
-                    kd: v.kd,
-                    kda: v.kda,
-                    acc: v.acc,
-                    hsPct: v.hsPct || 60.5,
-                    dmgPerMatch,
-                    dmgTakenPerMatch: Math.round(dmgPerMatch / Math.max(0.85, v.kd * 0.96)),
-                    killsPerMatch,
-                    deathsPerMatch,
-                    assistsPerMatch,
-                    avgLifeSeconds: Number(Math.max(32, Math.min(54, 540 / Math.max(8, deathsPerMatch))).toFixed(1)),
-                    perfectMedalsPerMatch: Number(Math.max(0.8, ((v.acc - 40) * 0.09)).toFixed(1)),
-                    powerWeaponKillsPerMatch: Number((1.2 + pts * 0.08).toFixed(1)),
-                    grenadeKillsPerMatch: 1.9,
-                    meleeKillsPerMatch: 2.1,
-                    winRate: v.winRate,
-                    pts,
-                    rank,
+                    pts: base.pts || consensus.pts,
+                    rank: calculateRankFromPts(base.pts || consensus.pts),
                     htScore: consensus.htScore,
                     dhScore: consensus.dhScore,
                     srScore: consensus.srScore,
-                    confidencePct: 99,
-                    source: v.source || 'Triple Cruce Verificado: SpartanRecord + DataHive + HaloTracker',
-                    liveVerified: true
-                };
-            }
-
-            // 2. Consulta Triple en Paralelo a SpartanRecord.com, HaloDataHive.com y HaloTracker.com (Multi-Proxy)
-            const endpoints = [
-                { id: 'spartanrecord', url: `https://r.jina.ai/https://spartanrecord.com/service_record/${encodeURIComponent(cleanTag)}` },
-                { id: 'halodatahive',  url: `https://r.jina.ai/https://halodatahive.com/Player/Infinite/${encodeURIComponent(cleanTag)}` },
-                { id: 'halotracker',   url: `https://r.jina.ai/https://halotracker.com/halo-infinite/profile/xbl/${encodeURIComponent(cleanTag)}/overview` },
-                { id: 'halodatahive_alt', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://halodatahive.com/Player/Infinite/' + cleanTag)}` }
-            ];
-
-            const fetchSource = async (ep) => {
-                const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), 3800);
-                try {
-                    const resp = await fetch(ep.url, { signal: ctrl.signal });
-                    clearTimeout(timer);
-                    if (!resp.ok) return null;
-                    const txt = await resp.text();
-                    return parseTelemetryFromRawText(txt, ep.id);
-                } catch (e) {
-                    clearTimeout(timer);
-                    return null;
-                }
-            };
-
-            const settled = await Promise.allSettled(endpoints.map(fetchSource));
-            const validResponses = settled
-                .map(r => (r.status === 'fulfilled' ? r.value : null))
-                .filter(Boolean);
-
-            // Si al menos 1 de las 3 herramientas devolvió telemetría real en vivo, derivamos las métricas faltantes
-            // de forma coherente con el nivel real detectado (¡NUNCA rellenando con promedios bajos de B+!)
-            if (validResponses.length > 0) {
-                const avgMetric = (key) => {
-                    const vals = validResponses.map(x => x[key]).filter(v => typeof v === 'number' && !isNaN(v));
-                    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-                };
-
-                let rawKd = avgMetric('kd');
-                let rawCsr = avgMetric('csr');
-                let rawAcc = avgMetric('acc');
-                let rawHs = avgMetric('hsPct');
-                let rawDmg = avgMetric('dmgPerMatch');
-                let rawWin = avgMetric('winRate');
-
-                // Correlación cruzada inteligente: si tenemos CSR pero no KD, o KD pero no CSR, inferimos coherentemente
-                if (rawKd !== null && rawCsr === null) {
-                    rawCsr = Math.round(800 + Math.pow(Math.max(0.5, rawKd), 1.35) * 580);
-                } else if (rawCsr !== null && rawKd === null) {
-                    rawKd = Number((0.65 + (rawCsr / 2400) * 1.15).toFixed(2));
-                }
-
-                const kd = Number((rawKd !== null ? rawKd : 1.15).toFixed(2));
-                const csr = Math.round(rawCsr !== null ? rawCsr : (900 + kd * 480));
-                const acc = Number((rawAcc !== null ? rawAcc : Math.min(64, 41 + kd * 11.5)).toFixed(1));
-                const hsPct = Number((rawHs !== null ? rawHs : Math.min(68, acc + 5.5)).toFixed(1));
-                const dmgPerMatch = Math.round(rawDmg !== null ? rawDmg : (2300 + kd * 1850 + (csr - 1000) * 1.1));
-                const winRate = Number((rawWin !== null ? rawWin : Math.min(72, Math.max(40, 38 + kd * 15.5))).toFixed(1));
-
-                const consensus = computeTripleConsensusPts({ csr, kd, acc, hsPct, dmgPerMatch, winRate });
-                const pts = existingInRoster ? existingInRoster.pts : consensus.pts;
-                const killsPerMatch = Number((8.5 + kd * 5.8).toFixed(1));
-                const deathsPerMatch = Number((killsPerMatch / Math.max(0.7, kd)).toFixed(1));
-                const assistsPerMatch = Number((5.0 + (dmgPerMatch / 680)).toFixed(1));
-
-                const parsedLive = {
-                    gamertag: cleanTag,
-                    csr,
-                    kd,
-                    kda: Number(((killsPerMatch + assistsPerMatch * 0.33 - deathsPerMatch)).toFixed(2)),
-                    acc,
-                    hsPct,
-                    dmgPerMatch,
-                    dmgTakenPerMatch: Math.round(dmgPerMatch / Math.max(0.78, kd * 0.96)),
                     killsPerMatch,
                     deathsPerMatch,
                     assistsPerMatch,
-                    avgLifeSeconds: Number(Math.max(25, Math.min(54, 530 / Math.max(8, deathsPerMatch))).toFixed(1)),
-                    perfectMedalsPerMatch: Number(Math.max(0.3, ((acc - 38) * 0.085)).toFixed(1)),
-                    powerWeaponKillsPerMatch: Number(Math.max(0.6, (pts * 0.11)).toFixed(1)),
-                    grenadeKillsPerMatch: 1.7,
-                    meleeKillsPerMatch: 1.9,
-                    winRate,
-                    pts,
-                    rank: calculateRankFromPts(pts),
-                    htScore: consensus.htScore,
-                    dhScore: consensus.dhScore,
-                    srScore: consensus.srScore,
-                    confidencePct: 96 + Math.min(3, validResponses.length),
-                    source: 'Triple Cruce en Vivo: SpartanRecord.com + DataHive + Tracker',
-                    liveVerified: true
+                    avgLifeSeconds: Number((520 / Math.max(8, deathsPerMatch)).toFixed(1)),
+                    dmgTakenPerMatch: Math.round(base.dmgPerMatch / Math.max(0.75, base.kd * 0.96)),
+                    perfectMedalsPerMatch: Number((0.6 + (base.acc - 45) * 0.11).toFixed(1)),
+                    powerWeaponKillsPerMatch: Number((1.1 + base.kd * 0.8).toFixed(1))
                 };
-
-                if (window.saveVerifiedProfileToCloud) window.saveVerifiedProfileToCloud(normKey, parsedLive);
-                return parsedLive;
             }
 
-            // 3. Revisar caché sincronizada si previamente fue calibrado o verificado
+            // 2. Verificar si existe en caché local previamente calibrado
             try {
-                const rawCache = window['local' + 'Storage'].getItem('mansalvas_halotracker_cache_v1');
-                if (rawCache) {
-                    const cacheMap = JSON.parse(rawCache);
-                    if (cacheMap[normKey] && cacheMap[normKey].liveVerified) {
-                        const c = cacheMap[normKey];
-                        if (existingInRoster) {
-                            c.pts = existingInRoster.pts;
-                            c.rank = calculateRankFromPts(existingInRoster.pts);
-                        }
-                        return c;
+                const localRaw = window['local' + 'Storage'].getItem('mansalvas_halotracker_cache_v1');
+                if (localRaw) {
+                    const localMap = JSON.parse(localRaw);
+                    if (localMap && localMap[normKey]) {
+                        const cached = localMap[normKey];
+                        const consensus = computeTripleConsensusPts(cached);
+                        const killsPerMatch = cached.killsPerMatch || Number((10.2 + cached.kd * 3.8).toFixed(1));
+                        const deathsPerMatch = cached.deathsPerMatch || Number((killsPerMatch / Math.max(0.5, cached.kd)).toFixed(1));
+                        const assistsPerMatch = cached.assistsPerMatch || Number((4.8 + (cached.dmgPerMatch / 950)).toFixed(1));
+                        return {
+                            ...cached,
+                            gamertag: cleanTag,
+                            pts: consensus.pts,
+                            rank: calculateRankFromPts(consensus.pts),
+                            htScore: consensus.htScore,
+                            dhScore: consensus.dhScore,
+                            srScore: consensus.srScore,
+                            killsPerMatch,
+                            deathsPerMatch,
+                            assistsPerMatch,
+                            avgLifeSeconds: cached.avgLifeSeconds || Number((520 / Math.max(8, deathsPerMatch)).toFixed(1)),
+                            dmgTakenPerMatch: cached.dmgTakenPerMatch || Math.round(cached.dmgPerMatch / Math.max(0.75, cached.kd * 0.96))
+                        };
                     }
                 }
             } catch (e) {}
 
-            // 4. Estimación de respaldo con espectro competitivo completo (incluye detección de tags Pro/Onyx/HCS y calibración abierta)
-            let h1 = 2166136261;
-            for (let i = 0; i < normKey.length; i++) {
-                h1 ^= normKey.charCodeAt(i);
-                h1 = Math.imul(h1, 16777619);
+            // 3. Intentar lectura en vivo desde SpartanRecord, HaloDataHive y Halo Tracker
+            let detectedKd = null;
+            let detectedCsr = null;
+            let detectedDmg = null;
+            let detectedAcc = null;
+            let detectedWinRate = null;
+
+            const fetchWithTimeout = async (url, ms = 3200) => {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), ms);
+                try {
+                    const res = await fetch(url, { signal: ctrl.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) return '';
+                    return await res.text();
+                } catch (e) {
+                    clearTimeout(timer);
+                    return '';
+                }
+            };
+
+            const encodedTag = encodeURIComponent(cleanTag);
+            const urlsToTry = [
+                `https://r.jina.ai/http://halodatahive.com/Player/Infinite/${encodedTag}`,
+                `https://r.jina.ai/http://spartanrecord.com/service_record/${encodedTag}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://halotracker.com/halo-infinite/profile/xbl/${encodedTag}/overview`)}`
+            ];
+
+            const responses = await Promise.all(urlsToTry.map(u => fetchWithTimeout(u, 3200)));
+            const combinedText = responses.join('\n');
+
+            if (combinedText && combinedText.length > 120) {
+                const kdMatch = combinedText.match(/(?:K\/D|KD\s*Ratio)\s*[:\-]?\s*([0-2]\.\d{2})/i);
+                if (kdMatch) detectedKd = parseFloat(kdMatch[1]);
+
+                const csrMatch = combinedText.match(/(?:CSR|Arena\s*CSR)\s*[:\-]?\s*([12]?\d{3})/i);
+                if (csrMatch) {
+                    const val = parseInt(csrMatch[1], 10);
+                    if (val >= 400 && val <= 2350 && val !== 2024 && val !== 2025 && val !== 2026) {
+                        detectedCsr = val;
+                    }
+                }
+
+                const dmgMatch = combinedText.match(/(?:Damage\/Game|Avg\s*Damage|Damage\s*Per\s*Game)\s*[:\-]?\s*([1-6],?\d{3})/i);
+                if (dmgMatch) {
+                    detectedDmg = parseInt(dmgMatch[1].replace(/,/g, ''), 10);
+                }
+
+                const accMatch = combinedText.match(/(?:Accuracy|Shot\s*Accuracy)\s*[:\-]?\s*([3-7]\d(?:\.\d)?)\s*%/i);
+                if (accMatch) detectedAcc = parseFloat(accMatch[1]);
             }
-            const seed = Math.abs(h1);
 
-            // Detectar si el Gamertag tiene nomenclatura competitiva/clan tag pro o si ya existe en el roster
-            const isCompetitiveTag = /(?:pro|hcs|onyx|god|mvp|faze|optic|ssg|sen|nv|c9|tox|kr|zr|xbl|ttv|yt)/i.test(cleanTag);
-            const prelimPts = existingInRoster
-                ? existingInRoster.pts
-                : isCompetitiveTag
-                    ? (20 + (seed % 6)) // 20 a 25 PTS (Rango S a SS)
-                    : (14 + (seed % 10)); // 14 a 23 PTS (Rango A hasta SS, evitando encasillar en B+)
+            // 4. Si el jugador ya existe en el Roster Oficial, alinear las métricas base con sus puntos reales en el Roster
+            const rosterMatch = (window.roster || []).find(p => window.normalizeSpartanKey(p.name) === normKey);
+            let csr = detectedCsr;
+            let kd = detectedKd;
+            let dmgPerMatch = detectedDmg;
 
-            const kd = Number((0.78 + (prelimPts / 25) * 0.72).toFixed(2));
-            const csr = Math.round(820 + prelimPts * 46);
-            const acc = Number((42.0 + (prelimPts / 25) * 18.5).toFixed(1));
-            const hsPct = Number((46.0 + (prelimPts / 25) * 19.5).toFixed(1));
-            const dmgPerMatch = Math.round(2450 + prelimPts * 128);
-            const winRate = Number((43.0 + prelimPts * 0.95).toFixed(1));
+            if (rosterMatch && (!csr || !kd || !dmgPerMatch)) {
+                const rPts = Number(rosterMatch.pts) || 11;
+                if (!csr) csr = Math.round(620 + rPts * 46);
+                if (!kd) kd = Number((0.66 + rPts * 0.031).toFixed(2));
+                if (!dmgPerMatch) dmgPerMatch = Math.round(1950 + rPts * 125);
+            }
+
+            // 5. Si es un perfil nuevo y las webs externas activaron protección anti-bot, usar los valores actuales del selector calibrador (Platino / Estándar por defecto, nunca inflar a SS)
+            if (!csr || !kd || !dmgPerMatch) {
+                const selCsr = parseFloat(document.getElementById('manualTrackerRankSelect')?.value || '1020');
+                const selKd = parseFloat(document.getElementById('manualTrackerKdSelect')?.value || '0.93');
+                const selDmg = parseFloat(document.getElementById('manualSpartanRecordSelect')?.value || '3100');
+
+                if (!csr) csr = selCsr;
+                if (!kd) kd = selKd;
+                if (!dmgPerMatch) dmgPerMatch = selDmg;
+            }
+
+            const acc = detectedAcc || Number(Math.min(62, Math.max(36, 38 + kd * 10.5)).toFixed(1));
+            const hsPct = Number(Math.min(66, acc + 4.5).toFixed(1));
+            const winRate = detectedWinRate || Number(Math.min(68, Math.max(35, 37 + kd * 13.0)).toFixed(1));
+            const kda = Number(((kd - 0.65) * 4.8).toFixed(1));
 
             const consensus = computeTripleConsensusPts({ csr, kd, acc, hsPct, dmgPerMatch, winRate });
-            const basePts = existingInRoster ? existingInRoster.pts : consensus.pts;
-            const rank = calculateRankFromPts(basePts);
+            const rank = calculateRankFromPts(consensus.pts);
 
-            const killsPerMatch = Number((7.5 + basePts * 0.48).toFixed(1));
-            const deathsPerMatch = Number(Math.max(8.0, (16.8 - basePts * 0.22)).toFixed(1));
-            const assistsPerMatch = Number((4.5 + basePts * 0.22).toFixed(1));
-            const avgLifeSeconds = Number(Math.max(26.0, Math.min(54.0, 530 / Math.max(8, deathsPerMatch))).toFixed(1));
+            const killsPerMatch = Number((8.5 + kd * 4.8).toFixed(1));
+            const deathsPerMatch = Number((killsPerMatch / Math.max(0.45, kd)).toFixed(1));
+            const assistsPerMatch = Number((4.2 + (dmgPerMatch / 820)).toFixed(1));
+            const avgLifeSeconds = Number((520 / Math.max(7.5, deathsPerMatch)).toFixed(1));
+            const dmgTakenPerMatch = Math.round(dmgPerMatch / Math.max(0.65, kd * 0.95));
 
-            return {
+            const resultStats = {
                 gamertag: cleanTag,
                 csr,
                 kd,
-                kda: Number(((killsPerMatch + assistsPerMatch * 0.33 - deathsPerMatch)).toFixed(2)),
+                kda,
                 acc,
                 hsPct,
                 dmgPerMatch,
-                dmgTakenPerMatch: Math.round(dmgPerMatch / Math.max(0.78, kd * 0.95)),
+                dmgTakenPerMatch,
+                avgLifeSeconds,
                 killsPerMatch,
                 deathsPerMatch,
                 assistsPerMatch,
-                avgLifeSeconds,
-                perfectMedalsPerMatch: Number(Math.max(0.4, ((acc - 38) * 0.08)).toFixed(1)),
-                powerWeaponKillsPerMatch: Number((0.6 + basePts * 0.09).toFixed(1)),
-                grenadeKillsPerMatch: 1.6,
-                meleeKillsPerMatch: 1.8,
+                perfectMedalsPerMatch: Number(Math.max(0.2, (acc - 42) * 0.12).toFixed(1)),
+                powerWeaponKillsPerMatch: Number((0.9 + kd * 0.75).toFixed(1)),
                 winRate,
-                pts: basePts,
-                rank,
+                pts: rosterMatch ? rosterMatch.pts : consensus.pts,
+                rank: rosterMatch ? calculateRankFromPts(rosterMatch.pts) : rank,
                 htScore: consensus.htScore,
                 dhScore: consensus.dhScore,
                 srScore: consensus.srScore,
-                confidencePct: 95,
-                source: 'Triple Análisis: SpartanRecord + DataHive + HaloTracker',
-                liveVerified: false
+                source: (detectedKd || detectedCsr)
+                    ? 'Telemetría Extraída (SpartanRecord + DataHive + Tracker)'
+                    : 'Calibrador Oficial (K/D 40% + Rango Arena 35% + Daño 25%)'
             };
-        }
 
+            return resultStats;
+        };
+
+        // Función principal del botón "Escáner Triple" al reclutar un Spartan
         window.scanHaloTrackerProfile = async function() {
-            const rawTag = (document.getElementById('newPlayerName')?.value || '').trim();
+            const nameInput = document.getElementById('newPlayerName');
+            const rawTag = (nameInput?.value || '').trim();
             if (!rawTag) {
-                showToast('Escribe primero el Gamertag del Spartan.');
+                showToast('Primero escribe el Gamertag del Spartan.');
+                nameInput?.focus();
                 return;
             }
+
             checkDuplicateSpartanLive();
 
-            const btnText = document.getElementById('scanBtnText');
+            const scanIcon = document.getElementById('scanIcon');
+            const scanBtnText = document.getElementById('scanBtnText');
             const statusEl = document.getElementById('scanProgressStatus');
-            const resultBox = document.getElementById('trackerResultBox');
-            const bridgeBox = document.getElementById('humanVerificationBridge');
+            const linksRow = document.getElementById('externalVerifyLinksRow');
 
-            if (btnText) btnText.innerText = 'Analizando 3 Fuentes...';
-            if (statusEl) statusEl.innerText = `Ejecutando Triple Análisis en SpartanRecord.com, HaloDataHive y Halo Tracker para "${rawTag}"...`;
+            if (scanIcon) scanIcon.className = 'fa-solid fa-spinner fa-spin text-cyan-300';
+            if (scanBtnText) scanBtnText.innerText = 'Analizando...';
+            if (statusEl) {
+                statusEl.innerHTML = `<span class="text-cyan-300 font-semibold">Consultando K/D, Rango en Arena y Daño para <strong>${rawTag}</strong>...</span>`;
+            }
 
-            const stats = await fetchDualTelemetryForGamertag(rawTag);
-            if (btnText) btnText.innerText = 'Escáner Triple';
+            const encoded = encodeURIComponent(rawTag);
+            const srLink = document.getElementById('directSpartanRecordLink');
+            const dhLink = document.getElementById('directDataHiveLink');
+            const htLink = document.getElementById('directTrackerLink');
+            if (srLink) srLink.href = `https://spartanrecord.com/service_record/${encoded}`;
+            if (dhLink) dhLink.href = `https://halodatahive.com/Player/Infinite/${encoded}`;
+            if (htLink) htLink.href = `https://halotracker.com/halo-infinite/profile/xbl/${encoded}/overview`;
+            if (linksRow) linksRow.classList.remove('hidden');
+
+            const stats = await window.fetchDualTelemetryForGamertag(rawTag);
+
+            if (scanIcon) scanIcon.className = 'fa-solid fa-satellite-dish text-cyan-400';
+            if (scanBtnText) scanBtnText.innerText = 'Escáner Triple';
 
             if (!stats) return;
             window._lastScannedRecruitStats = stats;
-
+            syncManualDropdownsWithStats(stats.csr, stats.kd, stats.dmgPerMatch);
             renderRecruitScannerResultCard(stats);
-
-            if (bridgeBox) {
-                bridgeBox.classList.remove('hidden');
-                const srLink = document.getElementById('directSpartanRecordLink');
-                const dhLink = document.getElementById('directDataHiveLink');
-                const trLink = document.getElementById('directTrackerLink');
-                if (srLink) srLink.href = `https://spartanrecord.com/service_record/${encodeURIComponent(rawTag)}`;
-                if (dhLink) dhLink.href = `https://halodatahive.com/Player/Infinite/${encodeURIComponent(rawTag)}`;
-                if (trLink) trLink.href = `https://halotracker.com/halo-infinite/profile/xbl/${encodeURIComponent(rawTag)}/overview`;
-            }
+            showToast(`Análisis completado: Rango ${stats.rank} (${stats.pts} PTS) sugerido para ${rawTag}.`);
         };
 
-        // Renderiza la tarjeta del Escáner Triple con campos editables en tiempo real para calibrar CSR, K/D, Daño y Precisión
+        // Renderiza la tarjeta del Escáner Triple mostrando claramente el peso de Rango Arena, K/D y Daño
         window.renderRecruitScannerResultCard = function(stats) {
             const resultBox = document.getElementById('trackerResultBox');
             const statusEl = document.getElementById('scanProgressStatus');
@@ -3052,92 +3012,80 @@ ${cobraLines}`;
 
             selectTier(stats.rank, stats.pts);
             const tierTitle = TIER_TITLES_MAP[stats.rank] || 'COMANDO ONI';
+            const arenaLeagueLabel = getArenaLeagueNameFromCsr(stats.csr);
 
             resultBox.classList.remove('hidden');
             resultBox.innerHTML = `
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/30 pb-2">
                     <div>
                         <span class="font-orbitron font-bold text-xs text-cyan-300 block"><i class="fa-solid fa-satellite-dish mr-1"></i> ${stats.source}</span>
-                        <span class="text-[10px] text-emerald-300 font-semibold">Consenso Triple Calculado: <strong>Rango ${stats.rank} (${tierTitle})</strong></span>
+                        <span class="text-[11px] text-emerald-300 font-semibold">Liga Detectada: <strong>${arenaLeagueLabel}</strong> • Rango Asignado: <strong>${stats.rank} (${tierTitle})</strong></span>
                     </div>
                     <span class="px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-orbitron font-black text-xs">Rango ${stats.rank} • ${stats.pts} PTS</span>
                 </div>
 
-                <!-- Desglose del Triple Análisis por Herramienta -->
+                <!-- Desglose Exacto por las 3 Variables Determinantes: K/D (40%) + Rango Arena (35%) + Daño (25%) -->
                 <div class="grid grid-cols-3 gap-2 pt-1 text-center">
-                    <div class="p-1.5 rounded bg-emerald-950/35 border border-emerald-500/40">
-                        <div class="text-[9px] font-orbitron text-emerald-300 font-bold">1. SPARTANRECORD</div>
-                        <div class="text-[11px] text-white font-bold">${stats.dmgPerMatch} DMG • ${stats.winRate}% Win</div>
-                        <div class="text-[10px] text-emerald-400 font-orbitron font-bold">${stats.srScore} PTS (${calculateRankFromPts(stats.srScore)})</div>
-                    </div>
-                    <div class="p-1.5 rounded bg-amber-950/35 border border-amber-500/40">
-                        <div class="text-[9px] font-orbitron text-amber-300 font-bold">2. HALODATAHIVE</div>
-                        <div class="text-[11px] text-white font-bold">${stats.kd} K/D • ${stats.hsPct}% HS</div>
+                    <div class="p-2 rounded bg-amber-950/35 border border-amber-500/40">
+                        <div class="text-[9px] font-orbitron text-amber-300 font-bold">1. K/D RATIO (PESO 40%)</div>
+                        <div class="text-xs text-white font-bold mt-0.5">${stats.kd} K/D</div>
                         <div class="text-[10px] text-amber-400 font-orbitron font-bold">${stats.dhScore} PTS (${calculateRankFromPts(stats.dhScore)})</div>
                     </div>
-                    <div class="p-1.5 rounded bg-cyan-950/35 border border-cyan-500/40">
-                        <div class="text-[9px] font-orbitron text-cyan-300 font-bold">3. HALO TRACKER</div>
-                        <div class="text-[11px] text-white font-bold">${stats.csr} CSR • ${stats.acc}% ACC</div>
+                    <div class="p-2 rounded bg-cyan-950/35 border border-cyan-500/40">
+                        <div class="text-[9px] font-orbitron text-cyan-300 font-bold">2. ARENA CSR (PESO 35%)</div>
+                        <div class="text-xs text-white font-bold mt-0.5">${arenaLeagueLabel} (${stats.csr})</div>
                         <div class="text-[10px] text-cyan-400 font-orbitron font-bold">${stats.htScore} PTS (${calculateRankFromPts(stats.htScore)})</div>
+                    </div>
+                    <div class="p-2 rounded bg-emerald-950/35 border border-emerald-500/40">
+                        <div class="text-[9px] font-orbitron text-emerald-300 font-bold">3. DAÑO / JUEGO (PESO 25%)</div>
+                        <div class="text-xs text-white font-bold mt-0.5">${stats.dmgPerMatch} DMG</div>
+                        <div class="text-[10px] text-emerald-400 font-orbitron font-bold">${stats.srScore} PTS (${calculateRankFromPts(stats.srScore)})</div>
                     </div>
                 </div>
 
-                <!-- Calibrador directo de estadísticas reales de las 3 fuentes -->
+                <!-- Ajuste numérico fino en vivo de las 3 variables -->
                 <div class="pt-1.5 border-t border-cyan-500/20">
                     <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-[10px] font-orbitron text-cyan-200 uppercase"><i class="fa-solid fa-sliders mr-1 text-cyan-400"></i>Ajuste Exacto de Telemetría (Recalcula Rango en Vivo):</span>
-                        <button type="button" onclick="applyProPresetToScanner()" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-300 font-orbitron font-bold text-[9px]">
-                            ⚡ Cargar Preset Pro / Onyx SS
-                        </button>
+                        <span class="text-[10px] font-orbitron text-cyan-200 uppercase"><i class="fa-solid fa-sliders mr-1 text-cyan-400"></i>Valores Exactos (Puedes digitar el número exacto de K/D, CSR o Daño):</span>
                     </div>
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-center">
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">CSR ARENA</label>
-                            <input id="liveInputCsr" type="number" step="10" value="${stats.csr}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-white focus:outline-none border-b border-cyan-500/40">
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="p-1.5 rounded bg-[#05162b] border border-amber-500/40">
+                            <label class="text-[9px] text-amber-300 font-bold block">K/D EXACTO</label>
+                            <input id="liveInputKd" type="number" step="0.02" min="0.30" max="3.00" value="${stats.kd}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-white focus:outline-none border-b border-amber-500/40">
                         </div>
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">K/D RATIO</label>
-                            <input id="liveInputKd" type="number" step="0.05" value="${stats.kd}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-cyan-300 focus:outline-none border-b border-cyan-500/40">
+                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/40">
+                            <label class="text-[9px] text-cyan-300 font-bold block">CSR EN ARENA</label>
+                            <input id="liveInputCsr" type="number" step="10" min="300" max="2400" value="${stats.csr}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-white focus:outline-none border-b border-cyan-500/40">
                         </div>
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">DAÑO/JUEGO</label>
-                            <input id="liveInputDmg" type="number" step="100" value="${stats.dmgPerMatch}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-emerald-300 focus:outline-none border-b border-cyan-500/40">
-                        </div>
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">PRECISIÓN %</label>
-                            <input id="liveInputAcc" type="number" step="0.5" value="${stats.acc}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-amber-300 focus:outline-none border-b border-cyan-500/40">
-                        </div>
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">HEADSHOT %</label>
-                            <input id="liveInputHs" type="number" step="0.5" value="${stats.hsPct}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-purple-300 focus:outline-none border-b border-cyan-500/40">
-                        </div>
-                        <div class="p-1.5 rounded bg-[#05162b] border border-cyan-500/30">
-                            <label class="text-[9px] text-slate-400 block">WIN RATE %</label>
-                            <input id="liveInputWin" type="number" step="1" value="${stats.winRate}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-sky-300 focus:outline-none border-b border-cyan-500/40">
+                        <div class="p-1.5 rounded bg-[#05162b] border border-emerald-500/40">
+                            <label class="text-[9px] text-emerald-300 font-bold block">DAÑO PROMEDIO</label>
+                            <input id="liveInputDmg" type="number" step="50" min="1200" max="7500" value="${stats.dmgPerMatch}" oninput="recalculateFromLiveStatInputs()" class="w-full bg-transparent text-center font-orbitron font-bold text-xs text-white focus:outline-none border-b border-emerald-500/40">
                         </div>
                     </div>
                 </div>
             `;
 
             if (statusEl) {
-                statusEl.innerText = `Triple Análisis completado para ${stats.gamertag}: Rango ${stats.rank} • ${tierTitle} (${stats.pts} PTS).`;
+                statusEl.innerText = `Calibración lista para ${stats.gamertag}: ${arenaLeagueLabel} • ${stats.kd} K/D • ${stats.dmgPerMatch} DMG → Rango ${stats.rank} (${stats.pts} PTS).`;
             }
         };
 
-        // Recalcula en tiempo real el consenso de las 3 herramientas cuando el usuario ingresa o ajusta las estadísticas reales del jugador
+        // Recalcula en tiempo real cuando el usuario escribe números exactos en las cajas de K/D, CSR o Daño
         window.recalculateFromLiveStatInputs = function() {
-            const stats = window._lastScannedRecruitStats || { gamertag: document.getElementById('newPlayerName')?.value || 'Spartan' };
-            const csr = parseFloat(document.getElementById('liveInputCsr')?.value) || 1500;
-            const kd = parseFloat(document.getElementById('liveInputKd')?.value) || 1.25;
-            const dmgPerMatch = parseFloat(document.getElementById('liveInputDmg')?.value) || 4800;
-            const acc = parseFloat(document.getElementById('liveInputAcc')?.value) || 56.0;
-            const hsPct = parseFloat(document.getElementById('liveInputHs')?.value) || 60.0;
-            const winRate = parseFloat(document.getElementById('liveInputWin')?.value) || 58.0;
+            const rawTag = (document.getElementById('newPlayerName')?.value || 'Spartan').trim();
+            const stats = window._lastScannedRecruitStats || { gamertag: rawTag };
+            const csr = parseFloat(document.getElementById('liveInputCsr')?.value) || 1020;
+            const kd = parseFloat(document.getElementById('liveInputKd')?.value) || 0.93;
+            const dmgPerMatch = parseFloat(document.getElementById('liveInputDmg')?.value) || 3100;
+            const acc = stats.acc || Number(Math.min(60, 39 + kd * 10.5).toFixed(1));
+            const hsPct = stats.hsPct || Number(Math.min(65, acc + 4.5).toFixed(1));
+            const winRate = stats.winRate || Number(Math.min(65, 38 + kd * 13.0).toFixed(1));
 
             const consensus = computeTripleConsensusPts({ csr, kd, acc, hsPct, dmgPerMatch, winRate });
             const rank = calculateRankFromPts(consensus.pts);
 
             Object.assign(stats, {
+                gamertag: rawTag || stats.gamertag,
                 csr,
                 kd,
                 dmgPerMatch,
@@ -3149,93 +3097,58 @@ ${cobraLines}`;
                 htScore: consensus.htScore,
                 dhScore: consensus.dhScore,
                 srScore: consensus.srScore,
+                source: 'Calibración Exacta por K/D + Rango en Arena + Daño',
                 liveVerified: true
             });
 
+            window._lastScannedRecruitStats = stats;
+            syncManualDropdownsWithStats(csr, kd, dmgPerMatch);
             selectTier(rank, consensus.pts);
+
             const normKey = window.normalizeSpartanKey(stats.gamertag);
             if (normKey && window.saveVerifiedProfileToCloud) {
                 window.saveVerifiedProfileToCloud(normKey, stats);
             }
         };
 
-        window.applyProPresetToScanner = function() {
+        // Recalcula al cambiar cualquiera de los 3 selectores principales (1. Rango en Arena, 2. K/D Ratio, 3. Daño Promedio)
+        window.calculateFromManualTrackerInputs = function() {
             const rawTag = (document.getElementById('newPlayerName')?.value || 'Spartan').trim();
-            const proStats = {
+            const csr = parseFloat(document.getElementById('manualTrackerRankSelect')?.value || '1020');
+            const kd = parseFloat(document.getElementById('manualTrackerKdSelect')?.value || '0.93');
+            const dmgPerMatch = parseFloat(document.getElementById('manualSpartanRecordSelect')?.value || '3100');
+
+            const acc = Number(Math.min(62, 39 + kd * 10.5).toFixed(1));
+            const hsPct = Number(Math.min(66, acc + 4.5).toFixed(1));
+            const winRate = Number(Math.min(66, 38 + kd * 13.5).toFixed(1));
+
+            const consensus = computeTripleConsensusPts({ csr, kd, acc, hsPct, dmgPerMatch, winRate });
+            const rank = calculateRankFromPts(consensus.pts);
+
+            const updatedStats = {
+                ...(window._lastScannedRecruitStats || {}),
                 gamertag: rawTag,
-                csr: 1850,
-                kd: 1.48,
-                kda: 6.5,
-                acc: 60.5,
-                hsPct: 65.8,
-                dmgPerMatch: 5650,
-                winRate: 66.5,
-                pts: 25,
-                rank: 'SS',
-                htScore: 25,
-                dhScore: 25,
-                srScore: 25,
-                confidencePct: 99,
-                source: 'Perfil Profesional / Onyx Élite Calibrado (3 Fuentes)',
+                csr,
+                kd,
+                dmgPerMatch,
+                acc,
+                hsPct,
+                winRate,
+                pts: consensus.pts,
+                rank,
+                htScore: consensus.htScore,
+                dhScore: consensus.dhScore,
+                srScore: consensus.srScore,
+                source: 'Calibrado por K/D (40%) + Rango en Arena (35%) + Daño (25%)',
                 liveVerified: true
             };
-            window._lastScannedRecruitStats = proStats;
-            renderRecruitScannerResultCard(proStats);
+
+            window._lastScannedRecruitStats = updatedStats;
+            renderRecruitScannerResultCard(updatedStats);
+
             const normKey = window.normalizeSpartanKey(rawTag);
-            if (normKey && window.saveVerifiedProfileToCloud) {
-                window.saveVerifiedProfileToCloud(normKey, proStats);
-            }
-        };
-
-        window.calculateFromManualTrackerInputs = function() {
-            const rankVal = document.getElementById('manualTrackerRankSelect')?.value || 'diamond_high';
-            const kdVal = parseFloat(document.getElementById('manualTrackerKdSelect')?.value || '1.15');
-            const srMod = parseInt(document.getElementById('manualSpartanRecordSelect')?.value || '0', 10);
-
-            const csrByTier = {
-                'pro_hcs': 1900,
-                'onyx_high': 1680,
-                'onyx': 1530,
-                'diamond_high': 1390,
-                'diamond_low': 1250,
-                'platinum_high': 1080,
-                'platinum': 920,
-                'gold': 740
-            };
-            const dmgBySrMod = {
-                '3': 5500,
-                '2': 4850,
-                '0': 4050,
-                '-2': 3250,
-                '-4': 2500
-            };
-
-            const csr = csrByTier[rankVal] || 1350;
-            const dmgPerMatch = dmgBySrMod[String(srMod)] || 4050;
-            const acc = kdVal >= 1.45 ? 60.5 : kdVal >= 1.25 ? 56.5 : kdVal >= 1.10 ? 52.0 : 46.5;
-            const hsPct = acc + 4.5;
-            const winRate = srMod >= 2 ? 61.0 : srMod === 0 ? 53.0 : 47.0;
-
-            const consensus = computeTripleConsensusPts({ csr, kd: kdVal, acc, hsPct, dmgPerMatch, winRate });
-            const rank = calculateRankFromPts(consensus.pts);
-            selectTier(rank, consensus.pts);
-
-            if (window._lastScannedRecruitStats) {
-                Object.assign(window._lastScannedRecruitStats, {
-                    csr,
-                    kd: kdVal,
-                    dmgPerMatch,
-                    acc,
-                    hsPct,
-                    winRate,
-                    pts: consensus.pts,
-                    rank,
-                    htScore: consensus.htScore,
-                    dhScore: consensus.dhScore,
-                    srScore: consensus.srScore,
-                    liveVerified: true
-                });
-                renderRecruitScannerResultCard(window._lastScannedRecruitStats);
+            if (normKey && rawTag !== 'Spartan' && window.saveVerifiedProfileToCloud) {
+                window.saveVerifiedProfileToCloud(normKey, updatedStats);
             }
         };
 
@@ -4290,31 +4203,101 @@ ${plan.configAdvice}
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuración oficial de tu proyecto Firebase (halomatch-d9240)
-        const DEFAULT_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyB35a_pQ4N8vX1Z7mK9L2wR5tY8uI0oP1",
-            authDomain: "halomatch-d9240.firebaseapp.com",
-            projectId: "halomatch-d9240",
-            storageBucket: "halomatch-d9240.firebasestorage.app",
-            messagingSenderId: "482910384756",
-            appId: "1:482910384756:web:9f8e7d6c5b4a3f2e1d0c9b"
-        };
+        const FIREBASE_PROJECT_ID = "halomatch-d9240";
+        const FIRESTORE_REST_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
 
-        function getActiveFirebaseConfig() {
+        // Posibles rutas de documentos en halomatch-d9240 para asegurar compatibilidad total con tu base en vivo
+        const CANDIDATE_ROSTER_PATHS = [
+            "artifacts/halomatch-d9240/public/data/rosterData/mainRoster",
+            "artifacts/default-app-id/public/data/rosterData/mainRoster",
+            "rosterData/mainRoster"
+        ];
+        let activeRosterDocPath = CANDIDATE_ROSTER_PATHS[0];
+
+        // Conversores nativos para la API REST directa de Firestore (funciona sin depender de API Keys locales)
+        function fromFirestoreValue(v) {
+            if (!v || typeof v !== 'object') return null;
+            if ('stringValue' in v) return v.stringValue;
+            if ('integerValue' in v) return Number(v.integerValue);
+            if ('doubleValue' in v) return Number(v.doubleValue);
+            if ('booleanValue' in v) return Boolean(v.booleanValue);
+            if ('nullValue' in v) return null;
+            if ('arrayValue' in v) return (v.arrayValue.values || []).map(fromFirestoreValue);
+            if ('mapValue' in v) {
+                const out = {};
+                const fields = v.mapValue.fields || {};
+                for (const k of Object.keys(fields)) {
+                    out[k] = fromFirestoreValue(fields[k]);
+                }
+                return out;
+            }
+            return null;
+        }
+
+        function toFirestoreValue(val) {
+            if (val === null || val === undefined) return { nullValue: null };
+            if (typeof val === 'boolean') return { booleanValue: val };
+            if (typeof val === 'number') {
+                return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+            }
+            if (typeof val === 'string') return { stringValue: val };
+            if (Array.isArray(val)) {
+                return { arrayValue: { values: val.map(toFirestoreValue) } };
+            }
+            if (typeof val === 'object') {
+                const fields = {};
+                for (const [k, v] of Object.entries(val)) {
+                    if (v !== undefined) fields[k] = toFirestoreValue(v);
+                }
+                return { mapValue: { fields } };
+            }
+            return { stringValue: String(val) };
+        }
+
+        async function restGetDocument(docPath) {
+            try {
+                const resp = await fetch(`${FIRESTORE_REST_BASE}/${docPath}`, { cache: 'no-store' });
+                if (!resp.ok) return null;
+                const json = await resp.json();
+                if (!json || !json.fields) return null;
+                const out = {};
+                for (const k of Object.keys(json.fields)) {
+                    out[k] = fromFirestoreValue(json.fields[k]);
+                }
+                return out;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function restSetDocument(docPath, dataObj) {
+            const fields = {};
+            for (const [k, v] of Object.entries(dataObj)) {
+                if (v !== undefined) fields[k] = toFirestoreValue(v);
+            }
+            const resp = await fetch(`${FIRESTORE_REST_BASE}/${docPath}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields })
+            });
+            return resp.ok;
+        }
+
+        function getCustomOrEnvFirebaseConfig() {
             try {
                 const savedCustom = window['local' + 'Storage'].getItem('mansalvas_custom_firebase_config');
                 if (savedCustom) {
                     const parsed = JSON.parse(savedCustom);
-                    if (parsed && parsed.projectId) return parsed;
+                    if (parsed && parsed.apiKey && parsed.projectId) return parsed;
                 }
             } catch (e) {}
             try {
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                     const envCfg = JSON.parse(__firebase_config);
-                    if (envCfg && envCfg.projectId) return envCfg;
+                    if (envCfg && envCfg.apiKey && envCfg.projectId) return envCfg;
                 }
             } catch (e) {}
-            return DEFAULT_FIREBASE_CONFIG;
+            return null;
         }
 
         function sanitizeForFirestore(obj) {
@@ -4322,217 +4305,219 @@ ${plan.configAdvice}
         }
 
         async function initCloudSync() {
-            try {
-                const firebaseConfig = getActiveFirebaseConfig();
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
+            const updateCloudBadgeUI = (count) => {
+                const sideCount = document.getElementById('sidebarCloudCount');
+                if (sideCount) sideCount.innerText = `${count} Spartans en Firebase`;
+            };
 
-                const appId = (typeof __app_id !== 'undefined' && __app_id) ? __app_id : 'halomatch-d9240';
+            // Aplicar datos recibidos desde Firebase de forma segura (sin meter perfiles inventados)
+            const applyCloudDataToApp = (data) => {
+                if (!data || typeof data !== 'object') return;
+                window.isCloudRosterLoaded = true;
+                if (Array.isArray(data.deletedKeys)) {
+                    data.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
+                    window.persistDeletedKeysLocally();
+                }
+                if (Array.isArray(data.players) && data.players.length > 0) {
+                    window.roster = window.deduplicateRosterList(data.players);
+                    updateCloudBadgeUI(window.roster.length);
+                    window.persistRosterLocally();
+                    if (window.renderRoster) window.renderRoster();
+                    if (typeof updateBalancedTeamsUI === 'function') updateBalancedTeamsUI(true);
+                } else if (window.renderRoster) {
+                    window.renderRoster();
+                }
+            };
+
+            // 1. Localizar automáticamente el documento activo en halomatch-d9240 vía REST directo
+            const findLiveRosterInCloud = async () => {
+                for (const candidatePath of CANDIDATE_ROSTER_PATHS) {
+                    const docData = await restGetDocument(candidatePath);
+                    if (docData && Array.isArray(docData.players) && docData.players.length > 0) {
+                        activeRosterDocPath = candidatePath;
+                        return docData;
+                    }
+                }
+                return await restGetDocument(activeRosterDocPath);
+            };
+
+            // 2. Función global para leer siempre la última versión de Firebase antes de cualquier guardado
+            window.pullLatestCloudRosterBeforeWrite = async () => {
+                const docData = await findLiveRosterInCloud();
+                if (docData) {
+                    if (Array.isArray(docData.deletedKeys)) {
+                        docData.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
+                        window.persistDeletedKeysLocally();
+                    }
+                    if (Array.isArray(docData.players)) {
+                        window.isCloudRosterLoaded = true;
+                        const cleanCloud = window.deduplicateRosterList(docData.players);
+                        updateCloudBadgeUI(cleanCloud.length);
+                        return cleanCloud;
+                    }
+                }
+                return null;
+            };
+
+            // 3. Botón manual de verificación en el menú hamburguesa
+            window.verifyCloudIntegrityManual = async () => {
+                window.deletedSpartanKeys.clear();
+                window.persistDeletedKeysLocally();
+                const cloudPlayers = await window.pullLatestCloudRosterBeforeWrite();
+                if (Array.isArray(cloudPlayers) && cloudPlayers.length > 0) {
+                    window.roster = window.deduplicateRosterList(cloudPlayers);
+                    window.persistRosterLocally();
+                    if (window.renderRoster) window.renderRoster();
+                    showToast(`✅ ¡Sincronizados ${window.roster.length} perfiles reales desde Firebase!`);
+                } else {
+                    showToast(`⚠️ Conectado: ${window.roster.length} perfiles activos.`);
+                }
+            };
+
+            // 4. Guardado Transaccional Seguro: NUNCA borra el Roster ni sube perfiles inventados
+            window.saveRosterToCloud = async (explicitDeletedKey = null, explicitRestoredKey = null, singleUpsertSpartan = null) => {
+                if (explicitDeletedKey && window.deletedSpartanKeys) {
+                    window.deletedSpartanKeys.add(explicitDeletedKey);
+                }
+                if (explicitRestoredKey && window.deletedSpartanKeys) {
+                    window.deletedSpartanKeys.delete(explicitRestoredKey);
+                }
+                window.persistDeletedKeysLocally();
 
                 try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+                    // Paso A: Descargar siempre la lista real que está en Firebase en este instante
+                    const currentCloudData = await findLiveRosterInCloud();
+                    let cloudPlayers = (currentCloudData && Array.isArray(currentCloudData.players))
+                        ? window.deduplicateRosterList(currentCloudData.players)
+                        : [];
+
+                    if (currentCloudData && Array.isArray(currentCloudData.deletedKeys)) {
+                        currentCloudData.deletedKeys.forEach(k => {
+                            if (k !== explicitRestoredKey) window.deletedSpartanKeys.add(k);
+                        });
                     }
-                } catch (authErr) {
-                    console.warn("Auth warning (continuando lectura pública):", authErr);
-                }
 
-                // 1. Sincronización Exacta con Firebase (Fuente Única de Verdad)
-                // Revisa tanto el appId del entorno como 'halomatch-d9240' directo para recuperar siempre tus 19 perfiles
-                const primaryRosterRef = doc(db, 'artifacts', 'halomatch-d9240', 'public', 'data', 'rosterData', 'mainRoster');
-                const envRosterRef = doc(db, 'artifacts', appId, 'public', 'data', 'rosterData', 'mainRoster');
-                let rosterDocRef = primaryRosterRef;
-                window.isCloudRosterLoaded = false;
-
-                const updateCloudBadgeUI = (count) => {
-                    const sideCount = document.getElementById('sidebarCloudCount');
-                    if (sideCount) sideCount.innerText = `${count} Spartans en Firebase`;
-                };
-
-                // Buscador inteligente: localiza en cuál de las rutas están almacenados tus 19 perfiles
-                const resolveActiveRosterDoc = async () => {
-                    try {
-                        const snapPrimary = await getDoc(primaryRosterRef);
-                        if (snapPrimary.exists() && Array.isArray(snapPrimary.data()?.players) && snapPrimary.data().players.length > 0) {
-                            rosterDocRef = primaryRosterRef;
-                            return snapPrimary;
-                        }
-                    } catch (e) {}
-                    try {
-                        if (appId !== 'halomatch-d9240') {
-                            const snapEnv = await getDoc(envRosterRef);
-                            if (snapEnv.exists() && Array.isArray(snapEnv.data()?.players) && snapEnv.data().players.length > 0) {
-                                rosterDocRef = envRosterRef;
-                                return snapEnv;
-                            }
-                        }
-                    } catch (e) {}
-                    return null;
-                };
-
-                // Consulta directa a Firebase antes de escribir
-                window.pullLatestCloudRosterBeforeWrite = async () => {
-                    try {
-                        const latestSnap = (await resolveActiveRosterDoc()) || (await getDoc(rosterDocRef));
-                        if (latestSnap && latestSnap.exists()) {
-                            const data = latestSnap.data() || {};
-                            if (Array.isArray(data.deletedKeys)) {
-                                data.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
-                                window.persistDeletedKeysLocally();
-                            }
-                            if (Array.isArray(data.players)) {
-                                window.isCloudRosterLoaded = true;
-                                const cleanCloud = window.deduplicateRosterList(data.players);
-                                updateCloudBadgeUI(cleanCloud.length);
-                                return cleanCloud;
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Read before write warning:", e);
+                    // Paso B: Si se eliminó explícitamente un jugador (solo Admin), quitar únicamente ese jugador
+                    if (explicitDeletedKey) {
+                        cloudPlayers = cloudPlayers.filter(p => window.normalizeSpartanKey(p.name) !== explicitDeletedKey);
                     }
-                    return null;
-                };
 
-                // Botón manual de verificación y recuperación forzada desde Firebase
-                window.verifyCloudIntegrityManual = async () => {
-                    // Limpiamos cualquier bloqueo local accidental para que salgan todos los perfiles de Firebase
-                    window.deletedSpartanKeys.clear();
-                    window.persistDeletedKeysLocally();
-                    const cloudPlayers = await window.pullLatestCloudRosterBeforeWrite();
-                    if (Array.isArray(cloudPlayers) && cloudPlayers.length > 0) {
-                        window.roster = window.deduplicateRosterList(cloudPlayers);
-                        window.persistRosterLocally();
-                        if (window.renderRoster) window.renderRoster();
-                        showToast(`✅ ¡Recuperados ${window.roster.length} perfiles desde Firebase!`);
-                    } else {
-                        showToast(`⚠️ Conectado: ${window.roster.length} perfiles en pantalla.`);
-                    }
-                };
-
-                // Resolver ruta inicial y activar escucha en tiempo real
-                await resolveActiveRosterDoc();
-
-                // Escucha en tiempo real de Firebase
-                onSnapshot(rosterDocRef, (snap) => {
-                    window.isCloudRosterLoaded = true;
-                    if (snap.exists()) {
-                        const data = snap.data() || {};
-                        if (Array.isArray(data.deletedKeys)) {
-                            data.deletedKeys.forEach(k => window.deletedSpartanKeys.add(k));
-                            window.persistDeletedKeysLocally();
-                        }
-                        if (Array.isArray(data.players) && data.players.length > 0) {
-                            window.roster = window.deduplicateRosterList(data.players);
-                            updateCloudBadgeUI(window.roster.length);
-                            window.persistRosterLocally();
-                            if (window.renderRoster) window.renderRoster();
-                            if (typeof updateBalancedTeamsUI === 'function') updateBalancedTeamsUI(true);
-                        } else if (window.roster && window.roster.length > 0) {
-                            // Si el documento en nube estaba vacío pero tenemos respaldo local, lo restauramos sin borrar nada
-                            updateCloudBadgeUI(window.roster.length);
-                            if (window.renderRoster) window.renderRoster();
+                    // Paso C: Si se reclutó o editó un jugador, aplicarlo sobre la lista fresca de Firebase
+                    if (singleUpsertSpartan && singleUpsertSpartan.name) {
+                        const targetKey = window.normalizeSpartanKey(singleUpsertSpartan.name);
+                        const existingIdx = cloudPlayers.findIndex(
+                            p => p.id === singleUpsertSpartan.id || window.normalizeSpartanKey(p.name) === targetKey
+                        );
+                        if (existingIdx > -1) {
+                            cloudPlayers[existingIdx] = {
+                                ...cloudPlayers[existingIdx],
+                                name: singleUpsertSpartan.name,
+                                pts: singleUpsertSpartan.pts,
+                                rank: singleUpsertSpartan.rank
+                            };
                         } else {
-                            if (window.renderRoster) window.renderRoster();
+                            cloudPlayers.push(singleUpsertSpartan);
                         }
                     } else {
-                        if (window.renderRoster) window.renderRoster();
+                        // Fusión aditiva segura (ej. tras veredicto del Tribunal)
+                        cloudPlayers = window.mergeRostersSafely(window.roster, cloudPlayers);
                     }
-                }, (err) => {
-                    window.isCloudRosterLoaded = true;
-                    if (window.renderRoster) window.renderRoster();
-                    console.warn("Sync roster warning:", err);
-                });
 
-                window.saveRosterToCloud = async (explicitDeletedKey = null, explicitRestoredKey = null) => {
-                    if (explicitDeletedKey && window.deletedSpartanKeys) {
-                        window.deletedSpartanKeys.add(explicitDeletedKey);
-                    }
-                    if (explicitRestoredKey && window.deletedSpartanKeys) {
-                        window.deletedSpartanKeys.delete(explicitRestoredKey);
-                    }
-                    window.persistDeletedKeysLocally();
+                    const finalPlayersToSave = window.deduplicateRosterList(cloudPlayers);
 
-                    if (window.deduplicateRosterList) {
-                        window.roster = window.deduplicateRosterList(window.roster || []);
+                    // Guardia Anti-Vaciado: Prohibido sobrescribir Firebase con una lista vacía si ya existían jugadores
+                    if (finalPlayersToSave.length === 0 && currentCloudData && Array.isArray(currentCloudData.players) && currentCloudData.players.length > 0) {
+                        console.warn("Guardia Anti-Borrado activada: se impidió sobrescribir el Roster con lista vacía.");
+                        return;
                     }
+
+                    window.roster = finalPlayersToSave;
                     window.persistRosterLocally();
+                    if (window.renderRoster) window.renderRoster();
 
-                    if (!auth.currentUser) {
-                        try { await signInAnonymously(auth); } catch (e) {}
+                    const payload = {
+                        players: finalPlayersToSave,
+                        deletedKeys: [...window.deletedSpartanKeys],
+                        updatedAt: Date.now()
+                    };
+
+                    // Guardar vía REST directo en halomatch-d9240
+                    const okRest = await restSetDocument(activeRosterDocPath, payload);
+                    if (okRest) {
+                        updateCloudBadgeUI(finalPlayersToSave.length);
                     }
 
-                    try {
-                        const currentCloudSnap = await getDoc(rosterDocRef);
-                        if (currentCloudSnap.exists()) {
-                            const cloudData = currentCloudSnap.data() || {};
-                            if (Array.isArray(cloudData.deletedKeys)) {
-                                cloudData.deletedKeys.forEach(k => {
-                                    if (k !== explicitRestoredKey) window.deletedSpartanKeys.add(k);
-                                });
-                            }
-                            let cloudList = Array.isArray(cloudData.players) ? cloudData.players : [];
-                            if (explicitDeletedKey) {
-                                cloudList = cloudList.filter(p => window.normalizeSpartanKey(p.name) !== explicitDeletedKey);
-                            }
-                            // Unir los cambios actuales con la nube respetando la lista negra de eliminados
-                            window.roster = window.mergeRostersSafely(window.roster, cloudList);
-                            window.persistRosterLocally();
-                        }
-
-                        const payload = {
-                            players: window.roster,
-                            deletedKeys: [...window.deletedSpartanKeys],
-                            updatedAt: Date.now()
-                        };
-                        await setDoc(rosterDocRef, sanitizeForFirestore(payload));
-                        updateCloudBadgeUI(window.roster.length);
-                    } catch (e) {
-                        console.warn("Error guardando roster en nube:", e);
-                        showToast("⚠️ Error de red al guardar en Firebase. Verifica tu conexión.");
-                    }
-                };
-
-                // 2. Sincronización del Tribunal Spartan ONI
-                const tribunalDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'tribunalData', 'activeTribunal');
-                onSnapshot(tribunalDocRef, (snap) => {
-                    if (snap.exists() && window.onTribunalCloudUpdate) {
-                        window.onTribunalCloudUpdate(snap.data());
-                    }
-                }, (err) => console.warn("Tribunal sync warning:", err));
-
-                window.saveTribunalToCloud = async (sessionPayload) => {
-                    if (!auth.currentUser || !sessionPayload) return;
-                    await setDoc(tribunalDocRef, sanitizeForFirestore(sessionPayload));
-                };
-
-                // 3. Caché compartida de perfiles escaneados
-                const trackerCacheDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'trackerCache', 'profiles');
-                onSnapshot(trackerCacheDocRef, (snap) => {
-                    if (snap.exists() && snap.data().map) {
+                    // Si además hay SDK activo, sincronizar también por SDK
+                    if (window._sdkRosterDocRef && window._sdkSetDoc) {
                         try {
-                            const localRaw = window['local' + 'Storage'].getItem('mansalvas_halotracker_cache_v1');
-                            const localMap = localRaw ? JSON.parse(localRaw) : {};
-                            const merged = { ...localMap, ...snap.data().map };
-                            window['local' + 'Storage'].setItem('mansalvas_halotracker_cache_v1', JSON.stringify(merged));
+                            await window._sdkSetDoc(window._sdkRosterDocRef, sanitizeForFirestore(payload));
                         } catch (e) {}
                     }
-                }, (err) => console.warn("Tracker cache sync warning:", err));
+                } catch (e) {
+                    console.warn("Error guardando roster en nube:", e);
+                    showToast("⚠️ Error de red al guardar en Firebase. Verifica tu conexión.");
+                }
+            };
 
-                window.saveVerifiedProfileToCloud = async (normKey, profileData) => {
-                    if (!auth.currentUser || !normKey || !profileData) return;
+            // 5. Carga inicial inmediata desde Firebase (halomatch-d9240)
+            const initialCloudData = await findLiveRosterInCloud();
+            if (initialCloudData) {
+                applyCloudDataToApp(initialCloudData);
+            } else {
+                window.isCloudRosterLoaded = true;
+                if (window.renderRoster) window.renderRoster();
+            }
+
+            // Sincronización periódica en tiempo real para que todos vean los nuevos Spartans agregados por otros jugadores
+            const tribunalRestPath = "artifacts/halomatch-d9240/public/data/tribunalData/activeTribunal";
+            setInterval(async () => {
+                const latest = await restGetDocument(activeRosterDocPath);
+                if (latest && Array.isArray(latest.players) && latest.players.length > 0) {
+                    applyCloudDataToApp(latest);
+                }
+                const latestTrib = await restGetDocument(tribunalRestPath);
+                if (latestTrib && latestTrib.status && window.onTribunalCloudUpdate) {
+                    window.onTribunalCloudUpdate(latestTrib);
+                }
+            }, 4500);
+
+            window.saveTribunalToCloud = async (sessionPayload) => {
+                if (!sessionPayload) return;
+                await restSetDocument(tribunalRestPath, sanitizeForFirestore(sessionPayload));
+            };
+
+            const trackerCacheRestPath = "artifacts/halomatch-d9240/public/data/trackerCache/profiles";
+            window.saveVerifiedProfileToCloud = async (normKey, profileData) => {
+                if (!normKey || !profileData) return;
+                try {
+                    const localRaw = window['local' + 'Storage'].getItem('mansalvas_halotracker_cache_v1');
+                    const localMap = localRaw ? JSON.parse(localRaw) : {};
+                    localMap[normKey] = profileData;
+                    window['local' + 'Storage'].setItem('mansalvas_halotracker_cache_v1', JSON.stringify(localMap));
+                } catch (e) {}
+            };
+
+            // 6. Si existe configuración de SDK con API Key válida en el entorno, activar también listener WebSocket
+            const sdkConfig = getCustomOrEnvFirebaseConfig();
+            if (sdkConfig) {
+                try {
+                    const app = initializeApp(sdkConfig);
+                    const auth = getAuth(app);
+                    const db = getFirestore(app);
                     try {
-                        const localRaw = window['local' + 'Storage'].getItem('mansalvas_halotracker_cache_v1');
-                        const localMap = localRaw ? JSON.parse(localRaw) : {};
-                        localMap[normKey] = profileData;
-                        window['local' + 'Storage'].setItem('mansalvas_halotracker_cache_v1', JSON.stringify(localMap));
-                        await setDoc(trackerCacheDocRef, sanitizeForFirestore({ map: localMap, updatedAt: Date.now() }), { merge: true });
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
                     } catch (e) {}
-                };
-            } catch (e) {
-                console.warn("Modo persistente local activo:", e);
+                    const sdkDocRef = doc(db, ...activeRosterDocPath.split('/'));
+                    window._sdkRosterDocRef = sdkDocRef;
+                    window._sdkSetDoc = setDoc;
+                    onSnapshot(sdkDocRef, (snap) => {
+                        if (snap.exists()) applyCloudDataToApp(snap.data());
+                    }, () => {});
+                } catch (e) {}
             }
         }
 
