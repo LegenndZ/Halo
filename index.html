@@ -987,6 +987,23 @@
     <!-- ========================================================= -->
     <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN                         -->
     <!-- ========================================================= -->
+    <script>
+        const ROSTER_BACKUP_KEY = 'mansalvas_halo_roster_v4_backup';
+        const TRIBUNAL_BACKUP_KEY = 'mansalvas_halo_tribunal_v4_backup';
+
+        const DEFAULT_ROSTER = [
+            { id: 'sp-1', name: 'Legennd Zr', pts: 21, rank: 'S' },
+            { id: 'sp-2', name: 'Prodig1z', pts: 21, rank: 'S' },
+            { id: 'sp-3', name: 'Ronin18', pts: 18, rank: 'A+' },
+            { id: 'sp-4', name: 'Spartan Mansalva', pts: 16, rank: 'A' },
+            { id: 'sp-5', name: 'MasterChief117', pts: 15, rank: 'A' },
+            { id: 'sp-6', name: 'Noble Six', pts: 14, rank: 'A' },
+            { id: 'sp-7', name: 'Cortana IA', pts: 12, rank: 'B+' },
+            { id: 'sp-8', name: 'Arbiter Vadam', pts: 12, rank: 'B+' },
+            { id: 'sp-9', name: 'Buck ODST', pts: 10, rank: 'B' },
+            { id: 'sp-10', name: 'Jorge 052', pts: 9, rank: 'B' }
+        ];
+
         // Perfiles verificados de respaldo rápido + Base de Profesionales HCS / Top Onyx de Halo Infinite
         const VERIFIED_HALO_PROFILES = {
             'prodig1z': { csr: 1540, tierName: 'Semidiós / Semi-Pro', kd: 1.24, kda: 4.3, acc: 55.2, hsPct: 60.4, dmgPerMatch: 4920, winRate: 56.5, pts: 21, rank: 'S', source: 'Triple Cruce Verificado (SpartanRecord + DataHive + Tracker)' },
