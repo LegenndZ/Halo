@@ -364,11 +364,18 @@
                             <i class="fa-solid fa-shuffle"></i> Alternar Opción
                         </button>
                         <button type="button" onclick="openMatchShareModal()" class="hud-btn py-2.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
-                            <i class="fa-brands fa-whatsapp text-base"></i> Compartir Imagen
+                            <i class="fa-brands fa-whatsapp text-base"></i> Compartir por WhatsApp
                         </button>
-                        <button type="button" onclick="openMatchSynergyInCoach()" class="sm:col-span-2 hud-btn py-2.5 px-3 bg-gradient-to-r from-cyan-500/25 via-emerald-500/25 to-amber-500/25 hover:from-cyan-500/40 hover:to-emerald-500/40 border border-emerald-400/70 text-emerald-200 font-orbitron font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-                            <i class="fa-solid fa-brain text-emerald-400"></i> 🧠 Sinergia Táctica Eagle vs Cobra
-                        </button>
+                        <div class="sm:col-span-2 grid grid-cols-2 gap-2">
+                            <button type="button" onclick="openMatchSynergyInCoach()" class="hud-btn py-2.5 px-2.5 bg-[#0a182b] hover:bg-[#102542] border border-slate-500/60 text-slate-100 font-orbitron font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-brain text-cyan-300"></i>
+                                <span class="truncate">Sinergia táctica</span>
+                            </button>
+                            <button id="btnOpenMapsLottery" type="button" onclick="openMapsLotteryModal()" class="hud-btn btn-maps-cyan py-2.5 px-2.5 font-orbitron font-black text-[11px] sm:text-xs flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 shrink-0 text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.85)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                                <span>Mapas</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -608,18 +615,18 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL: AUDITORÍA Y COMPARTIR IMAGEN TÁCTICA DE ESCUADRAS  -->
+    <!-- MODAL: COMPARTIR POR WHATSAPP (ESCUADRAS + MAPAS ALEATORIOS) -->
     <!-- ========================================================= -->
-    <div id="matchShareModal" onclick="if(event.target===this) closeMatchShareModal()" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="hud-panel max-w-xl w-full p-4 sm:p-5 border border-cyan-400/50 bg-[#040e1c] shadow-[0_0_35px_rgba(0,229,255,0.18)] my-4 max-h-[94vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-3 shrink-0">
+    <div id="matchShareModal" onclick="if(event.target===this) closeMatchShareModal()" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+        <div class="hud-panel max-w-2xl w-full p-3.5 sm:p-5 border border-cyan-400/50 bg-[#040e1c] shadow-[0_0_35px_rgba(0,229,255,0.18)] my-3 max-h-[95vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-cyan-500/30 pb-2.5 mb-3 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded bg-emerald-500/15 border border-emerald-400/60 flex items-center justify-center text-emerald-300">
-                        <i class="fa-solid fa-image"></i>
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="font-orbitron font-bold text-sm sm:text-base text-white tracking-wide">TARJETA TÁCTICA HD</h3>
-                        <p id="matchShareSubtitle" class="text-[11px] text-cyan-300/85">Revisa los equipos y comparte directo</p>
+                        <h3 class="font-orbitron font-bold text-sm sm:text-base text-white tracking-wide">COMPARTIR PARTIDA • MATCH #<span id="shareModalMatchCode">0000</span></h3>
+                        <p id="matchShareSubtitle" class="text-[11px] text-cyan-300/85">Escuadras balanceadas y Mapas aleatorios</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeMatchShareModal()" class="w-8 h-8 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Cerrar">
@@ -627,23 +634,79 @@
                 </button>
             </div>
 
-            <!-- Vista previa de la imagen generada -->
-            <div class="overflow-y-auto rounded-lg border border-cyan-500/30 bg-[#020813] p-2 flex-1 min-h-0 flex items-center justify-center">
-                <img id="matchSharePreviewImg" alt="Vista previa de escuadras UNSC Eagle vs Banished Cobra" class="w-full max-w-[440px] h-auto rounded shadow-lg" />
+            <!-- Selector de Pestañas dentro del modal de WhatsApp -->
+            <div class="grid grid-cols-2 gap-2 mb-3 shrink-0">
+                <button id="tabBtnShareSquads" type="button" onclick="switchMatchShareTab('squads')" class="hud-btn py-2 px-3 bg-cyan-500 text-slate-950 font-orbitron font-black text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Escuadras (Match)</span>
+                </button>
+                <button id="tabBtnShareMaps" type="button" onclick="switchMatchShareTab('maps')" class="hud-btn py-2 px-3 bg-[#0a182b] border border-cyan-400/50 text-cyan-200 font-orbitron font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition">
+                    <svg class="w-4 h-4 shrink-0 text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.85)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                    <span>Mapas aleatorios</span>
+                </button>
             </div>
 
-            <p id="matchShareHint" class="text-[11px] text-slate-300 mt-2.5 text-center shrink-0"></p>
+            <!-- TAB 1: ESCUADRAS (UNSC EAGLE VS BANISHED COBRA) -->
+            <div id="shareSquadsTabPanel" class="flex-1 min-h-0 flex flex-col">
+                <div class="overflow-y-auto rounded-lg border border-cyan-500/30 bg-[#020813] p-2 flex-1 min-h-0 flex items-center justify-center">
+                    <img id="matchSharePreviewImg" alt="Vista previa de escuadras UNSC Eagle vs Banished Cobra" class="w-full max-w-[440px] h-auto rounded shadow-lg" />
+                </div>
 
-            <!-- Botones de acción -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 shrink-0">
-                <button id="btnNativeShareMatch" type="button" onclick="shareMatchImageNative()" class="hud-btn py-2.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
-                    <i class="fa-brands fa-whatsapp text-base"></i>
-                    <span class="sm:hidden">Compartir en WhatsApp</span>
-                    <span class="hidden sm:inline">Compartir</span>
+                <p id="matchShareHint" class="text-[11px] text-slate-300 mt-2 text-center shrink-0"></p>
+
+                <button type="button" onclick="switchMatchShareTab('maps', true)" class="mt-2.5 w-full hud-btn btn-maps-cyan py-2.5 px-3 font-orbitron font-black text-xs flex items-center justify-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 shrink-0 text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.85)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                    <span>Sortear Mapas aleatorios</span>
                 </button>
-                <button id="btnCopyMatchImage" type="button" onclick="copyMatchImageToClipboard()" class="hidden sm:flex hud-btn py-2.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-black text-xs items-center justify-center gap-2">
-                    <i class="fa-regular fa-copy"></i> Copiar Imagen (Ctrl + V)
-                </button>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 shrink-0">
+                    <button id="btnNativeShareMatch" type="button" onclick="shareMatchImageNative()" class="hud-btn py-2.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
+                        <i class="fa-brands fa-whatsapp text-base"></i>
+                        <span class="sm:hidden">Compartir en WhatsApp</span>
+                        <span class="hidden sm:inline">Compartir</span>
+                    </button>
+                    <button id="btnCopyMatchImage" type="button" onclick="copyMatchImageToClipboard()" class="hidden sm:flex hud-btn py-2.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-black text-xs items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i> Copiar Imagen (Ctrl + V)
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: MAPAS ALEATORIOS (01-05 BISELADOS) -->
+            <div id="shareMapsTabPanel" class="hidden flex-1 min-h-0 flex-col overflow-y-auto">
+                <div class="halo-maps-shell p-3 sm:p-4">
+                    <div class="flex items-center justify-between border-b border-cyan-500/25 pb-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0 text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.85)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                            <span class="font-orbitron font-black text-xs sm:text-sm text-white">SERIE DE MAPAS • <span id="mapsModalFormatBadge" class="text-cyan-300">4V4</span></span>
+                        </div>
+                        <span class="text-[11px] font-orbitron text-slate-300">MATCH #<span id="mapsModalMatchCode">0000</span></span>
+                    </div>
+
+                    <div id="mapsIncompleteBox" class="hidden rounded-lg bg-slate-900/90 border border-amber-400/45 px-4 py-6 text-center my-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-300 text-lg mb-1.5"></i>
+                        <p class="font-rajdhani font-bold text-base text-amber-200">Completa los equipos para sortear los mapas</p>
+                    </div>
+
+                    <div id="mapsErrorBox" class="hidden rounded-lg bg-rose-950/75 border border-rose-400/50 px-4 py-4 text-center my-2 text-xs text-rose-200"></div>
+
+                    <div id="mapsCardsContainer" class="space-y-2 sm:space-y-2.5"></div>
+
+                    <div id="mapsModalFooterActions" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3.5">
+                        <button type="button" onclick="drawAndRenderMapsInModal()" class="hud-btn py-2.5 px-3 bg-[#0a182b] hover:bg-[#112642] border border-cyan-400/50 text-cyan-100 font-orbitron font-bold text-[11px] flex items-center justify-center gap-2 transition">
+                            <svg class="w-4 h-4 shrink-0 text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.85)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                            <span>Volver a sortear</span>
+                        </button>
+                        <button type="button" onclick="shareMapsWhatsApp()" class="hud-btn py-2.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-[11px] flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span class="sm:hidden">Compartir por WhatsApp</span>
+                            <span class="hidden sm:inline">Compartir</span>
+                        </button>
+                        <button type="button" onclick="copyMapsImageToClipboard()" class="hidden sm:flex hud-btn py-2.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-black text-[11px] items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Copiar Imagen (Ctrl + V)</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -796,6 +859,7 @@
     <script src="rank-engine.js"></script>
     <script src="map-drone-ux.js"></script>
     <script src="ai-coach.js"></script>
+    <script src="map-lottery-engine.js"></script>
 
     <!-- ========================================================= -->
     <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN                         -->
@@ -2404,6 +2468,365 @@
                 showToast(`Llave de donación: ${key}`, 'info');
             }
         };
+
+        // =========================================================
+        // MÓDULO MAPAS ALEATORIOS + WHATSAPP UNIFICADO
+        // =========================================================
+        let currentDrawnMaps = null;
+
+        async function getMapsManifest() {
+            const ts = Date.now();
+            try {
+                const resApi = await fetch(`/api/maps-manifest?t=${ts}`, { cache: 'no-store' });
+                if (resApi.ok) {
+                    return await resApi.json();
+                }
+            } catch (e) {}
+
+            const resFallback = await fetch(`maps-manifest.json?t=${ts}`, { cache: 'no-store' });
+            if (!resFallback.ok) {
+                throw new Error(`No se pudo cargar el catálogo de mapas (HTTP ${resFallback.status})`);
+            }
+            return await resFallback.json();
+        }
+
+        function areTeamsCompleteForMaps() {
+            const half = Math.floor(maxPlayers / 2);
+            return Boolean(
+                window.currentMatchData &&
+                Array.isArray(window.currentMatchData.eagle) &&
+                Array.isArray(window.currentMatchData.cobra) &&
+                window.currentMatchData.eagle.length === half &&
+                window.currentMatchData.cobra.length === half
+            );
+        }
+
+        function updateMapsButtonState() {
+            const btn = document.getElementById('btnOpenMapsLottery');
+            if (!btn) return;
+            const ok = areTeamsCompleteForMaps();
+            btn.disabled = !ok;
+            btn.title = ok ? 'Sortear 5 mapas oficiales' : 'Completa los equipos para sortear los mapas';
+        }
+
+        const origUpdateBalancedTeamsUIForMaps = window.updateBalancedTeamsUI;
+        if (typeof origUpdateBalancedTeamsUIForMaps === 'function') {
+            window.updateBalancedTeamsUI = function() {
+                origUpdateBalancedTeamsUIForMaps();
+                updateMapsButtonState();
+            };
+        }
+
+        const origOpenMatchShareModalForMaps = window.openMatchShareModal;
+        window.openMatchShareModal = function(initialTab) {
+            if (typeof origOpenMatchShareModalForMaps === 'function') {
+                origOpenMatchShareModalForMaps();
+            }
+            const codeEl = document.getElementById('shareModalMatchCode');
+            if (codeEl) codeEl.textContent = window.currentMatchData?.code || '0000';
+            switchMatchShareTab(initialTab === 'maps' ? 'maps' : 'squads');
+        };
+        window.copyMatchToWhatsApp = window.openMatchShareModal;
+
+        async function switchMatchShareTab(tab) {
+            const squadsPanel = document.getElementById('shareSquadsTabPanel');
+            const mapsPanel = document.getElementById('shareMapsTabPanel');
+            const tabSquads = document.getElementById('tabBtnShareSquads');
+            const tabMaps = document.getElementById('tabBtnShareMaps');
+            const isMaps = tab === 'maps';
+
+            if (squadsPanel) squadsPanel.classList.toggle('hidden', isMaps);
+            if (mapsPanel) {
+                mapsPanel.classList.toggle('hidden', !isMaps);
+                mapsPanel.classList.toggle('flex', isMaps);
+            }
+
+            if (tabSquads) {
+                tabSquads.className = !isMaps
+                    ? 'hud-btn py-2 px-3 bg-cyan-500 text-slate-950 font-orbitron font-black text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition'
+                    : 'hud-btn py-2 px-3 bg-[#0a182b] border border-slate-600 text-slate-300 font-orbitron font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition';
+            }
+            if (tabMaps) {
+                tabMaps.className = isMaps
+                    ? 'hud-btn btn-maps-cyan py-2 px-3 font-orbitron font-black text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition'
+                    : 'hud-btn py-2 px-3 bg-[#0a182b] border border-cyan-400/50 text-cyan-200 font-orbitron font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition';
+            }
+
+            if (isMaps) {
+                const incBox = document.getElementById('mapsIncompleteBox');
+                const errBox = document.getElementById('mapsErrorBox');
+                const container = document.getElementById('mapsCardsContainer');
+                const footer = document.getElementById('mapsModalFooterActions');
+                const codeEl = document.getElementById('mapsModalMatchCode');
+                const fmtEl = document.getElementById('mapsModalFormatBadge');
+
+                const fmtLabel = getModeLabel(maxPlayers);
+                if (codeEl) codeEl.textContent = window.currentMatchData?.code || '0000';
+                if (fmtEl) fmtEl.textContent = fmtLabel.toUpperCase();
+
+                if (!areTeamsCompleteForMaps()) {
+                    if (incBox) incBox.classList.remove('hidden');
+                    if (errBox) errBox.classList.add('hidden');
+                    if (container) container.innerHTML = '';
+                    if (footer) footer.classList.add('hidden');
+                } else {
+                    if (incBox) incBox.classList.add('hidden');
+                    if (footer) footer.classList.remove('hidden');
+                    await drawAndRenderMapsInModal();
+                }
+            }
+        }
+        window.switchMatchShareTab = switchMatchShareTab;
+
+        async function openMapsLotteryModal() {
+            if (!areTeamsCompleteForMaps()) {
+                showToast('Completa los equipos para sortear los mapas', 'info');
+                return;
+            }
+            window.openMatchShareModal('maps');
+        }
+        window.openMapsLotteryModal = openMapsLotteryModal;
+
+        function closeMapsLotteryModal() {
+            if (typeof window.closeMatchShareModal === 'function') window.closeMatchShareModal();
+        }
+        window.closeMapsLotteryModal = closeMapsLotteryModal;
+
+        async function drawAndRenderMapsInModal() {
+            const errBox = document.getElementById('mapsErrorBox');
+            const container = document.getElementById('mapsCardsContainer');
+            if (!areTeamsCompleteForMaps()) return;
+            try {
+                if (errBox) errBox.classList.add('hidden');
+                const manifest = await getMapsManifest();
+                const fmtLabel = getModeLabel(maxPlayers).toLowerCase();
+                currentDrawnMaps = window.HaloMapEngine.drawMaps(manifest, fmtLabel);
+                window.currentDrawnMaps = currentDrawnMaps;
+
+                container.innerHTML = currentDrawnMaps.maps.map(item => {
+                    const desktopSrc = encodeURI(item.desktopPath || item.path);
+                    const mobileSrc = encodeURI(item.mobilePath || item.path);
+                    return `
+                    <div class="map-slot-card">
+                        <div class="map-slot-num">
+                            <span class="font-orbitron font-bold text-xs sm:text-base text-slate-100 leading-none">${item.slotLabel}</span>
+                            <span class="mt-1 w-4 sm:w-6 h-[2px] bg-cyan-400 rounded-full shadow-[0_0_8px_#22d3ee]"></span>
+                        </div>
+                        <div class="map-slot-img-wrap">
+                            <picture>
+                                <source media="(max-width: 767px)" srcset="${mobileSrc}">
+                                <img src="${desktopSrc}" alt="${item.mapName} ${item.mode}" loading="eager">
+                            </picture>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                if (container) container.innerHTML = '';
+                if (errBox) {
+                    errBox.textContent = err.message || 'No se pudieron sortear los mapas.';
+                    errBox.classList.remove('hidden');
+                }
+            }
+        }
+        window.drawAndRenderMapsInModal = drawAndRenderMapsInModal;
+
+        function loadMapImgForCanvas(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Error cargando ' + src));
+                img.src = src;
+            });
+        }
+
+        function drawBevelPath(ctx, x, y, w, h, cut) {
+            ctx.beginPath();
+            ctx.moveTo(x + cut, y);
+            ctx.lineTo(x + w - cut, y);
+            ctx.lineTo(x + w, y + cut);
+            ctx.lineTo(x + w, y + h - cut);
+            ctx.lineTo(x + w - cut, y + h);
+            ctx.lineTo(x + cut, y + h);
+            ctx.lineTo(x, y + h - cut);
+            ctx.lineTo(x, y + cut);
+            ctx.closePath();
+        }
+
+        async function renderMapsHdCanvas() {
+            if (!currentDrawnMaps || !currentDrawnMaps.maps || !currentDrawnMaps.maps.length) {
+                await drawAndRenderMapsInModal();
+            }
+            if (!currentDrawnMaps || !currentDrawnMaps.maps) {
+                throw new Error('Primero sortea los mapas.');
+            }
+            const maps = currentDrawnMaps.maps;
+            const imgs = await Promise.all(
+                maps.map(item => loadMapImgForCanvas(encodeURI(item.desktopPath || item.path)))
+            );
+
+            const width = 2160;
+            const padOuter = 44;
+            const shellPadX = 36;
+            const headerH = 144;
+            const footerH = 92;
+            const slotGap = 24;
+            const cardW = width - padOuter * 2 - shellPadX * 2;
+            const numColW = 148;
+            const imgAreaXOffset = numColW + 18;
+            const imgSlotW = cardW - imgAreaXOffset - 6;
+
+            const slotHeights = imgs.map(img => Math.round(imgSlotW * (img.naturalHeight / img.naturalWidth)));
+            const totalSlotsH = slotHeights.reduce((acc, h) => acc + h, 0) + (maps.length - 1) * slotGap;
+            const height = padOuter * 2 + headerH + totalSlotsH + footerH;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, '#040c1a');
+            bgGrad.addColorStop(0.5, '#07172c');
+            bgGrad.addColorStop(1, '#030914');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            const sx = padOuter;
+            const sy = padOuter;
+            const sw = width - padOuter * 2;
+            const sh = height - padOuter * 2;
+            drawBevelPath(ctx, sx, sy, sw, sh, 28);
+            ctx.fillStyle = 'rgba(6, 17, 32, 0.98)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(30, 144, 214, 0.78)';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            const matchCode = window.currentMatchData?.code || '0000';
+            const fmtLabel = getModeLabel(maxPlayers).toUpperCase();
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 30px Orbitron, sans-serif';
+            ctx.fillText('HALO MATCH • SERIE DE MAPAS', width / 2, sy + 56);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 50px Orbitron, sans-serif';
+            ctx.fillText(`MATCH #${matchCode}  •  ${fmtLabel}`, width / 2, sy + 116);
+
+            let cursorY = sy + headerH;
+            const cardX = sx + shellPadX;
+
+            maps.forEach((item, idx) => {
+                const slotH = slotHeights[idx];
+                const img = imgs[idx];
+
+                ctx.save();
+                drawBevelPath(ctx, cardX, cursorY, cardW, slotH, 18);
+                ctx.fillStyle = '#040b16';
+                ctx.fill();
+                ctx.clip();
+
+                ctx.beginPath();
+                ctx.moveTo(cardX, cursorY);
+                ctx.lineTo(cardX + numColW + 22, cursorY);
+                ctx.lineTo(cardX + numColW - 14, cursorY + slotH);
+                ctx.lineTo(cardX, cursorY + slotH);
+                ctx.closePath();
+                ctx.fillStyle = '#091526';
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cardX + numColW + 22, cursorY);
+                ctx.lineTo(cardX + numColW - 14, cursorY + slotH);
+                ctx.stroke();
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#f1f5f9';
+                ctx.font = 'bold 46px Orbitron, sans-serif';
+                ctx.fillText(item.slotLabel, cardX + numColW / 2, cursorY + slotH / 2 + 8);
+
+                ctx.fillStyle = '#22d3ee';
+                ctx.fillRect(cardX + numColW / 2 - 28, cursorY + slotH / 2 + 26, 56, 5);
+
+                ctx.drawImage(img, cardX + imgAreaXOffset, cursorY, imgSlotW, slotH);
+                ctx.restore();
+
+                drawBevelPath(ctx, cardX, cursorY, cardW, slotH, 18);
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.52)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                cursorY += slotH + slotGap;
+            });
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '600 28px Rajdhani, sans-serif';
+            ctx.fillText(`Match #${matchCode} • ${fmtLabel} • UNSC TAC-BALANCER`, width / 2, sy + sh - 34);
+
+            return canvas;
+        }
+        window.renderMapsHdCanvas = renderMapsHdCanvas;
+
+        async function copyMapsImageToClipboard() {
+            try {
+                const canvas = await renderMapsHdCanvas();
+                const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+                if (blob && navigator.clipboard && window.ClipboardItem) {
+                    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    showToast('¡Imagen de Mapas copiada! Pégala con Ctrl + V en WhatsApp.', 'success');
+                    return;
+                }
+            } catch (err) {
+                console.warn('ClipboardItem Mapas falló:', err);
+            }
+            showToast('Tu navegador bloqueó la copia directa al portapapeles.', 'error');
+        }
+        window.copyMapsImageToClipboard = copyMapsImageToClipboard;
+
+        async function shareMapsWhatsApp() {
+            try {
+                const canvas = await renderMapsHdCanvas();
+                const matchCode = window.currentMatchData?.code || '0000';
+                const fmtLabel = getModeLabel(maxPlayers).toLowerCase();
+                const filename = `halo-mapas-match-${matchCode}-${fmtLabel}.png`;
+                const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+
+                if (blob && navigator.share && navigator.canShare && typeof File !== 'undefined') {
+                    const file = new File([blob], filename, { type: 'image/png' });
+                    if (navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: `Halo Match #${matchCode} (${fmtLabel.toUpperCase()})`,
+                                text: `Serie de mapas Match #${matchCode} (${fmtLabel.toUpperCase()})`
+                            });
+                            showToast('¡Tarjeta de mapas compartida!', 'success');
+                            return;
+                        } catch (err) {
+                            if (err && err.name === 'AbortError') return;
+                        }
+                    }
+                }
+                const url = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('Descarga la tarjeta y adjúntala en WhatsApp', 'info');
+            } catch (err) {
+                showToast(err.message || 'No se pudo compartir la tarjeta.', 'error');
+            }
+        }
+        window.shareMapsWhatsApp = shareMapsWhatsApp;
 
         window.addEventListener('DOMContentLoaded', () => {
             renderRoster();

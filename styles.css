@@ -573,3 +573,127 @@ details.halo-demand-card > summary .halo-demand-chevron {
 details.halo-demand-card[open] > summary .halo-demand-chevron {
     transform: rotate(180deg);
 }
+
+/* ========================================================= */
+/* MÓDULO DE MAPAS ALEATORIOS HALO INFINITE                  */
+/* ========================================================= */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+.halo-maps-shell {
+    position: relative;
+    background: linear-gradient(180deg, rgba(7, 19, 36, 0.98) 0%, rgba(4, 11, 22, 0.99) 100%);
+    border: 1.5px solid rgba(30, 144, 214, 0.65);
+    box-shadow: 0 0 36px rgba(0, 195, 255, 0.16), inset 0 0 28px rgba(0, 160, 255, 0.08);
+    clip-path: polygon(
+        14px 0, calc(100% - 14px) 0,
+        100% 14px, 100% calc(100% - 14px),
+        calc(100% - 14px) 100%, 14px 100%,
+        0 calc(100% - 14px), 0 14px
+    );
+}
+
+.halo-maps-shell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #38bdf8, #e0f2fe, #38bdf8, transparent);
+    box-shadow: 0 0 12px #38bdf8;
+    pointer-events: none;
+}
+
+.btn-maps-cyan {
+    background: linear-gradient(180deg, #1b93d4 0%, #0d588c 100%);
+    border: 1px solid rgba(96, 213, 255, 0.92);
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition: all 0.18s ease;
+}
+
+.btn-maps-cyan:hover:not(:disabled) {
+    background: linear-gradient(180deg, #28a6eb 0%, #126aa6 100%);
+    box-shadow: 0 0 22px rgba(56, 189, 248, 0.55);
+}
+
+.btn-maps-cyan:disabled {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border-color: rgba(100, 116, 139, 0.45);
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.map-slot-card {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    background: #040b16;
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+    clip-path: polygon(
+        8px 0, calc(100% - 8px) 0,
+        100% 8px, 100% calc(100% - 8px),
+        calc(100% - 8px) 100%, 8px 100%,
+        0 calc(100% - 8px), 0 8px
+    );
+    overflow: hidden;
+}
+
+.map-slot-num {
+    width: 40px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #0b182a 0%, #07101d 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 640px) {
+    .map-slot-num {
+        width: 64px;
+    }
+}
+
+.map-slot-num::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -9px;
+    width: 18px;
+    height: 100%;
+    background: linear-gradient(180deg, #0b182a 0%, #07101d 100%);
+    transform: skewX(-12deg);
+    border-right: 1.5px solid rgba(56, 189, 248, 0.48);
+    z-index: -1;
+}
+
+.map-slot-img-wrap {
+    flex: 1;
+    min-width: 0;
+    background: #040b16;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+}
+
+@media (min-width: 640px) {
+    .map-slot-img-wrap {
+        padding-left: 12px;
+    }
+}
+
+.map-slot-img-wrap picture,
+.map-slot-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+}

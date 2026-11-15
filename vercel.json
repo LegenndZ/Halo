@@ -1,6 +1,11 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "functions": {
+    "api/maps-manifest.js": {
+      "includeFiles": "Mapas/**"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
