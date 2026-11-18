@@ -33,7 +33,9 @@
         currentAdminMatchId: null,
         unsubTournament: null,
         unsubWinners: null,
-        fsCtx: null
+        fsCtx: null,
+        parceroSyncTimer: null,
+        parceroSyncInFlight: false
     };
 
     function getTeamSize() {
@@ -1396,6 +1398,47 @@
         `).join('');
     }
 
+    async function runVercelParceroSyncTick() {
+        if (state.parceroSyncInFlight || document.hidden) return;
+        const overlay = document.getElementById('tournamentModuleOverlay');
+        if (!overlay || overlay.classList.contains('hidden')) return;
+        state.parceroSyncInFlight = true;
+        try {
+            const res = await fetch('/api/parcero-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tournamentId: state.activeTournament?.id || null })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && state.activeTournament?.id && Array.isArray(data.updatedTournamentIds) && data.updatedTournamentIds.includes(state.activeTournament.id) && !state.unsubTournament) {
+                    const fresh = await loadTournamentFromCloud(state.activeTournament.id);
+                    if (fresh) {
+                        state.activeTournament = fresh;
+                        if (state.subView === 'bracket') renderBracketView();
+                    }
+                }
+            }
+        } catch (e) {
+            // Silencioso en caso de red intermitente o entorno sin serverless
+        } finally {
+            state.parceroSyncInFlight = false;
+        }
+    }
+
+    function startVercelParceroSyncLoop() {
+        if (state.parceroSyncTimer) return;
+        runVercelParceroSyncTick();
+        state.parceroSyncTimer = setInterval(runVercelParceroSyncTick, 4000);
+    }
+
+    function stopVercelParceroSyncLoop() {
+        if (state.parceroSyncTimer) {
+            clearInterval(state.parceroSyncTimer);
+            state.parceroSyncTimer = null;
+        }
+    }
+
     async function openTournamentModule(initialView) {
         ensureMounted();
         const overlay = document.getElementById('tournamentModuleOverlay');
@@ -1413,9 +1456,11 @@
             }
         }
         setSubView(initialView || (qTrn ? 'bracket' : 'create'));
+        startVercelParceroSyncLoop();
     }
 
     function closeTournamentModule() {
+        stopVercelParceroSyncLoop();
         const overlay = document.getElementById('tournamentModuleOverlay');
         if (overlay) overlay.classList.add('hidden');
         document.body.style.overflow = '';

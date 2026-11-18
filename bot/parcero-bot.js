@@ -244,15 +244,23 @@ function startDiscordGateway(testOnlyOnce) {
             if (!/\bparcero\b/i.test(content)) return;
 
             const authorId = d.author?.id || '';
+            const msgId = d.id || '';
             try {
-                const sessionsDoc = (await firestoreGetDoc('tournamentMeta/parceroSessions')) || { userGamertags: {} };
+                const sessionsDoc = (await firestoreGetDoc('tournamentMeta/parceroSessions')) || { userGamertags: {}, processedMsgIds: [] };
                 const userGamertags = sessionsDoc.userGamertags || {};
+                let processedMsgIds = Array.isArray(sessionsDoc.processedMsgIds) ? sessionsDoc.processedMsgIds.slice(-100) : [];
+                if (msgId && processedMsgIds.includes(msgId)) return;
+                if (msgId) {
+                    processedMsgIds.push(msgId);
+                    processedMsgIds = processedMsgIds.slice(-100);
+                }
 
                 // 1) Vinculación: "Parcero soy <Gamertag>"
                 const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
                 if (linkMatch) {
                     const gamertag = linkMatch[1].trim().replace(/[<>"'`]/g, '');
                     if (!gamertag) {
+                        await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
                         await postChannelMessage(d.channel_id, '⚠️ Indica tu Gamertag: `Parcero soy TuGamertag`');
                         return;
                     }
@@ -260,14 +268,17 @@ function startDiscordGateway(testOnlyOnce) {
                     const conflict = Object.entries(userGamertags)
                         .find(([uid, gt]) => uid !== authorId && String(gt).toLowerCase() === gtLower);
                     if (conflict) {
+                        await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
                         await postChannelMessage(d.channel_id, `⛔ El Gamertag **${gamertag}** ya está vinculado a otro usuario de Discord (1 Gamertag = 1 sesión).`);
                         return;
                     }
                     userGamertags[authorId] = gamertag;
-                    await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags });
+                    await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
                     await postChannelMessage(d.channel_id, `✅ Gamertag **${gamertag}** vinculado en Firestore a tu sesión de Discord.`);
                     return;
                 }
+
+                await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
 
                 // 2) Reporte de partido
                 const trnMatch = content.match(/\b(TRN-[A-Z0-9]{4,8})\b/i);

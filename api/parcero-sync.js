@@ -1,0 +1,261 @@
+// ============================================================================
+// UNSC TAC-BALANCER V2 — VERCEL SERVERLESS FUNCTION (api/parcero-sync.js)
+// Parcero Bot 24/7 a $0 pesos vía Discord REST + Firebase Firestore REST.
+// Idempotente mediante processedMsgIds (últimos 100) en tournamentMeta/parceroSessions.
+// ============================================================================
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const TEngine = require('../tournament-engine.js');
+
+const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/halomatch-d9240/databases/(default)/documents/artifacts/halomatch-d9240/public/data';
+
+function toFirestoreValue(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') {
+        if (Number.isInteger(val)) return { integerValue: String(val) };
+        return { doubleValue: val };
+    }
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(toFirestoreValue) } };
+    if (typeof val === 'object') {
+        const fields = {};
+        for (const [k, v] of Object.entries(val)) {
+            if (v !== undefined) fields[k] = toFirestoreValue(v);
+        }
+        return { mapValue: { fields } };
+    }
+    return { stringValue: String(val) };
+}
+
+function fromFirestoreValue(v) {
+    if (!v || typeof v !== 'object') return null;
+    if ('nullValue' in v) return null;
+    if ('booleanValue' in v) return v.booleanValue;
+    if ('integerValue' in v) return Number(v.integerValue);
+    if ('doubleValue' in v) return Number(v.doubleValue);
+    if ('stringValue' in v) return v.stringValue;
+    if ('arrayValue' in v) return (v.arrayValue.values || []).map(fromFirestoreValue);
+    if ('mapValue' in v) {
+        const out = {};
+        for (const [k, val] of Object.entries(v.mapValue.fields || {})) {
+            out[k] = fromFirestoreValue(val);
+        }
+        return out;
+    }
+    return null;
+}
+
+function toFirestoreDoc(obj) {
+    const fields = {};
+    for (const [k, v] of Object.entries(obj || {})) {
+        if (v !== undefined) fields[k] = toFirestoreValue(v);
+    }
+    return { fields };
+}
+
+function fromFirestoreDoc(doc) {
+    if (!doc || !doc.fields) return null;
+    return fromFirestoreValue({ mapValue: { fields: doc.fields } });
+}
+
+async function firestoreGetDoc(relPath) {
+    const res = await fetch(`${FIRESTORE_BASE}/${relPath}`);
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Firestore GET ${relPath} -> ${res.status}`);
+    return fromFirestoreDoc(await res.json());
+}
+
+async function firestorePatchDoc(relPath, obj) {
+    const res = await fetch(`${FIRESTORE_BASE}/${relPath}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toFirestoreDoc(obj))
+    });
+    if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error(`Firestore PATCH ${relPath} -> ${res.status}: ${txt.slice(0, 150)}`);
+    }
+    return true;
+}
+
+async function firestoreListCollection(colName) {
+    const res = await fetch(`${FIRESTORE_BASE}/${colName}?pageSize=50`);
+    if (res.status === 404 || !res.ok) return [];
+    const data = await res.json();
+    return (data.documents || []).map(fromFirestoreDoc).filter(Boolean);
+}
+
+async function postChannelMessage(channelId, token, content) {
+    if (!token || !channelId) return false;
+    try {
+        const res = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bot ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        });
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+async function syncWinnersToFirestore(tournament) {
+    if (!tournament || !Array.isArray(tournament.winners)) return;
+    for (const w of tournament.winners) {
+        const docId = String(w.tournamentId || tournament.id).toUpperCase();
+        await firestorePatchDoc(`tournamentWinners/${encodeURIComponent(docId)}`, w);
+    }
+}
+
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+
+    if (req.method === 'OPTIONS') return res.status(200).end();
+
+    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const channelId = process.env.DISCORD_CHANNEL_ID || '';
+    if (!botToken || !channelId) {
+        return res.status(200).json({ ok: false, reason: 'DISCORD_ENV_NOT_CONFIGURED' });
+    }
+
+    try {
+        const sessionsDoc = (await firestoreGetDoc('tournamentMeta/parceroSessions')) || {};
+        const userGamertags = sessionsDoc.userGamertags || sessionsDoc.sessions || {};
+        let processedMsgIds = Array.isArray(sessionsDoc.processedMsgIds) ? sessionsDoc.processedMsgIds.slice(-100) : [];
+        const processedSet = new Set(processedMsgIds);
+        let sessionsDirty = false;
+        let processedCount = 0;
+
+        // 1) Leer últimos 25 mensajes de Discord por HTTPS REST
+        const msgRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=25`, {
+            headers: { 'Authorization': `Bot ${botToken}` }
+        });
+        if (msgRes.ok) {
+            const messages = await msgRes.json();
+            // Orden cronológico (Discord devuelve más reciente primero)
+            const chronological = Array.isArray(messages) ? messages.slice().reverse() : [];
+            for (const msg of chronological) {
+                if (!msg || !msg.id || processedSet.has(msg.id)) continue;
+                if (msg.author && msg.author.bot) continue;
+                const content = String(msg.content || '').trim();
+                if (!/\bparcero\b/i.test(content)) continue;
+
+                processedSet.add(msg.id);
+                processedMsgIds.push(msg.id);
+                sessionsDirty = true;
+                processedCount++;
+
+                const authorId = msg.author?.id || '';
+                const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
+                if (linkMatch) {
+                    const gamertag = linkMatch[1].trim().replace(/[<>"'`]/g, '');
+                    if (!gamertag) {
+                        await postChannelMessage(channelId, botToken, '⚠️ Indica tu Gamertag: `Parcero soy TuGamertag`');
+                        continue;
+                    }
+                    const gtLower = gamertag.toLowerCase();
+                    const conflict = Object.entries(userGamertags)
+                        .find(([uid, gt]) => uid !== authorId && String(gt).toLowerCase() === gtLower);
+                    if (conflict) {
+                        await postChannelMessage(channelId, botToken, `⛔ El Gamertag **${gamertag}** ya está vinculado a otro usuario de Discord (1 Gamertag = 1 sesión).`);
+                        continue;
+                    }
+                    userGamertags[authorId] = gamertag;
+                    await postChannelMessage(channelId, botToken, `✅ Gamertag **${gamertag}** vinculado en Firestore a tu sesión de Discord.`);
+                    continue;
+                }
+
+                const trnMatch = content.match(/\b(TRN-[A-Z0-9]{4,8})\b/i);
+                if (!trnMatch) {
+                    await postChannelMessage(channelId, botToken, '⚠️ Indica el ID del torneo (ej. `Parcero TRN-4821 Equipo Rojo 2-1 Equipo Azul`).');
+                    continue;
+                }
+                const trnId = trnMatch[1].toUpperCase();
+                const tournament = await firestoreGetDoc(`tournaments/${encodeURIComponent(trnId)}`);
+                if (!tournament) {
+                    await postChannelMessage(channelId, botToken, `⚠️ No encontré el torneo \`${trnId}\` en Firebase.`);
+                    continue;
+                }
+
+                const linkedGt = userGamertags[authorId]
+                    || msg.author?.global_name
+                    || msg.author?.username
+                    || '';
+
+                const result = TEngine.processParceroCommand(tournament, {
+                    text: content,
+                    authorId,
+                    authorGamertag: linkedGt
+                }, Date.now());
+
+                if (result.ok) {
+                    await firestorePatchDoc(`tournaments/${encodeURIComponent(trnId)}`, tournament);
+                    await syncWinnersToFirestore(tournament);
+                }
+                await postChannelMessage(channelId, botToken, result.message || 'Procesado.');
+            }
+        }
+
+        if (sessionsDirty) {
+            processedMsgIds = processedMsgIds.slice(-100);
+            await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
+        }
+
+        // 2) Auto-sellado 10 min + Des-fijado 12 horas en torneos activos
+        const tournaments = await firestoreListCollection('tournaments');
+        const now = Date.now();
+        let autoSealedTotal = 0;
+        let unpinnedTotal = 0;
+
+        for (const trn of tournaments) {
+            if (!trn || !trn.id) continue;
+            let dirty = false;
+
+            const sealedIds = TEngine.resolveExpiredConfirmations(trn, now);
+            if (sealedIds.length > 0) {
+                dirty = true;
+                autoSealedTotal += sealedIds.length;
+                await syncWinnersToFirestore(trn);
+                await postChannelMessage(
+                    channelId,
+                    botToken,
+                    `⏱️ **Auto-sellado (10 min)** en **${trn.id}**: llave(s) \`${sealedIds.join(', ')}\` confirmadas automáticamente.`
+                );
+            }
+
+            const pin = trn.discordPin;
+            if (pin && pin.channelId && pin.messageId && pin.unpinAt && now >= pin.unpinAt) {
+                try {
+                    await fetch(`https://discord.com/api/v10/channels/${pin.channelId}/pins/${pin.messageId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bot ${botToken}` }
+                    });
+                } catch {}
+                delete trn.discordPin;
+                dirty = true;
+                unpinnedTotal++;
+            }
+
+            if (dirty) {
+                await firestorePatchDoc(`tournaments/${encodeURIComponent(trn.id)}`, trn);
+            }
+        }
+
+        return res.status(200).json({
+            ok: true,
+            processedMessages: processedCount,
+            autoSealedTotal,
+            unpinnedTotal
+        });
+    } catch (err) {
+        return res.status(500).json({ ok: false, error: err.message });
+    }
+}
