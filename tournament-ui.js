@@ -288,7 +288,7 @@
             <header class="sticky top-0 z-50 bg-[#0d0f13]/95 backdrop-blur-md border-b border-[#c9a255]/45 px-3 sm:px-6 py-2.5 shadow-xl">
                 <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
                     <div class="flex items-center gap-2.5">
-                        <button type="button" onclick="closeTournamentModule()" class="px-2.5 py-1.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-cyan-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition">
+                        <button id="trnBtnCloseOverlay" type="button" onclick="closeTournamentModule()" class="px-2.5 py-1.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-cyan-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-arrow-left"></i>
                             <span class="hidden sm:inline">Volver a Halo Match</span>
                         </button>
@@ -673,20 +673,53 @@
         }
     }
 
+    let backLockBound = false;
+    function lockBrowserBackNavigation() {
+        if (backLockBound) return;
+        backLockBound = true;
+        try {
+            window.history.pushState({ trnLocked: true }, '', window.location.href);
+            window.addEventListener('popstate', () => {
+                if (isTournamentLocked()) {
+                    window.history.pushState({ trnLocked: true }, '', window.location.href);
+                    setSubView('bracket');
+                }
+            });
+        } catch (e) {}
+    }
+
     function isTournamentLocked() {
-        const t = state.activeTournament;
-        if (!t || !t.id) return false;
         if (state.adminKey && state.adminNewTournamentUnlocked) return false;
-        if (t.status === 'COMPLETED' && state.adminNewTournamentUnlocked) return false;
-        return true;
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('torneo') && params.get('torneo')) return true;
+        if (state.activeTournament && state.activeTournament.id) return true;
+        try {
+            if (window.localStorage && window.localStorage.getItem('unsc_locked_tournament_id')) return true;
+        } catch (e) {}
+        return false;
     }
 
     function syncTournamentNavVisibility() {
         const locked = isTournamentLocked();
-        document.getElementById('trnNav-create')?.classList.toggle('hidden', locked);
-        document.getElementById('trnNav-maps')?.classList.toggle('hidden', locked);
-        document.getElementById('trnNav-bracket')?.classList.remove('hidden');
-        document.getElementById('trnNav-winners')?.classList.remove('hidden');
+        const createBtn = document.getElementById('trnNav-create');
+        const mapsBtn = document.getElementById('trnNav-maps');
+        const closeBtn = document.getElementById('trnBtnCloseOverlay');
+        const bracketBtn = document.getElementById('trnNav-bracket');
+        const winnersBtn = document.getElementById('trnNav-winners');
+
+        [createBtn, mapsBtn, closeBtn].forEach(el => {
+            if (!el) return;
+            if (locked) {
+                el.classList.add('hidden');
+                el.style.setProperty('display', 'none', 'important');
+            } else {
+                el.classList.remove('hidden');
+                el.style.removeProperty('display');
+            }
+        });
+
+        if (bracketBtn) bracketBtn.textContent = locked ? 'Bracket' : '2. Bracket';
+        if (winnersBtn) winnersBtn.textContent = locked ? 'Winners' : '3. Winners';
     }
 
     function toggleModal(id, show) {
@@ -724,6 +757,7 @@
             subscribeWinnersRealtime();
             renderWinnersView();
         }
+        syncTournamentNavVisibility();
     }
 
     function setCfg(key, val) {
@@ -1134,6 +1168,13 @@
         } catch (e) {}
 
         state.adminNewTournamentUnlocked = false;
+        try {
+            if (window.localStorage) window.localStorage.setItem('unsc_locked_tournament_id', id);
+        } catch (e) {}
+        try {
+            window.history.replaceState({}, '', `?torneo=${encodeURIComponent(id)}`);
+        } catch (e) {}
+        lockBrowserBackNavigation();
         try {
             await saveTournamentToFirestore(state.activeTournament);
         } catch (e) {}
@@ -1558,12 +1599,16 @@
 
     async function openTournamentModule(initialView) {
         ensureMounted();
+        syncTournamentNavVisibility();
         const overlay = document.getElementById('tournamentModuleOverlay');
         overlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
 
         const params = new URLSearchParams(window.location.search);
-        const qTrn = params.get('torneo');
+        let qTrn = params.get('torneo');
+        if (!qTrn) {
+            try { qTrn = window.localStorage?.getItem('unsc_locked_tournament_id') || ''; } catch (e) {}
+        }
         if (qTrn && (!state.activeTournament || state.activeTournament.id !== qTrn.toUpperCase())) {
             const loaded = await loadTournamentFromCloud(qTrn);
             if (loaded) {
@@ -1572,11 +1617,14 @@
                 subscribeTournamentRealtime(loaded.id);
             }
         }
+        if (isTournamentLocked()) lockBrowserBackNavigation();
+        syncTournamentNavVisibility();
         setSubView(initialView || (qTrn ? 'bracket' : 'create'));
         startVercelParceroSyncLoop();
     }
 
     function closeTournamentModule() {
+        if (isTournamentLocked()) return;
         stopVercelParceroSyncLoop();
         const overlay = document.getElementById('tournamentModuleOverlay');
         if (overlay) overlay.classList.add('hidden');
@@ -1588,7 +1636,9 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('torneo')) {
+        let lockedId = '';
+        try { lockedId = window.localStorage?.getItem('unsc_locked_tournament_id') || ''; } catch (e) {}
+        if (params.get('torneo') || lockedId) {
             openTournamentModule('bracket');
         } else if (params.get('view') === 'winners') {
             openTournamentModule('winners');

@@ -842,3 +842,7 @@ html, body {
     font-size: 11px;
     border-radius: 2px;
 }
+
+.hidden {
+    display: none !important;
+}
