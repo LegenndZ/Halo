@@ -118,53 +118,56 @@
     <header class="sticky top-0 z-30 backdrop-blur-md border-b border-cyan-500/30 px-3 sm:px-6 py-2.5">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <!-- Izquierda: Botón Menú Hamburguesa + Título -->
-            <div class="flex items-center gap-2.5">
-                <button type="button" onclick="toggleSidebar(true)" class="w-9 h-9 rounded-lg bg-[#05162b] hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 flex items-center justify-center transition shadow-[0_0_12px_rgba(0,229,255,0.2)]" title="Menú Táctico">
+            <div class="order-1 flex-1 min-w-0 sm:flex-initial flex items-center gap-2">
+                <button type="button" onclick="toggleSidebar(true)" class="w-9 h-9 rounded-lg bg-[#05162b] hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 flex items-center justify-center transition shadow-[0_0_12px_rgba(0,229,255,0.2)] shrink-0" title="Menú Táctico">
                     <i class="fa-solid fa-bars text-base"></i>
                 </button>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-orbitron font-black text-sm sm:text-lg tracking-wider text-white">MANSALVAS <span class="text-cyan-400">TAC-BALANCER</span></span>
-                        <span id="adminActivePill" class="hidden px-2 py-0.5 rounded bg-purple-500/25 border border-purple-400 text-purple-200 font-orbitron text-[9px] font-bold">ADMIN</span>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="font-orbitron font-black text-xs sm:text-lg tracking-wider text-white truncate">MANSALVAS <span class="text-cyan-400">TAC-BALANCER</span></span>
+                        <span id="adminActivePill" class="hidden px-2 py-0.5 rounded bg-purple-500/25 border border-purple-400 text-purple-200 font-orbitron text-[9px] font-bold shrink-0">ADMIN</span>
                     </div>
-                    <span id="currentMapLabel" class="text-[10px] sm:text-[11px] font-orbitron text-cyan-300/90 block truncate max-w-[230px] sm:max-w-none">
+                    <span id="currentMapLabel" class="text-[10px] sm:text-[11px] font-orbitron text-cyan-300/90 block truncate">
                         CALLES (Streets • Lluvia Nocturna Neón)
                     </span>
                 </div>
             </div>
 
+            <!-- Botón único Instalar PWA -->
+            <button id="headerPwaInstallBtn" type="button" onclick="installHaloMatchPwa()" class="order-2 sm:order-3 px-2.5 sm:px-3 py-1.5 rounded bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/75 text-cyan-100 text-[11px] font-orbitron font-bold flex items-center gap-1.5 transition shadow-[0_0_12px_rgba(0,229,255,0.22)] shrink-0" title="Instalar Halo Match como App">
+                <img src="icons/icon-192.png" alt="" class="w-4 h-4 rounded-sm border border-cyan-300/60 shrink-0" />
+                <i class="fa-solid fa-download text-cyan-300 text-[10px]"></i>
+                <span>Instalar</span>
+            </button>
+
             <!-- Derecha: Selector 4v4 / 3v3 / 2v2 + Acciones Rápidas -->
-            <div class="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
-                <div class="flex items-center bg-[#041122] p-0.5 rounded border border-cyan-500/40">
+            <div class="order-3 w-full sm:w-auto sm:order-2 sm:ml-auto flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2">
+                <div class="flex items-center bg-[#041122] p-0.5 rounded border border-cyan-500/40 shrink-0">
                     <button id="btn4v4" type="button" onclick="setMode(8)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4</button>
                     <button id="btn3v3" type="button" onclick="setMode(6)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3</button>
                     <button id="btn2v2" type="button" onclick="setMode(4)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">2v2</button>
                 </div>
 
-                <button type="button" onclick="openCoachIAModal()" class="hud-btn px-2.5 sm:px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/60 text-emerald-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-brain text-emerald-300"></i>
-                    <span class="hidden sm:inline">Coach IA</span>
-                </button>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button type="button" onclick="openCoachIAModal()" class="hud-btn px-2.5 sm:px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/60 text-emerald-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5">
+                        <i class="fa-solid fa-brain text-emerald-300"></i>
+                        <span class="hidden sm:inline">Coach IA</span>
+                    </button>
 
-                <button id="headerTribunalBtn" type="button" onclick="openTribunalModal()" class="hidden hud-btn px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-[11px] items-center gap-1">
-                    <i class="fa-solid fa-gavel"></i>
-                    <span class="hidden sm:inline">Tribunal</span>
-                </button>
+                    <button id="headerTribunalBtn" type="button" onclick="openTribunalModal()" class="hidden hud-btn px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-[11px] items-center gap-1">
+                        <i class="fa-solid fa-gavel"></i>
+                        <span class="hidden sm:inline">Tribunal</span>
+                    </button>
 
-                <button id="headerDonateBtn" type="button" onclick="openDonateModal()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-amber-500/15 border border-amber-400/40 hover:border-amber-300/70 text-amber-200/90 hover:text-amber-100 text-xs font-orbitron font-bold flex items-center gap-1.5 transition" title="Apoyar este proyecto comunitario">
-                    <i class="fa-solid fa-heart text-amber-400/90"></i>
-                    <span class="hidden sm:inline">Apoyar</span>
-                </button>
+                    <button id="headerDonateBtn" type="button" onclick="openDonateModal()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-amber-500/15 border border-amber-400/40 hover:border-amber-300/70 text-amber-200/90 hover:text-amber-100 text-xs font-orbitron font-bold flex items-center gap-1.5 transition" title="Apoyar este proyecto comunitario">
+                        <i class="fa-solid fa-heart text-amber-400/90"></i>
+                        <span class="hidden sm:inline">Apoyar</span>
+                    </button>
 
-                <button id="headerPwaInstallBtn" type="button" onclick="installHaloMatchPwa()" class="px-2 sm:px-3 py-1.5 rounded bg-gradient-to-r from-amber-500/20 to-cyan-500/20 hover:from-amber-500/35 hover:to-cyan-500/35 border border-amber-400/70 text-amber-100 text-[11px] font-orbitron font-bold flex items-center gap-1.5 transition shadow-[0_0_12px_rgba(245,184,0,0.22)] shrink-0" title="Instalar Halo Match como App">
-                    <img src="icons/icon-192.png" alt="App" class="w-4 h-4 rounded-sm border border-amber-300/60 shrink-0" />
-                    <span class="sm:hidden">App</span>
-                    <span class="hidden sm:inline">Instalar App</span>
-                </button>
-
-                <button type="button" onclick="replayHaloImmersionIntro()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-orbitron font-bold" title="Repetir Intro Halo Infinite">
-                    <i class="fa-solid fa-music"></i>
-                </button>
+                    <button type="button" onclick="replayHaloImmersionIntro()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-orbitron font-bold" title="Repetir Intro Halo Infinite">
+                        <i class="fa-solid fa-music"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -237,14 +240,6 @@
                         </button>
                     </div>
                 </div>
-
-                <button id="sidebarInstallPwaBtn" type="button" onclick="toggleSidebar(false); installHaloMatchPwa();" class="w-full p-3 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-left flex items-center gap-3 transition">
-                    <img src="/icons/icon-192.png" alt="Halo Match App" class="w-9 h-9 rounded object-cover border border-cyan-400/60 shrink-0">
-                    <div>
-                        <div class="font-orbitron font-bold text-xs text-white">📲 Instalar App</div>
-                        <div class="text-[11px] text-cyan-300">Acceso directo en Celular o PC</div>
-                    </div>
-                </button>
 
                 <button id="sidebarTribunalBtn" type="button" onclick="toggleSidebar(false); openTribunalModal();" class="hidden w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
