@@ -134,7 +134,7 @@
             </div>
 
             <!-- Derecha: Selector 4v4 / 3v3 / 2v2 + Acciones Rápidas -->
-            <div class="flex items-center gap-1.5 sm:gap-2">
+            <div class="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                 <div class="flex items-center bg-[#041122] p-0.5 rounded border border-cyan-500/40">
                     <button id="btn4v4" type="button" onclick="setMode(8)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold bg-cyan-500 text-black shadow">4v4</button>
                     <button id="btn3v3" type="button" onclick="setMode(6)" class="px-2.5 sm:px-3 py-1 rounded text-xs font-orbitron font-bold text-cyan-300 hover:text-white">3v3</button>
@@ -154,6 +154,12 @@
                 <button id="headerDonateBtn" type="button" onclick="openDonateModal()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-amber-500/15 border border-amber-400/40 hover:border-amber-300/70 text-amber-200/90 hover:text-amber-100 text-xs font-orbitron font-bold flex items-center gap-1.5 transition" title="Apoyar este proyecto comunitario">
                     <i class="fa-solid fa-heart text-amber-400/90"></i>
                     <span class="hidden sm:inline">Apoyar</span>
+                </button>
+
+                <button id="headerPwaInstallBtn" type="button" onclick="installHaloMatchPwa()" class="px-2 sm:px-3 py-1.5 rounded bg-gradient-to-r from-amber-500/20 to-cyan-500/20 hover:from-amber-500/35 hover:to-cyan-500/35 border border-amber-400/70 text-amber-100 text-[11px] font-orbitron font-bold flex items-center gap-1.5 transition shadow-[0_0_12px_rgba(245,184,0,0.22)] shrink-0" title="Instalar Halo Match como App">
+                    <img src="icons/icon-192.png" alt="App" class="w-4 h-4 rounded-sm border border-amber-300/60 shrink-0" />
+                    <span class="sm:hidden">App</span>
+                    <span class="hidden sm:inline">Instalar App</span>
                 </button>
 
                 <button type="button" onclick="replayHaloImmersionIntro()" class="px-2.5 py-1.5 rounded bg-[#05162b] hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-orbitron font-bold" title="Repetir Intro Halo Infinite">
@@ -2873,13 +2879,24 @@
         // =========================================================
         let deferredPwaPrompt = null;
 
+        function syncPwaInstallBtnVisibility() {
+            const btn = document.getElementById('headerPwaInstallBtn');
+            if (!btn) return;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            btn.style.display = isStandalone ? 'none' : 'flex';
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPwaPrompt = e;
+            syncPwaInstallBtnVisibility();
         });
 
         window.addEventListener('appinstalled', () => {
             deferredPwaPrompt = null;
+            syncPwaInstallBtnVisibility();
+            const btn = document.getElementById('headerPwaInstallBtn');
+            if (btn) btn.style.display = 'none';
             showToast('¡Halo Match instalada en tu dispositivo!', 'success');
         });
 
@@ -2915,6 +2932,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            syncPwaInstallBtnVisibility();
             renderRoster();
             updateBalancedTeamsUI();
             try {
