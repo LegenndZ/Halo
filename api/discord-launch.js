@@ -4,6 +4,43 @@
 // y fija (Pin) el mensaje por 12 horas usando DISCORD_BOT_TOKEN.
 // ============================================================================
 
+const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/halomatch-d9240/databases/(default)/documents/artifacts/halomatch-d9240/public/data';
+
+function toFirestoreValue(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') {
+        if (Number.isInteger(val)) return { integerValue: String(val) };
+        return { doubleValue: val };
+    }
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(toFirestoreValue) } };
+    if (typeof val === 'object') {
+        const fields = {};
+        for (const [k, v] of Object.entries(val)) {
+            if (v !== undefined) fields[k] = toFirestoreValue(v);
+        }
+        return { mapValue: { fields } };
+    }
+    return { stringValue: String(val) };
+}
+
+async function saveTournamentToFirestoreRest(tournamentObj) {
+    const clean = JSON.parse(JSON.stringify({
+        ...tournamentObj,
+        id: String(tournamentObj.id || '').trim().toUpperCase(),
+        phaseBannerImages: [],
+        updatedAt: Date.now()
+    }));
+    const fields = toFirestoreValue(clean).mapValue.fields;
+    const res = await fetch(`${FIRESTORE_BASE}/tournaments/${encodeURIComponent(clean.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields })
+    });
+    return res.ok;
+}
+
 function decodeDataUrlToBuffer(dataUrl) {
     const match = String(dataUrl || '').match(/^data:image\/[a-z0-9+.-]+;base64,(.+)$/i);
     if (!match) return null;
@@ -124,10 +161,17 @@ export default async function handler(req, res) {
             }
         }
 
+        const firestoreSaved = await saveTournamentToFirestoreRest({
+            ...tournament,
+            id: trnId,
+            discordPin: discordPin || tournament.discordPin || null
+        }).catch(() => false);
+
         return res.status(200).json({
             ok: true,
             tournamentId: trnId,
             webhookSent: true,
+            firestoreSaved,
             attachedMaps: attachments.length,
             pinned: Boolean(discordPin),
             discordPin

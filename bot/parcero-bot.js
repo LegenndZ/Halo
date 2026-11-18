@@ -92,12 +92,23 @@ function fromFirestoreDoc(doc) {
     return fromFirestoreValue({ mapValue: { fields: doc.fields } });
 }
 
+function normalizeTournamentObject(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if (typeof raw.payloadJson === 'string') {
+        try {
+            const parsed = JSON.parse(raw.payloadJson);
+            if (parsed && typeof parsed === 'object') return parsed;
+        } catch {}
+    }
+    return raw;
+}
+
 async function firestoreGetDoc(relPath) {
     const res = await fetch(`${FIRESTORE_BASE}/${relPath}`);
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Firestore GET ${relPath} -> ${res.status}`);
     const doc = await res.json();
-    return fromFirestoreDoc(doc);
+    return normalizeTournamentObject(fromFirestoreDoc(doc));
 }
 
 async function firestorePatchDoc(relPath, obj) {
@@ -118,7 +129,28 @@ async function firestoreListCollection(colName) {
     if (res.status === 404) return [];
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.documents || []).map(fromFirestoreDoc).filter(Boolean);
+    return (data.documents || []).map((d) => normalizeTournamentObject(fromFirestoreDoc(d))).filter(Boolean);
+}
+
+async function findTournamentSmart(trnIdRaw) {
+    const cleanId = String(trnIdRaw || '').trim().toUpperCase();
+    if (cleanId) {
+        const direct = await firestoreGetDoc(`tournaments/${encodeURIComponent(cleanId)}`);
+        if (direct) return direct;
+    }
+    const all = await firestoreListCollection('tournaments');
+    if (cleanId) {
+        const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
+        const byNorm = all.find((t) => String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase() === normTarget);
+        if (byNorm) return byNorm;
+    } else {
+        const activeList = all.filter((t) => !t.championTeamId);
+        if (activeList.length === 1) return activeList[0];
+        if (all.length > 0) {
+            return all.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+        }
+    }
+    return null;
 }
 
 async function postChannelMessage(channelId, content) {
@@ -282,16 +314,13 @@ function startDiscordGateway(testOnlyOnce) {
 
                 // 2) Reporte de partido
                 const trnMatch = content.match(/\b(TRN-[A-Z0-9]{4,8})\b/i);
-                if (!trnMatch) {
-                    await postChannelMessage(d.channel_id, '⚠️ Indica el ID del torneo (ej. `Parcero TRN-4821 Equipo Rojo 2-1 Equipo Azul`).');
-                    return;
-                }
-                const trnId = trnMatch[1].toUpperCase();
-                const tournament = await firestoreGetDoc(`tournaments/${encodeURIComponent(trnId)}`);
+                const requestedTrnId = trnMatch ? trnMatch[1].toUpperCase() : '';
+                const tournament = await findTournamentSmart(requestedTrnId);
                 if (!tournament) {
-                    await postChannelMessage(d.channel_id, `⚠️ No encontré el torneo \`${trnId}\` en Firebase.`);
+                    await postChannelMessage(d.channel_id, `⚠️ No encontré el torneo \`${requestedTrnId || 'activo'}\` en Firebase.`);
                     return;
                 }
+                const trnId = String(tournament.id || requestedTrnId).toUpperCase();
 
                 const linkedGt = userGamertags[authorId]
                     || d.author?.global_name

@@ -229,16 +229,53 @@
             return {
                 optionNumber: optionIdx + 1,
                 spread: res.spread,
+                isLessFavorable: optionIdx === 2,
                 teams
             };
         };
 
         const validStrict = candidates.filter((c) => c.spread <= 1).slice(0, 2);
+        const chosenOptions = validStrict.slice();
+        const usedSigs = new Set(chosenOptions.map((c) => partitionSignature(c.buckets)));
+
+        // Opción 3 (la menos favorable): buscar combinación distinta con brecha === 2 (o <= 2)
+        let option3 = candidates.find((c) => c.spread === 2 && !usedSigs.has(partitionSignature(c.buckets)));
+        if (!option3 && primary) {
+            // Intentar generar un swap de 1-2 PTS desde primary para obtener una 3ra opción con brecha === 2 (máx 2)
+            for (let tA = 0; tA < teamCount && !option3; tA++) {
+                for (let tB = tA + 1; tB < teamCount && !option3; tB++) {
+                    for (let i = 0; i < teamSize && !option3; i++) {
+                        for (let j = 0; j < teamSize && !option3; j++) {
+                            if (primary.buckets[tA][i].pts === primary.buckets[tB][j].pts) continue;
+                            const cloned = primary.buckets.map((b) => b.slice());
+                            const tmp = cloned[tA][i];
+                            cloned[tA][i] = cloned[tB][j];
+                            cloned[tB][j] = tmp;
+                            const sp = computeTeamsSpread(cloned);
+                            if (sp === 2) {
+                                const sortedBuckets = cloned.map((b) => b.slice().sort((x, y) => y.pts - x.pts));
+                                const sig = partitionSignature(sortedBuckets);
+                                if (!usedSigs.has(sig)) {
+                                    option3 = { buckets: sortedBuckets, spread: sp };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!option3) {
+            option3 = candidates.find((c) => c.spread <= 2 && !usedSigs.has(partitionSignature(c.buckets)));
+        }
+        if (option3) {
+            chosenOptions.push(option3);
+        }
+
         return {
             format: `${teamSize}v${teamSize}`,
             teamCount,
             teamSize,
-            alternatives: validStrict.map((res, idx) => formatPartition(res, idx))
+            alternatives: chosenOptions.map((res, idx) => formatPartition(res, idx))
         };
     }
 

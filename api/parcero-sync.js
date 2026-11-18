@@ -59,11 +59,22 @@ function fromFirestoreDoc(doc) {
     return fromFirestoreValue({ mapValue: { fields: doc.fields } });
 }
 
+function normalizeTournamentObject(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if (typeof raw.payloadJson === 'string') {
+        try {
+            const parsed = JSON.parse(raw.payloadJson);
+            if (parsed && typeof parsed === 'object') return parsed;
+        } catch {}
+    }
+    return raw;
+}
+
 async function firestoreGetDoc(relPath) {
     const res = await fetch(`${FIRESTORE_BASE}/${relPath}`);
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Firestore GET ${relPath} -> ${res.status}`);
-    return fromFirestoreDoc(await res.json());
+    return normalizeTournamentObject(fromFirestoreDoc(await res.json()));
 }
 
 async function firestorePatchDoc(relPath, obj) {
@@ -83,7 +94,28 @@ async function firestoreListCollection(colName) {
     const res = await fetch(`${FIRESTORE_BASE}/${colName}?pageSize=50`);
     if (res.status === 404 || !res.ok) return [];
     const data = await res.json();
-    return (data.documents || []).map(fromFirestoreDoc).filter(Boolean);
+    return (data.documents || []).map((d) => normalizeTournamentObject(fromFirestoreDoc(d))).filter(Boolean);
+}
+
+async function findTournamentSmart(trnIdRaw) {
+    const cleanId = String(trnIdRaw || '').trim().toUpperCase();
+    if (cleanId) {
+        const direct = await firestoreGetDoc(`tournaments/${encodeURIComponent(cleanId)}`);
+        if (direct) return direct;
+    }
+    const all = await firestoreListCollection('tournaments');
+    if (cleanId) {
+        const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
+        const byNorm = all.find((t) => String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase() === normTarget);
+        if (byNorm) return byNorm;
+    } else {
+        const activeList = all.filter((t) => !t.championTeamId);
+        if (activeList.length === 1) return activeList[0];
+        if (all.length > 0) {
+            return all.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+        }
+    }
+    return null;
 }
 
 async function postChannelMessage(channelId, token, content) {
@@ -173,16 +205,13 @@ export default async function handler(req, res) {
                 }
 
                 const trnMatch = content.match(/\b(TRN-[A-Z0-9]{4,8})\b/i);
-                if (!trnMatch) {
-                    await postChannelMessage(channelId, botToken, '⚠️ Indica el ID del torneo (ej. `Parcero TRN-4821 Equipo Rojo 2-1 Equipo Azul`).');
-                    continue;
-                }
-                const trnId = trnMatch[1].toUpperCase();
-                const tournament = await firestoreGetDoc(`tournaments/${encodeURIComponent(trnId)}`);
+                const requestedTrnId = trnMatch ? trnMatch[1].toUpperCase() : '';
+                const tournament = await findTournamentSmart(requestedTrnId);
                 if (!tournament) {
-                    await postChannelMessage(channelId, botToken, `⚠️ No encontré el torneo \`${trnId}\` en Firebase.`);
+                    await postChannelMessage(channelId, botToken, `⚠️ No encontré el torneo \`${requestedTrnId || 'activo'}\` en Firebase.`);
                     continue;
                 }
+                const trnId = String(tournament.id || requestedTrnId).toUpperCase();
 
                 const linkedGt = userGamertags[authorId]
                     || msg.author?.global_name

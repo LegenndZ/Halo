@@ -1,17 +1,6 @@
 (function () {
     'use strict';
 
-    const DEMO_GAMERTAGS = [
-        ['ItzTheLastShot', 25], ['LorDxKenji', 20], ['Legennd Zr', 19], ['Prodig1z', 19],
-        ['C4stigador', 14], ['Montrox9400', 13], ['As vz7', 12], ['Snakeblack23', 7],
-        ['BoundHalo', 24], ['EcoSpartan', 23], ['StelluR_CL', 22], ['LucidZeta', 21],
-        ['TrippyUNSC', 18], ['FormaL_MX', 18], ['FrostyCO', 17], ['RenegadeX', 17],
-        ['RoyalTwo', 16], ['SnakeBite', 16], ['CykulPro', 15], ['MentaL_99', 15],
-        ['SoulSnipe', 14], ['Suppressed', 14], ['GloryHCS', 13], ['SicaHalo', 13],
-        ['JimboEU', 12], ['MightySpartan', 12], ['BubuDubu', 11], ['Falcated', 11],
-        ['LethuL_OG', 10], ['Precision', 10], ['Manny_X', 9], ['Sab_Infinite', 9]
-    ];
-
     const LOCAL_BOT_BASE = 'http://localhost:3001';
     const TOURNAMENTS_COL = 'artifacts/halomatch-d9240/public/data/tournaments';
     const WINNERS_COL = 'artifacts/halomatch-d9240/public/data/tournamentWinners';
@@ -371,18 +360,20 @@
                                     <label class="text-[11px] font-orbitron text-[#c9a255]">5. ROSTER OFICIAL + INVITADOS (2–16 EQUIPOS)</label>
                                     <div class="flex flex-wrap gap-1.5">
                                         <button type="button" id="trnBtnSelectAllRoster" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-white font-semibold">Todos Roster</button>
-                                        <button type="button" id="trnBtnDemo8" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-cyan-300 font-semibold">Demo 8 eq.</button>
-                                        <button type="button" id="trnBtnDemo14" class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-[11px] text-amber-200 font-semibold">Demo 14 eq.</button>
                                         <button type="button" id="trnBtnClearPool" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">Limpiar</button>
                                     </div>
                                 </div>
 
                                 <div id="trnRosterChipsGrid" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 rounded bg-[#0b0d10] border border-slate-800"></div>
 
-                                <div class="flex flex-wrap gap-2">
-                                    <input id="trnGuestNameInput" type="text" placeholder="Gamertag invitado..." class="flex-1 min-w-[150px] px-3 py-1.5 rounded bg-[#0b0d10] border border-slate-700 text-xs text-white">
-                                    <input id="trnGuestPtsInput" type="number" min="1" max="25" value="15" class="w-20 px-2.5 py-1.5 rounded bg-[#0b0d10] border border-slate-700 text-xs text-amber-300 font-orbitron">
-                                    <button type="button" id="trnBtnAddGuest" class="px-3 py-1.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/50 text-cyan-200 text-xs font-bold">+ Invitado</button>
+                                <div class="space-y-1.5">
+                                    <div class="flex flex-wrap gap-2">
+                                        <input id="trnRecruitNameInput" type="text" placeholder="Buscar o reclutar Gamertag (HaloTracker + SpartanRecord + DataHive)..." class="flex-1 min-w-[180px] px-3 py-1.5 rounded bg-[#0b0d10] border border-slate-700 text-xs text-white focus:border-cyan-400 outline-none">
+                                        <button type="button" id="trnBtnRecruitSpartan" class="px-3.5 py-1.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-100 text-xs font-orbitron font-bold flex items-center gap-1.5">
+                                            ⚡ Reclutar Spartan
+                                        </button>
+                                    </div>
+                                    <div id="trnRecruitStatusBox" class="hidden text-[11px] px-2.5 py-1.5 rounded bg-[#071324] border border-cyan-500/30 text-cyan-200"></div>
                                 </div>
 
                                 <div class="text-xs text-slate-300 flex flex-wrap items-center justify-between gap-2 bg-[#0b0d10] px-3 py-2 rounded border border-slate-800">
@@ -432,11 +423,11 @@
                                 <p id="trnMapsSubtitle" class="text-xs text-cyan-300/85 mt-0.5"></p>
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" id="trnBtnRedrawMaps" class="px-4 py-2 rounded bg-[#0a182b] hover:bg-[#112642] border border-cyan-400/60 text-cyan-100 font-orbitron font-bold text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-arrows-rotate"></i> Re-sortear Mapas
+                                <button type="button" id="trnBtnBackFromMaps" class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron font-bold text-xs flex items-center gap-1.5">
+                                    ⬅ Volver
                                 </button>
-                                <button type="button" id="trnBtnLaunchFromMaps" class="px-4 py-2 rounded bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-black text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-rocket"></i> Lanzar Torneo
+                                <button type="button" id="trnBtnRedrawMaps" class="px-4 py-2 rounded btn-maps-cyan font-orbitron font-black text-xs flex items-center gap-1.5">
+                                    🔀 Sortear Mapas
                                 </button>
                             </div>
                         </div>
@@ -635,8 +626,6 @@
             (window.roster || []).forEach(p => state.selectedRosterIds.add(p.id));
             renderRosterChips();
         };
-        document.getElementById('trnBtnDemo8').onclick = () => loadDemoTeams(8);
-        document.getElementById('trnBtnDemo14').onclick = () => loadDemoTeams(14);
         document.getElementById('trnBtnClearPool').onclick = () => {
             state.selectedRosterIds.clear();
             state.guests = [];
@@ -644,12 +633,13 @@
             document.getElementById('trnBalanceResultPreview').innerHTML = '';
             renderRosterChips();
         };
-        document.getElementById('trnBtnAddGuest').onclick = addGuestPlayer;
+        document.getElementById('trnBtnRecruitSpartan').onclick = recruitSpartanForTournament;
+        document.getElementById('trnRecruitNameInput').onkeydown = (e) => { if (e.key === 'Enter') recruitSpartanForTournament(); };
         document.getElementById('trnBtnStrictBalance').onclick = runStrictBalance;
         document.getElementById('trnBtnOpenMaps').onclick = () => setSubView('maps');
         document.getElementById('trnBtnLaunch').onclick = launchTournament;
         document.getElementById('trnBtnRedrawMaps').onclick = () => drawTournamentPhaseMaps(true);
-        document.getElementById('trnBtnLaunchFromMaps').onclick = launchTournament;
+        document.getElementById('trnBtnBackFromMaps').onclick = () => setSubView('create');
 
         document.getElementById('trnBracketSearchInput').oninput = renderBracketView;
         document.getElementById('trnWinnersFilterInput').oninput = renderWinnersView;
@@ -767,28 +757,84 @@
         updatePoolCounters();
     }
 
-    function loadDemoTeams(teamCount) {
-        state.selectedRosterIds.clear();
-        state.guests = [];
-        const needed = teamCount * getTeamSize();
-        for (let i = 0; i < needed; i++) {
-            const base = DEMO_GAMERTAGS[i % DEMO_GAMERTAGS.length];
-            const suffix = i >= DEMO_GAMERTAGS.length ? `_${Math.floor(i / DEMO_GAMERTAGS.length) + 1}` : '';
-            state.guests.push({ id: `demo_${i + 1}`, name: base[0] + suffix, pts: base[1] });
+    async function recruitSpartanForTournament() {
+        const inp = document.getElementById('trnRecruitNameInput');
+        const btn = document.getElementById('trnBtnRecruitSpartan');
+        const statusBox = document.getElementById('trnRecruitStatusBox');
+        const rawTag = (inp?.value || '').trim();
+        if (!rawTag) {
+            notify('Escribe el Gamertag del Spartan a reclutar.', 'info');
+            return;
         }
-        renderRosterChips();
-        runStrictBalance();
-    }
 
-    function addGuestPlayer() {
-        const inp = document.getElementById('trnGuestNameInput');
-        const ptsInp = document.getElementById('trnGuestPtsInput');
-        const name = (inp?.value || '').trim();
-        const pts = Math.max(1, Math.min(25, Number(ptsInp?.value) || 15));
-        if (!name) return;
-        state.guests.push({ id: `guest_${Date.now()}`, name, pts });
-        inp.value = '';
-        renderRosterChips();
+        // Si ya existe en el Roster Oficial, seleccionarlo sin duplicar
+        const norm = rawTag.toLowerCase();
+        const existingRoster = (Array.isArray(window.roster) ? window.roster : []).find(p => String(p.name || '').toLowerCase() === norm);
+        if (existingRoster) {
+            state.selectedRosterIds.add(existingRoster.id);
+            inp.value = '';
+            if (statusBox) {
+                statusBox.textContent = `✅ ${existingRoster.name} seleccionado del Roster Oficial (${existingRoster.pts} PTS).`;
+                statusBox.classList.remove('hidden');
+            }
+            renderRosterChips();
+            return;
+        }
+
+        if (state.guests.some(g => String(g.name || '').toLowerCase() === norm)) {
+            notify(`${rawTag} ya está agregado al torneo.`, 'info');
+            return;
+        }
+
+        if (typeof window.fetchDualTelemetryForGamertag !== 'function') {
+            notify('Servicio de análisis triple no disponible.', 'error');
+            return;
+        }
+
+        if (btn) btn.disabled = true;
+        if (statusBox) {
+            statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Analizando a <strong>${rawTag}</strong> en HaloTracker, SpartanRecord y HaloDataHive...`;
+            statusBox.classList.remove('hidden');
+        }
+
+        try {
+            const stats = await window.fetchDualTelemetryForGamertag(rawTag, { allowRosterFallback: false });
+            if (!stats || stats.notFound) {
+                if (statusBox) {
+                    statusBox.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-rose-200">
+                            <span>⚠️ No se halló perfil público para <strong>${rawTag}</strong>. Puedes asignarle PTS manuales (1–25) solo para este torneo:</span>
+                            <div class="flex items-center gap-1.5">
+                                <input id="trnFallbackPtsInp" type="number" min="1" max="25" value="12" class="w-16 px-2 py-0.5 rounded bg-[#0b0d10] border border-slate-600 text-amber-300 font-orbitron">
+                                <button type="button" id="trnFallbackAddBtn" class="px-2.5 py-0.5 rounded bg-amber-500 text-black font-bold">Agregar</button>
+                            </div>
+                        </div>`;
+                    document.getElementById('trnFallbackAddBtn').onclick = () => {
+                        const pts = Math.max(1, Math.min(25, Number(document.getElementById('trnFallbackPtsInp')?.value) || 12));
+                        state.guests.push({ id: `recruit_${Date.now()}`, name: rawTag, pts, rank: 'MANUAL' });
+                        inp.value = '';
+                        statusBox.textContent = `✅ ${rawTag} agregado manualmente (${pts} PTS) solo para este torneo.`;
+                        renderRosterChips();
+                    };
+                }
+                return;
+            }
+
+            const pts = Math.max(1, Math.min(25, Math.round(Number(stats.pts) || 12)));
+            const rank = stats.rank || 'B';
+            const finalName = stats.gamertag || rawTag;
+            state.guests.push({ id: `recruit_${Date.now()}`, name: finalName, pts, rank });
+            inp.value = '';
+            if (statusBox) {
+                statusBox.innerHTML = `⚡ <strong>${finalName}</strong> reclutado para este torneo • Rango <strong class="text-amber-300">${rank}</strong> (${pts} PTS).`;
+            }
+            notify(`⚡ ${finalName}: ${rank} (${pts} PTS)`, 'success');
+            renderRosterChips();
+        } catch (err) {
+            if (statusBox) statusBox.textContent = `Error analizando ${rawTag}: ${err.message || err}`;
+        } finally {
+            if (btn) btn.disabled = false;
+        }
     }
 
     function runStrictBalance() {
@@ -813,9 +859,15 @@
         const box = document.getElementById('trnBalanceResultPreview');
         const alt = state.balancedAlternatives[state.selectedAlternativeIdx];
         if (!alt) return;
-        const tabs = state.balancedAlternatives.map((a, idx) =>
-            `<button type="button" data-alt-idx="${idx}" class="px-2.5 py-1 rounded text-[11px] font-orbitron font-bold ${idx === state.selectedAlternativeIdx ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-300'}">Opción ${idx + 1} (Brecha: ${a.spread ?? a.maxDiff ?? 0} PT)</button>`
-        ).join('');
+        const tabs = state.balancedAlternatives.map((a, idx) => {
+            const spread = a.spread ?? a.maxDiff ?? 0;
+            const isThird = Boolean(a.isLessFavorable || idx === 2);
+            const label = isThird
+                ? `Opción ${idx + 1} (Menos favorable • Brecha: ${spread} PTS)`
+                : `Opción ${idx + 1} (Brecha: ${spread} PT)`;
+            const activeCls = isThird ? 'bg-amber-400 text-black' : 'bg-emerald-500 text-black';
+            return `<button type="button" data-alt-idx="${idx}" class="px-2.5 py-1 rounded text-[11px] font-orbitron font-bold ${idx === state.selectedAlternativeIdx ? activeCls : 'bg-slate-800 text-slate-300'}">${label}</button>`;
+        }).join('');
         const teamsHtml = alt.teams.map(t => {
             const vis = getTeamVisual(t);
             return `
