@@ -42,17 +42,21 @@ async function saveTournamentToFirestoreRest(tournamentObj) {
 }
 
 function decodeDataUrlToBuffer(dataUrl) {
-    const match = String(dataUrl || '').match(/^data:image\/[a-z0-9+.-]+;base64,(.+)$/i);
+    const match = String(dataUrl || '').match(/^data:(image\/[a-z0-9+.-]+);base64,(.+)$/i);
     if (!match) return null;
-    return Buffer.from(match[1], 'base64');
+    return {
+        mimeType: match[1].toLowerCase(),
+        buf: Buffer.from(match[2], 'base64')
+    };
 }
 
-function normalizeBannerFileName(phaseKey) {
+function normalizeBannerFileName(phaseKey, mimeType) {
+    const ext = /jpe?g/i.test(mimeType || '') ? 'jpg' : 'png';
     const slug = String(phaseKey || 'fase')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
-    return slug.startsWith('mapas-') ? `${slug}.png` : `mapas-${slug}.png`;
+    return slug.startsWith('mapas-') ? `${slug}.${ext}` : `mapas-${slug}.${ext}`;
 }
 
 export default async function handler(req, res) {
@@ -92,18 +96,18 @@ export default async function handler(req, res) {
     if (Array.isArray(bannersInput)) {
         for (const item of bannersInput) {
             if (attachments.length >= 5) break;
-            const buf = decodeDataUrlToBuffer(item && (item.dataUrl || item.url || item));
-            if (!buf) continue;
-            const fileName = item.fileName || normalizeBannerFileName(item.phase || item.name || `fase-${attachments.length + 1}`);
-            attachments.push({ buf, fileName });
+            const decoded = decodeDataUrlToBuffer(item && (item.dataUrl || item.url || item));
+            if (!decoded) continue;
+            const fileName = item.fileName || normalizeBannerFileName(item.phase || item.name || `fase-${attachments.length + 1}`, decoded.mimeType);
+            attachments.push({ buf: decoded.buf, mimeType: decoded.mimeType, fileName });
         }
     } else if (bannersInput && typeof bannersInput === 'object') {
         for (const [phaseKey, val] of Object.entries(bannersInput)) {
             if (attachments.length >= 5) break;
             const dataUrl = typeof val === 'string' ? val : (val && (val.dataUrl || val.url));
-            const buf = decodeDataUrlToBuffer(dataUrl);
-            if (!buf) continue;
-            attachments.push({ buf, fileName: normalizeBannerFileName(phaseKey) });
+            const decoded = decodeDataUrlToBuffer(dataUrl);
+            if (!decoded) continue;
+            attachments.push({ buf: decoded.buf, mimeType: decoded.mimeType, fileName: normalizeBannerFileName(phaseKey, decoded.mimeType) });
         }
     }
 
@@ -129,7 +133,7 @@ export default async function handler(req, res) {
     }));
 
     attachments.forEach((att, idx) => {
-        const blob = new Blob([att.buf], { type: 'image/png' });
+        const blob = new Blob([att.buf], { type: att.mimeType || 'image/png' });
         form.append(`files[${idx}]`, blob, att.fileName);
     });
 

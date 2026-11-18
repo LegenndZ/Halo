@@ -972,18 +972,18 @@
     }
 
     function loadImgForCanvas(src) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error('Error cargando ' + src));
+            img.onerror = () => resolve(null);
             img.src = src;
         });
     }
 
     async function renderPhaseBannerPngDataUrl(phaseTitle, maps, format, tournamentId) {
         const imgs = await Promise.all(maps.map(m => loadImgForCanvas(encodeURI(m.desktopPath || m.path))));
-        const width = 1400;
+        const width = 1280;
         const padX = 36;
         const headerH = 96;
         const footerH = 54;
@@ -991,7 +991,7 @@
         const cardW = width - padX * 2;
         const numColW = 96;
         const imgSlotW = cardW - numColW - 14;
-        const slotHeights = imgs.map(img => Math.round(imgSlotW * (img.naturalHeight / img.naturalWidth)));
+        const slotHeights = imgs.map(img => (img && img.naturalWidth > 0) ? Math.round(imgSlotW * (img.naturalHeight / img.naturalWidth)) : 240);
         const height = headerH + slotHeights.reduce((a, b) => a + b, 0) + Math.max(0, imgs.length - 1) * gap + footerH;
 
         const canvas = document.createElement('canvas');
@@ -1025,6 +1025,7 @@
         let cy = headerH;
         imgs.forEach((img, idx) => {
             const sh = slotHeights[idx];
+            const m = maps[idx] || {};
             ctx.fillStyle = '#091526';
             ctx.fillRect(padX, cy, numColW, sh);
             ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
@@ -1039,7 +1040,15 @@
             ctx.fillRect(padX + numColW / 2 - 18, cy + sh / 2 + 18, 36, 4);
             ctx.textAlign = 'left';
 
-            ctx.drawImage(img, padX + numColW + 8, cy, imgSlotW, sh);
+            if (img && img.naturalWidth > 0) {
+                ctx.drawImage(img, padX + numColW + 8, cy, imgSlotW, sh);
+            } else {
+                ctx.fillStyle = '#040b16';
+                ctx.fillRect(padX + numColW + 8, cy, imgSlotW, sh);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 34px Orbitron, sans-serif';
+                ctx.fillText(`${String(m.mapName || 'MAPA').toUpperCase()} • ${String(m.mode || '').toUpperCase()}`, padX + numColW + 36, cy + sh / 2 + 10);
+            }
             cy += sh + gap;
         });
 
@@ -1047,7 +1056,7 @@
         ctx.fillStyle = '#94a3b8';
         ctx.font = 'bold 18px Orbitron, sans-serif';
         ctx.fillText(`HALO MATCH • ${tournamentId}`, width / 2, height - 22);
-        return canvas.toDataURL('image/png');
+        return canvas.toDataURL('image/jpeg', 0.88);
     }
 
     async function launchTournament() {
@@ -1089,7 +1098,9 @@
             window.history.replaceState(null, '', url.toString());
         } catch (e) {}
 
-        await saveTournamentToFirestore(state.activeTournament);
+        try {
+            await saveTournamentToFirestore(state.activeTournament);
+        } catch (e) {}
         subscribeTournamentRealtime(id);
         setSubView('bracket');
         dispatchTournamentToDiscord();
@@ -1107,7 +1118,8 @@
                 if (!Array.isArray(list) || !list.length) continue;
                 try {
                     const dataUrl = await renderPhaseBannerPngDataUrl(def.title, list, t.format, t.id);
-                    phaseBannerImages.push({ key: def.key, title: def.title, fileName: def.fileName, dataUrl });
+                    const fileName = def.fileName.replace(/\.png$/i, '.jpg');
+                    phaseBannerImages.push({ key: def.key, title: def.title, fileName, dataUrl });
                 } catch (e) {}
             }
         }
@@ -1128,8 +1140,14 @@
             `;
         }
 
-        const bodyJson = JSON.stringify({ tournament: t, tournamentUrl, phaseBannerImages });
+        const cleanTournament = { ...t, phaseBannerImages: [] };
+        let bodyJson = JSON.stringify({ tournament: cleanTournament, tournamentUrl, phaseBannerImages });
+        if (bodyJson.length > 3800000) {
+            bodyJson = JSON.stringify({ tournament: cleanTournament, tournamentUrl, phaseBannerImages: phaseBannerImages.slice(0, 3) });
+        }
+
         let sent = false;
+        let lastErr = '';
         for (const endpoint of ['/api/discord-launch', `${LOCAL_BOT_BASE}/api/discord/launch-tournament`]) {
             try {
                 const res = await fetch(endpoint, {
@@ -1137,18 +1155,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: bodyJson
                 });
-                if (res.ok) {
-                    const data = await res.json();
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok !== false) {
                     if (data.discordPin) {
                         t.discordPin = data.discordPin;
-                        await saveTournamentToFirestore(t);
+                        try { await saveTournamentToFirestore(t); } catch (e) {}
                     }
                     sent = true;
                     break;
                 }
-            } catch (e) {}
+                lastErr = data.error || `HTTP ${res.status}`;
+            } catch (e) {
+                lastErr = e.message || 'Error de red';
+            }
         }
         if (sent) notify(`Torneo ${t.id} publicado y fijado en Discord.`, 'success');
+        else notify(`Torneo creado en Bracket, pero Discord devolvió: ${lastErr}`, 'error');
     }
 
     // =========================================================
