@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Three.js para el Dron 3D Hiperrealista -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Google Fonts: Orbitron & Rajdhani -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Orbitron, Rajdhani & Barlow Condensed -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos Principales Modulares V2 -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -205,6 +205,25 @@
                         <div class="text-[11px] text-emerald-300">Análisis SpartanRecord + Plan</div>
                     </div>
                 </button>
+
+                <div class="rounded-lg bg-gradient-to-r from-amber-500/15 to-yellow-500/10 border border-amber-400/50 overflow-hidden">
+                    <button type="button" onclick="toggleSidebar(false); openTournamentModule('create');" class="w-full p-3 hover:bg-amber-500/15 text-left flex items-center gap-3 transition">
+                        <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0 text-base">
+                            🏆
+                        </div>
+                        <div>
+                            <div class="font-orbitron font-bold text-xs text-white">Torneo</div>
+                            <div class="text-[11px] text-amber-300">Bracket HCS + Parcero Bot</div>
+                        </div>
+                    </button>
+                    <div class="px-3 pb-2.5 pt-1 border-t border-amber-400/20 flex items-center justify-between">
+                        <span class="text-[10px] font-orbitron text-slate-400 uppercase tracking-wider">Subsección</span>
+                        <button type="button" onclick="toggleSidebar(false); openTournamentModule('winners');" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-200 font-orbitron font-bold text-[10px] flex items-center gap-1 transition">
+                            <i class="fa-solid fa-crown text-[10px]"></i>
+                            <span>Winners</span>
+                        </button>
+                    </div>
+                </div>
 
                 <button id="sidebarTribunalBtn" type="button" onclick="toggleSidebar(false); openTribunalModal();" class="hidden w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
@@ -860,6 +879,8 @@
     <script src="map-drone-ux.js"></script>
     <script src="ai-coach.js"></script>
     <script src="map-lottery-engine.js"></script>
+    <script src="tournament-engine.js"></script>
+    <script src="tournament-ui.js"></script>
 
     <!-- ========================================================= -->
     <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN                         -->
