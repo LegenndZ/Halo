@@ -2,7 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#051329">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Halo Match">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon-64.png">
     <title>UNSC Tac-Balancer | Halo Infinite Matchmaker</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -224,6 +231,14 @@
                         </button>
                     </div>
                 </div>
+
+                <button id="sidebarInstallPwaBtn" type="button" onclick="toggleSidebar(false); installHaloMatchPwa();" class="w-full p-3 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-left flex items-center gap-3 transition">
+                    <img src="/icons/icon-192.png" alt="Halo Match App" class="w-9 h-9 rounded object-cover border border-cyan-400/60 shrink-0">
+                    <div>
+                        <div class="font-orbitron font-bold text-xs text-white">📲 Instalar App</div>
+                        <div class="text-[11px] text-cyan-300">Acceso directo en Celular o PC</div>
+                    </div>
+                </button>
 
                 <button id="sidebarTribunalBtn" type="button" onclick="toggleSidebar(false); openTribunalModal();" class="hidden w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
@@ -2852,6 +2867,52 @@
             }
         }
         window.shareMapsWhatsApp = shareMapsWhatsApp;
+
+        // =========================================================
+        // SOPORTE PWA (SERVICE WORKER + INSTALACIÓN MÓVIL / PC)
+        // =========================================================
+        let deferredPwaPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPwaPrompt = null;
+            showToast('¡Halo Match instalada en tu dispositivo!', 'success');
+        });
+
+        window.installHaloMatchPwa = async function() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            if (isStandalone) {
+                showToast('Halo Match ya está abierta como aplicación instalada.', 'info');
+                return;
+            }
+            if (deferredPwaPrompt) {
+                try {
+                    deferredPwaPrompt.prompt();
+                    const choice = await deferredPwaPrompt.userChoice;
+                    if (choice && choice.outcome === 'accepted') {
+                        showToast('Instalando Halo Match...', 'success');
+                    }
+                } catch (e) {}
+                deferredPwaPrompt = null;
+                return;
+            }
+            const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            if (isIos) {
+                showToast('En iPhone/iPad: toca Compartir (⬆️) y luego "Agregar a pantalla de inicio".', 'info');
+            } else {
+                showToast('En tu navegador, abre el menú (⋮) y elige "Instalar aplicación" / "Agregar a pantalla de inicio".', 'info');
+            }
+        };
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             renderRoster();

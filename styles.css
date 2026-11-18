@@ -846,3 +846,16 @@ html, body {
 .hidden {
     display: none !important;
 }
+
+/* ========================================================= */
+/* SOPORTE PWA STANDALONE (NOTCH / ISLA DINÁMICA)            */
+/* ========================================================= */
+@media all and (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    header.sticky {
+        top: env(safe-area-inset-top);
+    }
+}
