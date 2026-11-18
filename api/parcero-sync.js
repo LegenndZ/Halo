@@ -4,9 +4,8 @@
 // Idempotente mediante processedMsgIds (últimos 100) en tournamentMeta/parceroSessions.
 // ============================================================================
 
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const TEngine = require('../tournament-engine.js');
+import TEnginePkg from '../tournament-engine.js';
+const TEngine = TEnginePkg?.default || TEnginePkg;
 
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/halomatch-d9240/databases/(default)/documents/artifacts/halomatch-d9240/public/data';
 

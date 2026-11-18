@@ -4,6 +4,9 @@
   "functions": {
     "api/maps-manifest.js": {
       "includeFiles": "Mapas/**"
+    },
+    "api/parcero-sync.js": {
+      "includeFiles": "tournament-engine.js"
     }
   },
   "headers": [
