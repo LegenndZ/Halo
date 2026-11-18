@@ -87,6 +87,19 @@ export default async function handler(req, res) {
     }
 
     const trnId = String(tournament.id).toUpperCase();
+
+    // Candado anti-sobrescritura: si el torneo ya existe en Firestore, rechazar con 409
+    try {
+        const existsRes = await fetch(`${FIRESTORE_BASE}/tournaments/${encodeURIComponent(trnId)}`);
+        if (existsRes.ok) {
+            return res.status(409).json({
+                ok: false,
+                error: 'TOURNAMENT_LOCKED',
+                message: `El torneo ${trnId} ya fue lanzado y está bloqueado.`
+            });
+        }
+    } catch {}
+
     const originHeader = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
     const baseOrigin = body.publicOrigin || originHeader || 'https://halomatch.vercel.app';
     const publicUrl = `${String(baseOrigin).replace(/\/$/, '')}/?torneo=${encodeURIComponent(trnId)}`;

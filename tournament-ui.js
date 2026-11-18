@@ -18,6 +18,7 @@
         drawnPhaseMaps: null,
         winnersHistory: [],
         adminKey: '',
+        adminNewTournamentUnlocked: false,
         shieldClicks: [],
         currentAdminMatchId: null,
         unsubTournament: null,
@@ -464,7 +465,10 @@
                             <i class="fa-solid fa-shield-halved text-[#facc15]"></i>
                             <span>Modo Admin Activo — Clic en cualquier llave para editar o mover equipos</span>
                         </span>
-                        <button type="button" id="trnBtnExitAdmin" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron text-[10px]">Salir Admin</button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="trnBtnAdminNewTournament" class="px-2.5 py-1 rounded bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-[10px]">➕ Crear Nuevo Torneo</button>
+                            <button type="button" id="trnBtnExitAdmin" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron text-[10px]">Salir Admin</button>
+                        </div>
                     </div>
 
                     <div id="trnBracketCanvasWrap" class="forerunner-arena-bg overflow-x-auto p-4 sm:p-6 min-h-[460px]">
@@ -656,6 +660,33 @@
         document.getElementById('trnAdminMatchCloseBtn').onclick = () => toggleModal('trnAdminMatchModal', false);
         document.getElementById('trnAdminReopenBtn').onclick = () => saveAdminMatchEdit(true);
         document.getElementById('trnAdminSaveBtn').onclick = () => saveAdminMatchEdit(false);
+        const newTrnBtn = document.getElementById('trnBtnAdminNewTournament');
+        if (newTrnBtn) {
+            newTrnBtn.onclick = () => {
+                if (!state.adminKey) return;
+                state.adminNewTournamentUnlocked = true;
+                const idInp = document.getElementById('trnCfgId');
+                if (idInp) idInp.value = `TRN-${Math.floor(1000 + Math.random() * 9000)}`;
+                syncTournamentNavVisibility();
+                setSubView('create');
+            };
+        }
+    }
+
+    function isTournamentLocked() {
+        const t = state.activeTournament;
+        if (!t || !t.id) return false;
+        if (state.adminKey && state.adminNewTournamentUnlocked) return false;
+        if (t.status === 'COMPLETED' && state.adminNewTournamentUnlocked) return false;
+        return true;
+    }
+
+    function syncTournamentNavVisibility() {
+        const locked = isTournamentLocked();
+        document.getElementById('trnNav-create')?.classList.toggle('hidden', locked);
+        document.getElementById('trnNav-maps')?.classList.toggle('hidden', locked);
+        document.getElementById('trnNav-bracket')?.classList.remove('hidden');
+        document.getElementById('trnNav-winners')?.classList.remove('hidden');
     }
 
     function toggleModal(id, show) {
@@ -666,7 +697,11 @@
     }
 
     function setSubView(v) {
+        if (isTournamentLocked() && (v === 'create' || v === 'maps')) {
+            v = 'bracket';
+        }
         state.subView = v;
+        syncTournamentNavVisibility();
         const map = {
             create: 'trnView-create',
             maps: 'trnView-maps',
@@ -1098,10 +1133,12 @@
             window.history.replaceState(null, '', url.toString());
         } catch (e) {}
 
+        state.adminNewTournamentUnlocked = false;
         try {
             await saveTournamentToFirestore(state.activeTournament);
         } catch (e) {}
         subscribeTournamentRealtime(id);
+        syncTournamentNavVisibility();
         setSubView('bracket');
         dispatchTournamentToDiscord();
     }
@@ -1372,9 +1409,15 @@
 
     function exitTournamentAdmin() {
         state.adminKey = '';
+        state.adminNewTournamentUnlocked = false;
         document.getElementById('trnAdminBar')?.classList.add('hidden');
         toggleModal('trnAdminMatchModal', false);
-        renderBracketView();
+        syncTournamentNavVisibility();
+        if (isTournamentLocked() && (state.subView === 'create' || state.subView === 'maps')) {
+            setSubView('bracket');
+        } else {
+            renderBracketView();
+        }
     }
 
     function openAdminMatchModal(matchId) {
