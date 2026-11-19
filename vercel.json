@@ -7,6 +7,9 @@
     },
     "api/parcero-sync.js": {
       "includeFiles": "tournament-engine.js"
+    },
+    "api/discord-interactions.js": {
+      "includeFiles": "tournament-engine.js"
     }
   },
   "headers": [

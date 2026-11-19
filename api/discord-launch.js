@@ -132,34 +132,73 @@ export default async function handler(req, res) {
             `🔗 **Consulta aquí el Bracket:** ${publicUrl}`,
             `⚔️ **Formato:** ${tournament.format || '4v4'} • **Serie:** Bo${tournament.bestOf || 3} • **Eliminación:** ${tournament.elimination === 'double' ? 'Doble' : 'Simple'}`,
             '',
-            `🤖 **Reportar resultado a Parcero:** \`Parcero ${trnId} Equipo A 2-1 Equipo B\` (vincula primero: \`Parcero soy TuGamertag\`)`,
+            `🤖 **Reportar resultado al instante con Parcero:** usa los botones **🔗 Vincular Gamertag** y **🎯 Reportar Resultado** aquí abajo (o \`/vincular\` / \`/reportar\`).`,
             '🎧 **Únete al Discord oficial:** https://discord.gg/3K4PCc3YU'
         ].join('\n'),
         footer: { text: `UNSC Tac-Balancer V2 • ${trnId}` },
         timestamp: new Date().toISOString()
     };
 
-    const form = new FormData();
-    form.append('payload_json', JSON.stringify({
-        username: 'Parcero • UNSC Arbiter',
-        embeds: [embed]
-    }));
+    const components = [
+        {
+            type: 1,
+            components: [
+                {
+                    type: 2,
+                    style: 2,
+                    label: 'Vincular Gamertag',
+                    emoji: { name: '🔗' },
+                    custom_id: `parcero_link:${trnId}`
+                },
+                {
+                    type: 2,
+                    style: 1,
+                    label: 'Reportar Resultado',
+                    emoji: { name: '🎯' },
+                    custom_id: `parcero_report:${trnId}`
+                }
+            ]
+        }
+    ];
 
-    attachments.forEach((att, idx) => {
-        const blob = new Blob([att.buf], { type: att.mimeType || 'image/png' });
-        form.append(`files[${idx}]`, blob, att.fileName);
-    });
+    function buildForm(payloadObj) {
+        const f = new FormData();
+        f.append('payload_json', JSON.stringify(payloadObj));
+        attachments.forEach((att, idx) => {
+            const blob = new Blob([att.buf], { type: att.mimeType || 'image/png' });
+            f.append(`files[${idx}]`, blob, att.fileName);
+        });
+        return f;
+    }
 
     const waitUrl = webhookUrlRaw.includes('?') ? `${webhookUrlRaw}&wait=true` : `${webhookUrlRaw}?wait=true`;
 
     try {
-        const whRes = await fetch(waitUrl, { method: 'POST', body: form });
-        if (!whRes.ok) {
-            const errTxt = await whRes.text().catch(() => '');
-            return res.status(502).json({ ok: false, status: whRes.status, error: errTxt.slice(0, 200) });
+        let msgData = null;
+
+        if (botToken && defaultChannelId) {
+            const botRes = await fetch(`https://discord.com/api/v10/channels/${defaultChannelId}/messages`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bot ${botToken}` },
+                body: buildForm({ embeds: [embed], components })
+            });
+            if (botRes.ok) {
+                msgData = await botRes.json().catch(() => ({}));
+            }
         }
 
-        const msgData = await whRes.json().catch(() => ({}));
+        if (!msgData) {
+            const whRes = await fetch(waitUrl, {
+                method: 'POST',
+                body: buildForm({ username: 'Parcero • UNSC Arbiter', embeds: [embed] })
+            });
+            if (!whRes.ok) {
+                const errTxt = await whRes.text().catch(() => '');
+                return res.status(502).json({ ok: false, status: whRes.status, error: errTxt.slice(0, 200) });
+            }
+            msgData = await whRes.json().catch(() => ({}));
+        }
+
         const channelId = msgData.channel_id || defaultChannelId;
         const messageId = msgData.id || null;
         let discordPin = null;

@@ -712,24 +712,9 @@
         return autoSealed;
     }
 
-    function processParceroCommand(tournament, payload, nowMs) {
-        const now = Number.isFinite(nowMs) ? nowMs : Date.now();
-        resolveExpiredConfirmations(tournament, now);
-
-        const parsed = parseParceroMessage(payload && payload.text, tournament && tournament.teams);
-        if (!parsed.ok) return parsed;
-
-        if (parsed.tournamentId !== String(tournament.id || '').toUpperCase()) {
-            return {
-                ok: false,
-                reason: 'TOURNAMENT_MISMATCH',
-                message: `El ID ${parsed.tournamentId} no coincide con este torneo (${tournament.id}).`
-            };
-        }
-
-        // Regla 3b: 1 Gamertag = 1 sesión (evitar suplantación por otro authorId)
-        const gtKey = normalizeKey(payload.authorGamertag);
-        const authorId = String(payload.authorId || '').trim();
+    function evaluateAndSubmitReport(tournament, matchObj, scoreA, scoreB, payload, now) {
+        const gtKey = normalizeKey(payload && payload.authorGamertag);
+        const authorId = String((payload && payload.authorId) || '').trim();
         if (!gtKey) {
             return { ok: false, reason: 'MISSING_GAMERTAG', message: 'Debes vincular tu Gamertag para reportar.' };
         }
@@ -742,23 +727,8 @@
             };
         }
 
-        // Regla 2: Buscar llave PENDING o CONFIRMING con esos 2 equipos
-        const id1 = parsed.firstTeam.id;
-        const id2 = parsed.secondTeam.id;
-        const matchObj = (tournament.matches || []).find((m) =>
-            (m.status === 'PENDING' || m.status === 'CONFIRMING')
-            && ((m.teamAId === id1 && m.teamBId === id2) || (m.teamAId === id2 && m.teamBId === id1))
-        );
-        if (!matchObj) {
-            return {
-                ok: false,
-                reason: 'MATCH_NOT_FOUND',
-                message: `No existe una llave activa (PENDING/CONFIRMING) entre ${parsed.firstTeam.name} y ${parsed.secondTeam.name}.`
-            };
-        }
-
-        const teamA = tournament.teams.find((t) => t.id === matchObj.teamAId);
-        const teamB = tournament.teams.find((t) => t.id === matchObj.teamBId);
+        const teamA = (tournament.teams || []).find((t) => t.id === matchObj.teamAId);
+        const teamB = (tournament.teams || []).find((t) => t.id === matchObj.teamBId);
         const inA = teamA && teamA.players.some((p) => normalizeKey(p.name || p.gamertag) === gtKey);
         const inB = teamB && teamB.players.some((p) => normalizeKey(p.name || p.gamertag) === gtKey);
 
@@ -776,15 +746,13 @@
         }
 
         const reporterTeamId = inA ? teamA.id : teamB.id;
-        const scoreA = (parsed.firstTeam.id === teamA.id) ? parsed.score1 : parsed.score2;
-        const scoreB = (parsed.firstTeam.id === teamA.id) ? parsed.score2 : parsed.score1;
         const winnerId = scoreA > scoreB ? teamA.id : teamB.id;
         const loserId = scoreA > scoreB ? teamB.id : teamA.id;
 
         // Regla 4: Confirmación cruzada
         if (reporterTeamId === loserId) {
-            // El perdedor reporta o confirma -> sella de inmediato
             sealMatchResult(tournament, matchObj, winnerId, loserId, scoreA, scoreB, 'LOSER_CONFIRM');
+            matchObj.pendingReport = null;
             return {
                 ok: true,
                 action: 'SEALED_IMMEDIATE',
@@ -818,6 +786,210 @@
             scoreA,
             scoreB,
             message: `⏳ Reporte recibido (${teamA.name} ${scoreA} - ${scoreB} ${teamB.name}). Esperando confirmación del rival o auto-sellado en 10 min.`
+        };
+    }
+
+    function processParceroCommand(tournament, payload, nowMs) {
+        const now = Number.isFinite(nowMs) ? nowMs : Date.now();
+        resolveExpiredConfirmations(tournament, now);
+
+        const parsed = parseParceroMessage(payload && payload.text, tournament && tournament.teams);
+        if (!parsed.ok) return parsed;
+
+        if (parsed.tournamentId !== String(tournament.id || '').toUpperCase()) {
+            return {
+                ok: false,
+                reason: 'TOURNAMENT_MISMATCH',
+                message: `El ID ${parsed.tournamentId} no coincide con este torneo (${tournament.id}).`
+            };
+        }
+
+        // Regla 2: Buscar llave PENDING o CONFIRMING con esos 2 equipos
+        const id1 = parsed.firstTeam.id;
+        const id2 = parsed.secondTeam.id;
+        const matchObj = (tournament.matches || []).find((m) =>
+            (m.status === 'PENDING' || m.status === 'CONFIRMING')
+            && ((m.teamAId === id1 && m.teamBId === id2) || (m.teamAId === id2 && m.teamBId === id1))
+        );
+        if (!matchObj) {
+            return {
+                ok: false,
+                reason: 'MATCH_NOT_FOUND',
+                message: `No existe una llave activa (PENDING/CONFIRMING) entre ${parsed.firstTeam.name} y ${parsed.secondTeam.name}.`
+            };
+        }
+
+        const teamA = tournament.teams.find((t) => t.id === matchObj.teamAId);
+        const scoreA = (parsed.firstTeam.id === teamA.id) ? parsed.score1 : parsed.score2;
+        const scoreB = (parsed.firstTeam.id === teamA.id) ? parsed.score2 : parsed.score1;
+        return evaluateAndSubmitReport(tournament, matchObj, scoreA, scoreB, payload, now);
+    }
+
+    function findPlayerActiveMatch(tournament, authorGamertag, nowMs) {
+        const now = Number.isFinite(nowMs) ? nowMs : Date.now();
+        if (!tournament || !Array.isArray(tournament.teams) || !Array.isArray(tournament.matches)) {
+            return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no válido.' };
+        }
+        resolveExpiredConfirmations(tournament, now);
+
+        const gtKey = normalizeKey(authorGamertag);
+        if (!gtKey) {
+            return { ok: false, reason: 'MISSING_GAMERTAG', message: 'Debes vincular tu Gamertag primero.' };
+        }
+
+        const playerTeam = tournament.teams.find((t) =>
+            Array.isArray(t.players) && t.players.some((p) => normalizeKey(p.name || p.gamertag) === gtKey)
+        );
+        if (!playerTeam) {
+            return {
+                ok: false,
+                reason: 'PLAYER_NOT_IN_TOURNAMENT',
+                message: `⛔ Acceso denegado: **${authorGamertag}** no pertenece a ningún equipo de este torneo.`
+            };
+        }
+
+        const matchObj = tournament.matches.find((m) =>
+            (m.status === 'PENDING' || m.status === 'CONFIRMING')
+            && (m.teamAId === playerTeam.id || m.teamBId === playerTeam.id)
+        );
+        if (!matchObj) {
+            return {
+                ok: false,
+                reason: 'NO_ACTIVE_MATCH',
+                playerTeam,
+                message: `Tu equipo (**${playerTeam.name}**) no tiene ningún enfrentamiento activo pendiente de marcador en este momento.`
+            };
+        }
+
+        const teamA = tournament.teams.find((t) => t.id === matchObj.teamAId) || null;
+        const teamB = tournament.teams.find((t) => t.id === matchObj.teamBId) || null;
+        if (!teamA || !teamB) {
+            return {
+                ok: false,
+                reason: 'WAITING_RIVAL',
+                playerTeam,
+                message: `⏳ Tu llave (**${matchObj.roundLabel || matchObj.id}**) aún espera rival.`
+            };
+        }
+
+        const rivalTeam = (teamA.id === playerTeam.id) ? teamB : teamA;
+        const bestOf = Number(tournament.bestOf || (tournament.bracket && tournament.bracket.bestOf) || 3);
+        return {
+            ok: true,
+            match: matchObj,
+            teamA,
+            teamB,
+            playerTeam,
+            rivalTeam,
+            bestOf
+        };
+    }
+
+    function submitInteractiveMatchScore(tournament, params, nowMs) {
+        const now = Number.isFinite(nowMs) ? nowMs : Date.now();
+        if (!tournament || !Array.isArray(tournament.matches)) {
+            return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no encontrado.' };
+        }
+        resolveExpiredConfirmations(tournament, now);
+
+        const cfg = params || {};
+        const matchObj = tournament.matches.find((m) => m.id === cfg.matchId);
+        if (!matchObj || (matchObj.status !== 'PENDING' && matchObj.status !== 'CONFIRMING')) {
+            return {
+                ok: false,
+                reason: 'MATCH_NOT_ACTIVE',
+                message: 'Esta llave ya fue cerrada o no está activa para reportar.'
+            };
+        }
+
+        const scoreA = parseInt(cfg.scoreA, 10);
+        const scoreB = parseInt(cfg.scoreB, 10);
+        if (!Number.isFinite(scoreA) || !Number.isFinite(scoreB) || scoreA < 0 || scoreB < 0 || scoreA === scoreB) {
+            return {
+                ok: false,
+                reason: 'INVALID_SCORE',
+                message: 'Marcador inválido (no puede ser empate ni negativo).'
+            };
+        }
+
+        return evaluateAndSubmitReport(tournament, matchObj, scoreA, scoreB, cfg, now);
+    }
+
+    function confirmOrDisputeMatch(tournament, params, nowMs) {
+        const now = Number.isFinite(nowMs) ? nowMs : Date.now();
+        if (!tournament || !Array.isArray(tournament.matches)) {
+            return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no encontrado.' };
+        }
+        resolveExpiredConfirmations(tournament, now);
+
+        const cfg = params || {};
+        const matchObj = tournament.matches.find((m) => m.id === cfg.matchId);
+        if (!matchObj) {
+            return { ok: false, reason: 'MATCH_NOT_FOUND', message: 'Llave no encontrada.' };
+        }
+        if (matchObj.status === 'COMPLETED') {
+            return { ok: false, reason: 'ALREADY_COMPLETED', message: 'Este enfrentamiento ya fue sellado en el Bracket.' };
+        }
+        if (matchObj.status !== 'CONFIRMING' || !matchObj.pendingReport) {
+            return { ok: false, reason: 'NOT_CONFIRMING', message: 'Este cruce no tiene un reporte pendiente de confirmación.' };
+        }
+
+        const gtKey = normalizeKey(cfg.authorGamertag);
+        const authorId = String(cfg.authorId || '').trim();
+        if (!gtKey) {
+            return { ok: false, reason: 'MISSING_GAMERTAG', message: 'Debes vincular tu Gamertag para confirmar o disputar.' };
+        }
+        if (!tournament.gamertagSessions) tournament.gamertagSessions = {};
+        if (authorId && tournament.gamertagSessions[gtKey] && tournament.gamertagSessions[gtKey] !== authorId) {
+            return {
+                ok: false,
+                reason: 'SESSION_CONFLICT',
+                message: `⛔ El Gamertag ${cfg.authorGamertag} ya está vinculado a otra sesión activa.`
+            };
+        }
+
+        const pr = matchObj.pendingReport;
+        const loserTeam = (tournament.teams || []).find((t) => t.id === pr.loserId);
+        const teamA = (tournament.teams || []).find((t) => t.id === matchObj.teamAId);
+        const teamB = (tournament.teams || []).find((t) => t.id === matchObj.teamBId);
+        const inLoser = loserTeam && loserTeam.players.some((p) => normalizeKey(p.name || p.gamertag) === gtKey);
+
+        if (!inLoser) {
+            return {
+                ok: false,
+                reason: 'ONLY_LOSER_CAN_CONFIRM',
+                message: `⛔ Acceso denegado: solo un jugador de **${loserTeam ? loserTeam.name : 'equipo rival'}** puede confirmar o disputar este resultado.`
+            };
+        }
+
+        if (authorId) {
+            tournament.gamertagSessions[gtKey] = authorId;
+        }
+
+        if (cfg.action === 'dispute') {
+            matchObj.status = 'PENDING';
+            matchObj.confirmDeadline = null;
+            matchObj.pendingReport = null;
+            matchObj.disputedBy = cfg.authorGamertag;
+            return {
+                ok: true,
+                action: 'DISPUTED_REOPENED',
+                matchId: matchObj.id,
+                message: `⚠️ Marcador disputado por **${cfg.authorGamertag}** (${loserTeam.name}). La llave vuelve a quedar pendiente para revisión o nuevo reporte.`
+            };
+        }
+
+        sealMatchResult(tournament, matchObj, pr.winnerId, pr.loserId, pr.scoreA, pr.scoreB, 'LOSER_CONFIRM_BTN');
+        matchObj.pendingReport = null;
+        return {
+            ok: true,
+            action: 'CONFIRMED_SEALED',
+            matchId: matchObj.id,
+            winnerId: pr.winnerId,
+            loserId: pr.loserId,
+            scoreA: pr.scoreA,
+            scoreB: pr.scoreB,
+            message: `✅ Marcador confirmado por **${cfg.authorGamertag}** y sellado en el Bracket (${teamA ? teamA.name : 'Equipo A'} ${pr.scoreA} - ${pr.scoreB} ${teamB ? teamB.name : 'Equipo B'}).`
         };
     }
 
@@ -870,6 +1042,9 @@
         generatePhaseMaps,
         parseParceroMessage,
         processParceroCommand,
+        findPlayerActiveMatch,
+        submitInteractiveMatchScore,
+        confirmOrDisputeMatch,
         resolveExpiredConfirmations,
         adminMoveOrSetMatchResult
     };
