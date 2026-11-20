@@ -758,8 +758,13 @@
         if (cancelBtn) {
             const activeId = state.activeTournament?.id || '';
             let createdId = '';
-            try { createdId = window.localStorage?.getItem('unsc_created_tournament_id') || ''; } catch (e) {}
-            const canCancel = Boolean(activeId) && (createdId === activeId || Boolean(state.adminKey));
+            let lockedId = '';
+            try {
+                createdId = window.localStorage?.getItem('unsc_created_tournament_id') || '';
+                lockedId = window.localStorage?.getItem('unsc_locked_tournament_id') || '';
+            } catch (e) {}
+            const urlHasTorneoParam = Boolean(new URLSearchParams(window.location.search).get('torneo'));
+            const canCancel = Boolean(activeId) && (createdId === activeId || Boolean(state.adminKey) || (!urlHasTorneoParam && lockedId === activeId));
             if (canCancel) {
                 cancelBtn.classList.remove('hidden');
                 cancelBtn.style.removeProperty('display');
@@ -1664,17 +1669,32 @@
         if (!qTrn) {
             try { qTrn = window.localStorage?.getItem('unsc_locked_tournament_id') || ''; } catch (e) {}
         }
+        let healedCancelled = false;
         if (qTrn && (!state.activeTournament || state.activeTournament.id !== qTrn.toUpperCase())) {
             const loaded = await loadTournamentFromCloud(qTrn);
-            if (loaded) {
+            if (loaded && loaded.status !== 'CANCELLED') {
                 state.activeTournament = loaded;
                 document.getElementById('trnTopBadge').textContent = `${loaded.id} • ${loaded.teams.length} Equipos`;
                 subscribeTournamentRealtime(loaded.id);
+            } else {
+                healedCancelled = true;
+                try {
+                    window.localStorage?.removeItem('unsc_locked_tournament_id');
+                    window.localStorage?.removeItem('unsc_created_tournament_id');
+                    window.sessionStorage?.removeItem('unsc_trn_user_exited');
+                } catch (e) {}
+                state.activeTournament = null;
+                try {
+                    if (window.location.search) {
+                        window.history.replaceState({}, '', window.location.pathname);
+                    }
+                } catch (e) {}
+                notify('El torneo anterior fue cancelado o eliminado. Ya puedes crear uno nuevo.', 'info');
             }
         }
         if (isTournamentLocked()) lockBrowserBackNavigation();
         syncTournamentNavVisibility();
-        setSubView(initialView || (qTrn ? 'bracket' : 'create'));
+        setSubView(healedCancelled ? 'create' : (initialView || (qTrn ? 'bracket' : 'create')));
         startVercelParceroSyncLoop();
     }
 
