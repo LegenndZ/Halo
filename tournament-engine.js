@@ -63,19 +63,25 @@
         return max - min;
     }
 
-    function buildSingleStrictPartition(players, teamCount, teamSize, rng) {
+    function buildSingleStrictPartition(players, teamCount, teamSize, rng, useRandomInit) {
         const randomized = shuffle(players, rng).map((p) => ({
             ...p,
             pts: Math.max(1, Math.min(25, Math.round(Number(p.pts) || 12)))
         }));
-        const sorted = randomized.slice().sort((a, b) => b.pts - a.pts);
 
-        // Snake draft inicial
         const buckets = Array.from({ length: teamCount }, () => []);
-        for (let i = 0; i < sorted.length; i++) {
-            const cycle = Math.floor(i / teamCount);
-            const idx = cycle % 2 === 0 ? (i % teamCount) : (teamCount - 1 - (i % teamCount));
-            buckets[idx].push(sorted[i]);
+        if (useRandomInit) {
+            for (let i = 0; i < randomized.length; i++) {
+                buckets[i % teamCount].push(randomized[i]);
+            }
+        } else {
+            const sorted = randomized.slice().sort((a, b) => b.pts - a.pts);
+            // Snake draft inicial
+            for (let i = 0; i < sorted.length; i++) {
+                const cycle = Math.floor(i / teamCount);
+                const idx = cycle % 2 === 0 ? (i % teamCount) : (teamCount - 1 - (i % teamCount));
+                buckets[idx].push(sorted[i]);
+            }
         }
 
         // Búsqueda local por intercambios (2-swap) hasta alcanzar brecha <= 1 (ideal 0)
@@ -182,25 +188,54 @@
         const candidates = [];
         const seenSigs = new Set();
 
-        for (let attempt = 0; attempt < 40; attempt++) {
-            const res = buildSingleStrictPartition(players, teamCount, teamSize, rng);
-            const sig = partitionSignature(res.buckets);
+        const addCandidate = (buckets, spread) => {
+            const sortedBuckets = buckets.map((b) => b.slice().sort((x, y) => y.pts - x.pts));
+            const sig = partitionSignature(sortedBuckets);
             if (!seenSigs.has(sig)) {
                 seenSigs.add(sig);
-                candidates.push(res);
+                candidates.push({ buckets: sortedBuckets, spread });
             }
-            const zeroOrOneCount = candidates.filter((c) => c.spread <= 1).length;
-            if (zeroOrOneCount >= 2 && candidates.some((c) => c.spread === 0)) {
+        };
+
+        for (let attempt = 0; attempt < 60; attempt++) {
+            const res = buildSingleStrictPartition(players, teamCount, teamSize, rng, attempt > 0);
+            addCandidate(res.buckets, res.spread);
+            const count0 = candidates.filter((c) => c.spread === 0).length;
+            const count1 = candidates.filter((c) => c.spread === 1).length;
+            const count2 = candidates.filter((c) => c.spread === 2).length;
+            if (attempt >= 18 && count0 >= 2 && (count1 >= 1 || count2 >= 1)) {
                 break;
             }
         }
 
         candidates.sort((a, b) => a.spread - b.spread);
         const primary = candidates[0];
-        if (!primary || primary.spread > 1) {
+        if (!primary || primary.spread > 2) {
             throw new Error(
-                `Balanceo estricto imposible con esta combinación de puntajes (brecha mínima encontrada: ${primary ? primary.spread : '?'} PTS; máximo permitido: 1 PT).`
+                `Balanceo estricto imposible con esta combinación de puntajes (brecha mínima encontrada: ${primary ? primary.spread : '?'} PTS; máximo permitido: 2 PTS).`
             );
+        }
+
+        // Expandir vecinos por intercambio simple (2-swap) desde las mejores particiones para garantizar 3 opciones distintas (<= 2 PTS) y encontrar la brecha siguiente
+        const seeds = candidates.filter((c) => c.spread <= 2).slice(0, 4);
+        for (const seed of seeds) {
+            for (let tA = 0; tA < teamCount; tA++) {
+                for (let tB = tA + 1; tB < teamCount; tB++) {
+                    for (let i = 0; i < teamSize; i++) {
+                        for (let j = 0; j < teamSize; j++) {
+                            if (seed.buckets[tA][i].pts === seed.buckets[tB][j].pts) continue;
+                            const cloned = seed.buckets.map((b) => b.slice());
+                            const tmp = cloned[tA][i];
+                            cloned[tA][i] = cloned[tB][j];
+                            cloned[tB][j] = tmp;
+                            const sp = computeTeamsSpread(cloned);
+                            if (sp <= 2) {
+                                addCandidate(cloned, sp);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         const formatPartition = (res, optionIdx) => {
@@ -234,42 +269,26 @@
             };
         };
 
-        const validStrict = candidates.filter((c) => c.spread <= 1).slice(0, 2);
-        const chosenOptions = validStrict.slice();
+        const validPool = candidates.filter((c) => c.spread <= 2).sort((a, b) => a.spread - b.spread);
+        // Opción 1 y Opción 2: siempre las 2 mejores disponibles (menor brecha, desde 0 PTS hasta máx 2 PTS)
+        const chosenOptions = validPool.slice(0, 2);
         const usedSigs = new Set(chosenOptions.map((c) => partitionSignature(c.buckets)));
 
-        // Opción 3 (la menos favorable): buscar combinación distinta con brecha === 2 (o <= 2)
-        let option3 = candidates.find((c) => c.spread === 2 && !usedSigs.has(partitionSignature(c.buckets)));
-        if (!option3 && primary) {
-            // Intentar generar un swap de 1-2 PTS desde primary para obtener una 3ra opción con brecha === 2 (máx 2)
-            for (let tA = 0; tA < teamCount && !option3; tA++) {
-                for (let tB = tA + 1; tB < teamCount && !option3; tB++) {
-                    for (let i = 0; i < teamSize && !option3; i++) {
-                        for (let j = 0; j < teamSize && !option3; j++) {
-                            if (primary.buckets[tA][i].pts === primary.buckets[tB][j].pts) continue;
-                            const cloned = primary.buckets.map((b) => b.slice());
-                            const tmp = cloned[tA][i];
-                            cloned[tA][i] = cloned[tB][j];
-                            cloned[tB][j] = tmp;
-                            const sp = computeTeamsSpread(cloned);
-                            if (sp === 2) {
-                                const sortedBuckets = cloned.map((b) => b.slice().sort((x, y) => y.pts - x.pts));
-                                const sig = partitionSignature(sortedBuckets);
-                                if (!usedSigs.has(sig)) {
-                                    option3 = { buckets: sortedBuckets, spread: sp };
-                                }
-                            }
-                        }
-                    }
-                }
+        // Opción 3: preferir la brecha siguiente más cercana (spread > op2.spread y <= 2), o si no existe, otra distinta <= 2
+        if (validPool.length > chosenOptions.length) {
+            const refSpread = chosenOptions.length > 0 ? chosenOptions[chosenOptions.length - 1].spread : 0;
+            const remaining = validPool.filter((c) => !usedSigs.has(partitionSignature(c.buckets)));
+            let option3 = remaining.find((c) => c.spread > refSpread && c.spread <= 2);
+            if (!option3) {
+                option3 = remaining.find((c) => c.spread <= 2);
+            }
+            if (option3) {
+                chosenOptions.push(option3);
             }
         }
-        if (!option3) {
-            option3 = candidates.find((c) => c.spread <= 2 && !usedSigs.has(partitionSignature(c.buckets)));
-        }
-        if (option3) {
-            chosenOptions.push(option3);
-        }
+
+        // Ordenar estrictamente de menor a mayor brecha (Opción 1 <= Opción 2 <= Opción 3 <= 2 PTS)
+        chosenOptions.sort((a, b) => a.spread - b.spread);
 
         return {
             format: `${teamSize}v${teamSize}`,
