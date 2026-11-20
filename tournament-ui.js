@@ -292,6 +292,10 @@
                             <i class="fa-solid fa-arrow-left"></i>
                             <span>Salir</span><span class="hidden sm:inline"> a Halo Match</span>
                         </button>
+                        <button id="trnBtnCancelBracket" type="button" class="hidden px-2.5 py-1.5 rounded bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/60 text-rose-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition shrink-0">
+                            <span>✖</span>
+                            <span>Cancelar</span>
+                        </button>
                         <div class="hidden md:block">
                             <div class="font-hcs font-bold text-base tracking-wider text-white uppercase leading-none">🏆 TORNEO HCS</div>
                             <div class="text-[11px] text-slate-400"><span id="trnTopBadge" class="text-amber-300 font-semibold">Sin torneo activo</span> • <span id="trnRealtimeBadge" class="text-emerald-300">Firestore Ready</span></div>
@@ -604,6 +608,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- MODAL CONFIRMAR CANCELACIÓN DE BRACKET -->
+            <div id="trnCancelBracketModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+                <div class="max-w-md w-full rounded-xl bg-[#13161b] border-2 border-rose-500/70 p-5 shadow-2xl space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-orbitron font-bold text-sm text-rose-300 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>CANCELAR TORNEO Y ELIMINAR BRACKET</span>
+                        </h3>
+                        <button type="button" id="trnCancelCloseBtn" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">
+                        ¿Estás seguro? <strong class="text-rose-300">Se cancelará el bracket, se eliminará</strong> y <strong>Parcero Bot dejará de aceptar reportes para este torneo</strong> (también se desfijará el anuncio en Discord).
+                    </p>
+                    <div class="flex flex-wrap justify-end gap-2 pt-2 border-t border-slate-700">
+                        <button type="button" id="trnCancelBackBtn" class="px-3.5 py-2 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">No, volver</button>
+                        <button type="button" id="trnConfirmCancelBtn" class="px-4 py-2 rounded bg-rose-600 hover:bg-rose-500 text-white font-orbitron font-bold text-xs">Sí, cancelar y eliminar Bracket</button>
+                    </div>
+                </div>
+            </div>
         `;
         document.body.appendChild(overlay);
         bindEvents();
@@ -660,6 +684,11 @@
         document.getElementById('trnAdminMatchCloseBtn').onclick = () => toggleModal('trnAdminMatchModal', false);
         document.getElementById('trnAdminReopenBtn').onclick = () => saveAdminMatchEdit(true);
         document.getElementById('trnAdminSaveBtn').onclick = () => saveAdminMatchEdit(false);
+
+        document.getElementById('trnBtnCancelBracket').onclick = () => toggleModal('trnCancelBracketModal', true);
+        document.getElementById('trnCancelCloseBtn').onclick = () => toggleModal('trnCancelBracketModal', false);
+        document.getElementById('trnCancelBackBtn').onclick = () => toggleModal('trnCancelBracketModal', false);
+        document.getElementById('trnConfirmCancelBtn').onclick = confirmCancelTournament;
         const newTrnBtn = document.getElementById('trnBtnAdminNewTournament');
         if (newTrnBtn) {
             newTrnBtn.onclick = () => {
@@ -723,6 +752,21 @@
         if (closeBtn) {
             closeBtn.classList.remove('hidden');
             closeBtn.style.removeProperty('display');
+        }
+
+        const cancelBtn = document.getElementById('trnBtnCancelBracket');
+        if (cancelBtn) {
+            const activeId = state.activeTournament?.id || '';
+            let createdId = '';
+            try { createdId = window.localStorage?.getItem('unsc_created_tournament_id') || ''; } catch (e) {}
+            const canCancel = Boolean(activeId) && (createdId === activeId || Boolean(state.adminKey));
+            if (canCancel) {
+                cancelBtn.classList.remove('hidden');
+                cancelBtn.style.removeProperty('display');
+            } else {
+                cancelBtn.classList.add('hidden');
+                cancelBtn.style.setProperty('display', 'none', 'important');
+            }
         }
 
         if (bracketBtn) bracketBtn.textContent = locked ? 'Bracket' : '2. Bracket';
@@ -1176,7 +1220,10 @@
 
         state.adminNewTournamentUnlocked = false;
         try {
-            if (window.localStorage) window.localStorage.setItem('unsc_locked_tournament_id', id);
+            if (window.localStorage) {
+                window.localStorage.setItem('unsc_locked_tournament_id', id);
+                window.localStorage.setItem('unsc_created_tournament_id', id);
+            }
         } catch (e) {}
         try {
             window.history.replaceState({}, '', `?torneo=${encodeURIComponent(id)}`);
@@ -1629,6 +1676,45 @@
         syncTournamentNavVisibility();
         setSubView(initialView || (qTrn ? 'bracket' : 'create'));
         startVercelParceroSyncLoop();
+    }
+
+    async function confirmCancelTournament() {
+        const activeId = state.activeTournament?.id;
+        if (!activeId) return;
+        const confirmBtn = document.getElementById('trnConfirmCancelBtn');
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Cancelando...';
+        }
+        try {
+            await fetch('/api/tournament-cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tournamentId: activeId })
+            });
+        } catch (e) {}
+
+        try {
+            if (window.localStorage) {
+                window.localStorage.removeItem('unsc_locked_tournament_id');
+                window.localStorage.removeItem('unsc_created_tournament_id');
+            }
+            window.sessionStorage?.removeItem('unsc_trn_user_exited');
+        } catch (e) {}
+
+        if (state.unsubTournament) {
+            try { state.unsubTournament(); } catch (e) {}
+            state.unsubTournament = null;
+        }
+        state.activeTournament = null;
+        state.adminNewTournamentUnlocked = false;
+        toggleModal('trnCancelBracketModal', false);
+        closeTournamentModule();
+        notify(`Torneo ${activeId} cancelado y bracket eliminado.`, 'success');
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Sí, cancelar y eliminar Bracket';
+        }
     }
 
     function closeTournamentModule() {

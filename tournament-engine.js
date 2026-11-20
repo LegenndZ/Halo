@@ -765,9 +765,9 @@
             };
         }
 
-        // El ganador reporta -> abre ventana de 10 minutos (CONFIRMING)
+        // El ganador reporta -> abre ventana de 5 minutos (CONFIRMING)
         matchObj.status = 'CONFIRMING';
-        matchObj.confirmDeadline = now + 600000;
+        matchObj.confirmDeadline = now + 300000;
         matchObj.pendingReport = {
             winnerId,
             loserId,
@@ -785,11 +785,25 @@
             loserId,
             scoreA,
             scoreB,
-            message: `⏳ Reporte recibido (${teamA.name} ${scoreA} - ${scoreB} ${teamB.name}). Esperando confirmación del rival o auto-sellado en 10 min.`
+            message: `⏳ Reporte recibido (${teamA.name} ${scoreA} - ${scoreB} ${teamB.name}). Esperando confirmación del rival o auto-sellado en 5 min.`
         };
     }
 
+    function cancelledResponse(tournament) {
+        const tid = tournament && tournament.id ? tournament.id : 'TRN';
+        return {
+            ok: false,
+            reason: 'TOURNAMENT_CANCELLED',
+            message: `🚫 El torneo ${tid} fue cancelado y eliminado. Ya no se aceptan reportes.`
+        };
+    }
+
+    function isTournamentCancelled(tournament) {
+        return Boolean(tournament && String(tournament.status || '').toUpperCase() === 'CANCELLED');
+    }
+
     function processParceroCommand(tournament, payload, nowMs) {
+        if (isTournamentCancelled(tournament)) return cancelledResponse(tournament);
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         resolveExpiredConfirmations(tournament, now);
 
@@ -826,6 +840,7 @@
     }
 
     function findPlayerActiveMatch(tournament, authorGamertag, nowMs) {
+        if (isTournamentCancelled(tournament)) return cancelledResponse(tournament);
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         if (!tournament || !Array.isArray(tournament.teams) || !Array.isArray(tournament.matches)) {
             return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no válido.' };
@@ -886,6 +901,7 @@
     }
 
     function submitInteractiveMatchScore(tournament, params, nowMs) {
+        if (isTournamentCancelled(tournament)) return cancelledResponse(tournament);
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         if (!tournament || !Array.isArray(tournament.matches)) {
             return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no encontrado.' };
@@ -916,6 +932,7 @@
     }
 
     function confirmOrDisputeMatch(tournament, params, nowMs) {
+        if (isTournamentCancelled(tournament)) return cancelledResponse(tournament);
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         if (!tournament || !Array.isArray(tournament.matches)) {
             return { ok: false, reason: 'INVALID_TOURNAMENT', message: 'Torneo no encontrado.' };

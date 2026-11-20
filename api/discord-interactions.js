@@ -1,7 +1,7 @@
 // ============================================================================
 // UNSC TAC-BALANCER V2 — VERCEL SERVERLESS FUNCTION (api/discord-interactions.js)
 // Endpoint oficial de Discord Interactions (Ed25519) para respuesta < 1s 24/7 a $0.
-// Soporta botones interactivos, Modal de Gamertag, Slash Commands y confirmación 10m.
+// Soporta botones interactivos, Modal de Gamertag, Slash Commands y confirmación 5m.
 // No modifica mainRoster ni guarda secretos en código.
 // ============================================================================
 
@@ -159,24 +159,44 @@ async function firestoreListCollection(colName) {
     return (data.documents || []).map((d) => normalizeTournamentObject(fromFirestoreDoc(d))).filter(Boolean);
 }
 
+async function getCancelledTournamentSet() {
+    try {
+        const meta = await firestoreGetDoc('tournamentMeta/cancelledTournaments');
+        const list = (meta && Array.isArray(meta.cancelledIds)) ? meta.cancelledIds : [];
+        return new Set(list.map((id) => String(id || '').replace(/[^A-Z0-9]/gi, '').toUpperCase()).filter(Boolean));
+    } catch {
+        return new Set();
+    }
+}
+
 async function findTournamentSmart(trnIdRaw) {
     const cleanId = String(trnIdRaw || '').trim().toUpperCase();
     const isSpecific = cleanId && cleanId !== 'ACTIVE' && cleanId !== 'GLOBAL';
+    const cancelledSet = await getCancelledTournamentSet();
+
     if (isSpecific) {
+        const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
+        if (cancelledSet.has(normTarget)) {
+            return { id: cleanId, status: 'CANCELLED' };
+        }
         const direct = await firestoreGetDoc(`tournaments/${encodeURIComponent(cleanId)}`);
         if (direct) return direct;
     }
     const all = await firestoreListCollection('tournaments');
+    const validAll = all.filter((t) => {
+        const normId = String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+        return String(t.status || '').toUpperCase() !== 'CANCELLED' && !cancelledSet.has(normId);
+    });
     if (isSpecific) {
         const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
         return all.find((t) => String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase() === normTarget) || null;
     }
-    const activeList = all.filter((t) => !t.championTeamId);
+    const activeList = validAll.filter((t) => !t.championTeamId);
     if (activeList.length > 0) {
         return activeList.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
     }
-    if (all.length > 0) {
-        return all.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+    if (validAll.length > 0) {
+        return validAll.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
     }
     return null;
 }
@@ -341,7 +361,7 @@ async function handleReportMenu(res, { trnId, userId, userGamertags }) {
             });
         }
         return ephemeralResp(res, {
-            content: `⏳ Ya enviaste un reporte en **${teamA.name} vs ${teamB.name}**. Esperando confirmación de **${rivalTeam.name}** (o auto-sellado en 10 minutos).`
+            content: `⏳ Ya enviaste un reporte en **${teamA.name} vs ${teamB.name}**. Esperando confirmación de **${rivalTeam.name}** (o auto-sellado en 5 minutos).`
         });
     }
 
@@ -355,7 +375,7 @@ async function handleReportMenu(res, { trnId, userId, userGamertags }) {
                 '',
                 'Selecciona el marcador exacto:',
                 '• Si reporta el **perdedor**, se sella al instante en el Bracket.',
-                '• Si reporta el **ganador**, **' + rivalTeam.name + '** tendrá **10 minutos** para confirmar.'
+                '• Si reporta el **ganador**, **' + rivalTeam.name + '** tendrá **5 minutos** para confirmar.'
             ].join('\n')
         }],
         components: buildScoreButtons(tid, match, teamA, teamB, bestOf)
@@ -563,17 +583,17 @@ export default async function handler(req, res) {
                 });
             }
 
-            // CONFIRMING_OPENED: espera 10 minutos o confirmación del equipo perdedor
+            // CONFIRMING_OPENED: espera 5 minutos o confirmación del equipo perdedor
             await postChannelPayload(targetChannelId, botToken, {
                 embeds: [{
-                    title: `⏳ Confirmación Requerida (10 min) • ${tournament.id}`,
+                    title: `⏳ Confirmación Requerida (5 min) • ${tournament.id}`,
                     url: bracketUrl,
                     color: 0xf59e0b,
                     description: [
                         `⚔️ **${teamA ? teamA.name : 'Equipo A'}** \`${result.scoreA}\` - \`${result.scoreB}\` **${teamB ? teamB.name : 'Equipo B'}**`,
                         `👤 **Reportado por (ganador):** ${gt} (${winTeam ? winTeam.name : ''})`,
                         '',
-                        `🔔 **${loseTeam ? loseTeam.name : 'Equipo Rival'}**: pulsa **✅ Confirmar** para sellar al instante o **⚠️ Disputar** si hay error. *(Sin objeciones se sella automáticamente en 10 minutos).*`
+                        `🔔 **${loseTeam ? loseTeam.name : 'Equipo Rival'}**: pulsa **✅ Confirmar** para sellar al instante o **⚠️ Disputar** si hay error. *(Sin objeciones se sella automáticamente en 5 minutos).*`
                     ].join('\n'),
                     timestamp: new Date().toISOString()
                 }],
@@ -581,7 +601,7 @@ export default async function handler(req, res) {
             });
 
             return updateMessageResp(res, {
-                content: `⏳ **Reporte enviado al canal.** Esperando confirmación de **${loseTeam ? loseTeam.name : 'equipo rival'}** (ventana de 10 minutos).`,
+                content: `⏳ **Reporte enviado al canal.** Esperando confirmación de **${loseTeam ? loseTeam.name : 'equipo rival'}** (ventana de 5 minutos).`,
                 embeds: [],
                 components: []
             });

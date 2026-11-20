@@ -132,22 +132,39 @@ async function firestoreListCollection(colName) {
     return (data.documents || []).map((d) => normalizeTournamentObject(fromFirestoreDoc(d))).filter(Boolean);
 }
 
+async function getCancelledTournamentSet() {
+    try {
+        const meta = await firestoreGetDoc('tournamentMeta/cancelledTournaments');
+        const list = (meta && Array.isArray(meta.cancelledIds)) ? meta.cancelledIds : [];
+        return new Set(list.map((id) => String(id || '').replace(/[^A-Z0-9]/gi, '').toUpperCase()).filter(Boolean));
+    } catch {
+        return new Set();
+    }
+}
+
 async function findTournamentSmart(trnIdRaw) {
     const cleanId = String(trnIdRaw || '').trim().toUpperCase();
+    const cancelledSet = await getCancelledTournamentSet();
     if (cleanId) {
+        const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
+        if (cancelledSet.has(normTarget)) return { id: cleanId, status: 'CANCELLED' };
         const direct = await firestoreGetDoc(`tournaments/${encodeURIComponent(cleanId)}`);
         if (direct) return direct;
     }
     const all = await firestoreListCollection('tournaments');
+    const validAll = all.filter((t) => {
+        const normId = String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+        return String(t.status || '').toUpperCase() !== 'CANCELLED' && !cancelledSet.has(normId);
+    });
     if (cleanId) {
         const normTarget = cleanId.replace(/[^A-Z0-9]/g, '');
         const byNorm = all.find((t) => String(t.id || '').replace(/[^A-Z0-9]/g, '').toUpperCase() === normTarget);
         if (byNorm) return byNorm;
     } else {
-        const activeList = all.filter((t) => !t.championTeamId);
+        const activeList = validAll.filter((t) => !t.championTeamId);
         if (activeList.length === 1) return activeList[0];
-        if (all.length > 0) {
-            return all.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+        if (validAll.length > 0) {
+            return validAll.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
         }
     }
     return null;
@@ -187,7 +204,7 @@ async function checkExpiredConfirmationsAndPins() {
             if (!trn || !trn.id) continue;
             let dirty = false;
 
-            // 1) Auto-sellado 10 minutos
+            // 1) Auto-sellado 5 minutos
             const sealedIds = TEngine.resolveExpiredConfirmations(trn, now);
             if (sealedIds.length > 0) {
                 dirty = true;
@@ -195,7 +212,7 @@ async function checkExpiredConfirmationsAndPins() {
                 if (DISCORD_CHANNEL_ID) {
                     await postChannelMessage(
                         DISCORD_CHANNEL_ID,
-                        `⏱️ **Auto-sellado (10 min)** en **${trn.id}**: llave(s) \`${sealedIds.join(', ')}\` confirmadas automáticamente.`
+                        `⏱️ **Auto-sellado (5 min)** en **${trn.id}**: llave(s) \`${sealedIds.join(', ')}\` confirmadas automáticamente.`
                     );
                 }
             }
