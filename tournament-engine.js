@@ -716,6 +716,37 @@
                 tournament.championTeamId = champTeam.id;
             }
         }
+        syncBracketStructure(tournament);
+    }
+
+    function syncBracketStructure(tournament) {
+        if (!tournament || !Array.isArray(tournament.matches)) return tournament;
+        const byId = new Map(tournament.matches.map((m) => [m.id, m]));
+        const FIELDS = ['teamAId', 'teamBId', 'scoreA', 'scoreB', 'winnerId', 'loserId', 'status', 'confirmDeadline', 'pendingReport', 'sealedBy', 'isBye'];
+        const copyFields = (target) => {
+            if (!target || !target.id) return;
+            const src = byId.get(target.id);
+            if (!src || src === target) return;
+            for (const f of FIELDS) {
+                if (f in src) target[f] = src[f];
+            }
+        };
+        const b = tournament.bracket;
+        if (b && typeof b === 'object') {
+            if (Array.isArray(b.matches)) b.matches.forEach(copyFields);
+            if (Array.isArray(b.winnersRounds)) {
+                b.winnersRounds.forEach((rnd) => {
+                    if (rnd && Array.isArray(rnd.matches)) rnd.matches.forEach(copyFields);
+                });
+            }
+            if (Array.isArray(b.losersRounds)) {
+                b.losersRounds.forEach((rnd) => {
+                    if (rnd && Array.isArray(rnd.matches)) rnd.matches.forEach(copyFields);
+                });
+            }
+            if (b.grandFinal) copyFields(b.grandFinal);
+        }
+        return tournament;
     }
 
     function resolveExpiredConfirmations(tournament, nowMs) {
@@ -728,6 +759,7 @@
                 autoSealed.push(m.id);
             }
         }
+        if (autoSealed.length > 0) syncBracketStructure(tournament);
         return autoSealed;
     }
 
@@ -795,6 +827,7 @@
             submittedByTeamId: reporterTeamId,
             submittedByGamertag: payload.authorGamertag
         };
+        syncBracketStructure(tournament);
         return {
             ok: true,
             action: 'CONFIRMING_OPENED',
@@ -1007,6 +1040,7 @@
             matchObj.confirmDeadline = null;
             matchObj.pendingReport = null;
             matchObj.disputedBy = cfg.authorGamertag;
+            syncBracketStructure(tournament);
             return {
                 ok: true,
                 action: 'DISPUTED_REOPENED',
@@ -1052,6 +1086,7 @@
             matchObj.pendingReport = null;
             matchObj.sealedBy = null;
             matchObj.isBye = false;
+            syncBracketStructure(tournament);
             return { ok: true, action: 'REOPENED', match: matchObj };
         }
 
@@ -1062,12 +1097,14 @@
             const sA = cfg.scoreA !== undefined && cfg.scoreA !== null ? Number(cfg.scoreA) : (cfg.winnerTeamId === matchObj.teamAId ? 2 : 0);
             const sB = cfg.scoreB !== undefined && cfg.scoreB !== null ? Number(cfg.scoreB) : (cfg.winnerTeamId === matchObj.teamBId ? 2 : 0);
             sealMatchResult(tournament, matchObj, cfg.winnerTeamId, loserId, sA, sB, 'ADMIN_OVERRIDE');
+            syncBracketStructure(tournament);
             return { ok: true, action: 'ADMIN_SEALED', match: matchObj };
         }
 
         if (cfg.scoreA !== undefined) matchObj.scoreA = cfg.scoreA === null || cfg.scoreA === '' ? null : Number(cfg.scoreA);
         if (cfg.scoreB !== undefined) matchObj.scoreB = cfg.scoreB === null || cfg.scoreB === '' ? null : Number(cfg.scoreB);
 
+        syncBracketStructure(tournament);
         return { ok: true, action: 'SLOTS_UPDATED', match: matchObj };
     }
 
@@ -1082,6 +1119,7 @@
         submitInteractiveMatchScore,
         confirmOrDisputeMatch,
         resolveExpiredConfirmations,
-        adminMoveOrSetMatchResult
+        adminMoveOrSetMatchResult,
+        syncBracketStructure
     };
 }));

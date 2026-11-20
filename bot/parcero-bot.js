@@ -170,8 +170,9 @@ async function findTournamentSmart(trnIdRaw) {
     return null;
 }
 
-async function postChannelMessage(channelId, content) {
+async function postChannelMessage(channelId, payload) {
     if (!DISCORD_BOT_TOKEN || !channelId) return false;
+    const bodyObj = (typeof payload === 'string') ? { content: payload } : payload;
     try {
         const res = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
             method: 'POST',
@@ -179,13 +180,29 @@ async function postChannelMessage(channelId, content) {
                 'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content })
+            body: JSON.stringify(bodyObj)
         });
         return res.ok;
     } catch (e) {
         console.error('DISCORD_REST_ERR:', e.message);
         return false;
     }
+}
+
+const GREETING_RE = /^\s*(hola|buenas|que\s+m[aá]s|oe)\b/i;
+
+function buildNeroGreetingPayload(trnId) {
+    const tid = trnId || 'ACTIVE';
+    return {
+        content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+        components: [{
+            type: 1,
+            components: [
+                { type: 2, style: 1, label: '🔗 Vincular Gamertag', custom_id: `parcero_link:${tid}` },
+                { type: 2, style: 3, label: '🎯 Reportar Resultado', custom_id: `parcero_report:${tid}` }
+            ]
+        }]
+    };
 }
 
 async function syncWinnersToFirestore(tournament) {
@@ -290,7 +307,8 @@ function startDiscordGateway(testOnlyOnce) {
             if (d.author && d.author.bot) return;
             if (DISCORD_CHANNEL_ID && d.channel_id !== DISCORD_CHANNEL_ID) return;
             const content = String(d.content || '').trim();
-            if (!/\bparcero\b/i.test(content)) return;
+            const isGreeting = GREETING_RE.test(content) || /\bhola\s+parcero\b/i.test(content);
+            if (!/\bparcero\b/i.test(content) && !isGreeting) return;
 
             const authorId = d.author?.id || '';
             const msgId = d.id || '';
@@ -304,8 +322,16 @@ function startDiscordGateway(testOnlyOnce) {
                     processedMsgIds = processedMsgIds.slice(-100);
                 }
 
-                // 1) Vinculación: "Parcero soy <Gamertag>"
+                // 0) Saludo "Hola" en tono ñero
                 const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
+                if (isGreeting && !linkMatch && !/(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content)) {
+                    await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
+                    const activeTrn = await findTournamentSmart('');
+                    await postChannelMessage(d.channel_id, buildNeroGreetingPayload(activeTrn ? activeTrn.id : 'ACTIVE'));
+                    return;
+                }
+
+                // 1) Vinculación: "Parcero soy <Gamertag>"
                 if (linkMatch) {
                     const gamertag = linkMatch[1].trim().replace(/[<>"'`]/g, '');
                     if (!gamertag) {

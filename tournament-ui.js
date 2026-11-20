@@ -181,38 +181,67 @@
         return false;
     }
 
+    function reconcileTournamentBracketState(tournament, opts = {}) {
+        if (!tournament || !window.HaloTournamentEngine) return [];
+        if (typeof window.HaloTournamentEngine.syncBracketStructure === 'function') {
+            window.HaloTournamentEngine.syncBracketStructure(tournament);
+        }
+        if (tournament.status === 'CANCELLED') return [];
+        let autoSealed = [];
+        if (typeof window.HaloTournamentEngine.resolveExpiredConfirmations === 'function') {
+            autoSealed = window.HaloTournamentEngine.resolveExpiredConfirmations(tournament, Date.now()) || [];
+        }
+        if (typeof window.HaloTournamentEngine.syncBracketStructure === 'function') {
+            window.HaloTournamentEngine.syncBracketStructure(tournament);
+        }
+        if (autoSealed.length > 0 && opts.persistIfAutoSealed !== false && !state.reconcilingSave) {
+            state.reconcilingSave = true;
+            Promise.resolve(saveTournamentToCloud(tournament)).finally(() => {
+                state.reconcilingSave = false;
+            });
+        }
+        return autoSealed;
+    }
+
     async function loadTournamentFromCloud(tournamentId) {
         const id = String(tournamentId || '').trim().toUpperCase();
         if (!id) return null;
 
+        let loaded = null;
         const ctx = await ensureFirestoreContext();
         if (ctx) {
             try {
                 const ref = ctx.fsMod.doc(ctx.db, ...`${TOURNAMENTS_COL}/${id}`.split('/'));
                 const snap = await ctx.fsMod.getDoc(ref);
-                if (snap.exists()) return snap.data();
+                if (snap.exists()) loaded = snap.data();
             } catch (e) {}
         }
 
-        const restBase = window.FIRESTORE_REST_BASE;
-        if (restBase) {
+        if (!loaded) {
+            const restBase = window.FIRESTORE_REST_BASE;
+            if (restBase) {
+                try {
+                    const res = await fetch(`${restBase}/tournaments/${encodeURIComponent(id)}?t=${Date.now()}`, { cache: 'no-store' });
+                    if (res.ok) {
+                        const docJson = await res.json();
+                        if (docJson && docJson.fields) loaded = fromFirestoreValue({ mapValue: { fields: docJson.fields } });
+                    }
+                } catch (e) {}
+            }
+        }
+
+        if (!loaded) {
             try {
-                const res = await fetch(`${restBase}/tournaments/${encodeURIComponent(id)}?t=${Date.now()}`, { cache: 'no-store' });
+                const res = await fetch(`${LOCAL_BOT_BASE}/api/tournament/${encodeURIComponent(id)}?t=${Date.now()}`, { cache: 'no-store' });
                 if (res.ok) {
-                    const docJson = await res.json();
-                    if (docJson && docJson.fields) return fromFirestoreValue({ mapValue: { fields: docJson.fields } });
+                    const d = await res.json();
+                    if (d?.tournament) loaded = d.tournament;
                 }
             } catch (e) {}
         }
 
-        try {
-            const res = await fetch(`${LOCAL_BOT_BASE}/api/tournament/${encodeURIComponent(id)}?t=${Date.now()}`, { cache: 'no-store' });
-            if (res.ok) {
-                const d = await res.json();
-                if (d?.tournament) return d.tournament;
-            }
-        } catch (e) {}
-        return null;
+        if (loaded) reconcileTournamentBracketState(loaded);
+        return loaded;
     }
 
     async function subscribeTournamentRealtime(tournamentId) {
@@ -225,7 +254,9 @@
         const ref = ctx.fsMod.doc(ctx.db, ...`${TOURNAMENTS_COL}/${tournamentId}`.split('/'));
         state.unsubTournament = ctx.fsMod.onSnapshot(ref, (snap) => {
             if (!snap.exists()) return;
-            state.activeTournament = snap.data();
+            const incoming = snap.data();
+            reconcileTournamentBracketState(incoming);
+            state.activeTournament = incoming;
             const badge = document.getElementById('trnTopBadge');
             if (badge) badge.textContent = `${state.activeTournament.id} • ${state.activeTournament.teams.length} Equipos`;
             const statusEl = document.getElementById('trnRealtimeBadge');
@@ -1326,6 +1357,7 @@
             svgEl.innerHTML = '';
             return;
         }
+        reconcileTournamentBracketState(t);
         document.getElementById('trnBracketHeaderName').textContent = `${t.name} • ${t.id}`;
         const query = (document.getElementById('trnBracketSearchInput')?.value || '').trim().toLowerCase();
 

@@ -135,8 +135,9 @@ async function findTournamentSmart(trnIdRaw) {
     return null;
 }
 
-async function postChannelMessage(channelId, token, content) {
+async function postChannelMessage(channelId, token, payload) {
     if (!token || !channelId) return false;
+    const bodyObj = (typeof payload === 'string') ? { content: payload } : payload;
     try {
         const res = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
             method: 'POST',
@@ -144,12 +145,28 @@ async function postChannelMessage(channelId, token, content) {
                 'Authorization': `Bot ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content })
+            body: JSON.stringify(bodyObj)
         });
         return res.ok;
     } catch {
         return false;
     }
+}
+
+const GREETING_RE = /^\s*(hola|buenas|que\s+m[aá]s|oe)\b/i;
+
+function buildNeroGreetingPayload(trnId) {
+    const tid = trnId || 'ACTIVE';
+    return {
+        content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+        components: [{
+            type: 1,
+            components: [
+                { type: 2, style: 1, label: '🔗 Vincular Gamertag', custom_id: `parcero_link:${tid}` },
+                { type: 2, style: 3, label: '🎯 Reportar Resultado', custom_id: `parcero_report:${tid}` }
+            ]
+        }]
+    };
 }
 
 async function syncWinnersToFirestore(tournament) {
@@ -194,7 +211,8 @@ export default async function handler(req, res) {
                 if (!msg || !msg.id || processedSet.has(msg.id)) continue;
                 if (msg.author && msg.author.bot) continue;
                 const content = String(msg.content || '').trim();
-                if (!/\bparcero\b/i.test(content)) continue;
+                const isGreeting = GREETING_RE.test(content) || /\bhola\s+parcero\b/i.test(content);
+                if (!/\bparcero\b/i.test(content) && !isGreeting) continue;
 
                 processedSet.add(msg.id);
                 processedMsgIds.push(msg.id);
@@ -203,6 +221,11 @@ export default async function handler(req, res) {
 
                 const authorId = msg.author?.id || '';
                 const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
+                if (isGreeting && !linkMatch && !/(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content)) {
+                    const activeTrn = await findTournamentSmart('');
+                    await postChannelMessage(channelId, botToken, buildNeroGreetingPayload(activeTrn ? activeTrn.id : 'ACTIVE'));
+                    continue;
+                }
                 if (linkMatch) {
                     const gamertag = linkMatch[1].trim().replace(/[<>"'`]/g, '');
                     if (!gamertag) {

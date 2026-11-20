@@ -500,6 +500,20 @@ export default async function handler(req, res) {
             const trnOpt = String(getOpt('torneo') || 'ACTIVE').trim().toUpperCase();
             return handleReportMenu(res, { trnId: trnOpt, userId, userGamertags });
         }
+        if (cmdName === 'hola') {
+            const activeTrn = await findTournamentSmart('');
+            const tid = activeTrn ? activeTrn.id : 'ACTIVE';
+            return ephemeralResp(res, {
+                content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+                components: [{
+                    type: 1,
+                    components: [
+                        { type: 2, style: 1, label: '🔗 Vincular Gamertag', custom_id: `parcero_link:${tid}` },
+                        { type: 2, style: 3, label: '🎯 Reportar Resultado', custom_id: `parcero_report:${tid}` }
+                    ]
+                }]
+            });
+        }
         return ephemeralResp(res, { content: '⚠️ Comando no reconocido.' });
     }
 
