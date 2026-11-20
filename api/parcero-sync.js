@@ -157,8 +157,16 @@ const GREETING_RE = /^\s*(hola|buenas|que\s+m[aá]s|oe)\b/i;
 
 function buildNeroGreetingPayload(trnId) {
     const tid = trnId || 'ACTIVE';
+    const bracketUrl = (tid && tid !== 'ACTIVE')
+        ? `https://halomatch.vercel.app/?torneo=${encodeURIComponent(tid)}`
+        : 'https://halomatch.vercel.app';
     return {
-        content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+        content: [
+            '¡Buenas sosito, buena por saludar! 🫡 Ante todo los modales.',
+            'Mire, aquí le paso la información para que vincule su Gamertag, reporte su marcador o mire el Bracket en vivo:',
+            `🔗 **Ver Bracket:** ${bracketUrl}`,
+            'Toque los botones de acá abajo y hagámosle pues 👇'
+        ].join('\n'),
         components: [{
             type: 1,
             components: [
@@ -168,6 +176,8 @@ function buildNeroGreetingPayload(trnId) {
         }]
     };
 }
+
+const MANNERS_REMINDER = 'Sosito, o sea, ante todo los modales, primero salude, ¿no? Escriba `hola` 😤';
 
 async function syncWinnersToFirestore(tournament) {
     if (!tournament || !Array.isArray(tournament.winners)) return;
@@ -211,8 +221,12 @@ export default async function handler(req, res) {
                 if (!msg || !msg.id || processedSet.has(msg.id)) continue;
                 if (msg.author && msg.author.bot) continue;
                 const content = String(msg.content || '').trim();
+                if (!content) continue;
+                const msgTimeMs = msg.timestamp ? Date.parse(msg.timestamp) : Date.now();
+                const isRecent = Number.isFinite(msgTimeMs) ? (Date.now() - msgTimeMs <= 180000) : true;
                 const isGreeting = GREETING_RE.test(content) || /\bhola\s+parcero\b/i.test(content);
-                if (!/\bparcero\b/i.test(content) && !isGreeting) continue;
+                const mentionsParcero = /\bparcero\b/i.test(content);
+                if (!mentionsParcero && !isGreeting && !isRecent) continue;
 
                 processedSet.add(msg.id);
                 processedMsgIds.push(msg.id);
@@ -221,9 +235,14 @@ export default async function handler(req, res) {
 
                 const authorId = msg.author?.id || '';
                 const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
-                if (isGreeting && !linkMatch && !/(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content)) {
+                const hasScore = /(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content);
+                if (isGreeting && !linkMatch && !hasScore) {
                     const activeTrn = await findTournamentSmart('');
                     await postChannelMessage(channelId, botToken, buildNeroGreetingPayload(activeTrn ? activeTrn.id : 'ACTIVE'));
+                    continue;
+                }
+                if (!mentionsParcero) {
+                    await postChannelMessage(channelId, botToken, MANNERS_REMINDER);
                     continue;
                 }
                 if (linkMatch) {

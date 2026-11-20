@@ -193,8 +193,16 @@ const GREETING_RE = /^\s*(hola|buenas|que\s+m[aá]s|oe)\b/i;
 
 function buildNeroGreetingPayload(trnId) {
     const tid = trnId || 'ACTIVE';
+    const bracketUrl = (tid && tid !== 'ACTIVE')
+        ? `https://halomatch.vercel.app/?torneo=${encodeURIComponent(tid)}`
+        : 'https://halomatch.vercel.app';
     return {
-        content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+        content: [
+            '¡Buenas sosito, buena por saludar! 🫡 Ante todo los modales.',
+            'Mire, aquí le paso la información para que vincule su Gamertag, reporte su marcador o mire el Bracket en vivo:',
+            `🔗 **Ver Bracket:** ${bracketUrl}`,
+            'Toque los botones de acá abajo y hagámosle pues 👇'
+        ].join('\n'),
         components: [{
             type: 1,
             components: [
@@ -204,6 +212,8 @@ function buildNeroGreetingPayload(trnId) {
         }]
     };
 }
+
+const MANNERS_REMINDER = 'Sosito, o sea, ante todo los modales, primero salude, ¿no? Escriba `hola` 😤';
 
 async function syncWinnersToFirestore(tournament) {
     if (!tournament || !Array.isArray(tournament.winners)) return;
@@ -307,8 +317,9 @@ function startDiscordGateway(testOnlyOnce) {
             if (d.author && d.author.bot) return;
             if (DISCORD_CHANNEL_ID && d.channel_id !== DISCORD_CHANNEL_ID) return;
             const content = String(d.content || '').trim();
+            if (!content) return;
             const isGreeting = GREETING_RE.test(content) || /\bhola\s+parcero\b/i.test(content);
-            if (!/\bparcero\b/i.test(content) && !isGreeting) return;
+            const mentionsParcero = /\bparcero\b/i.test(content);
 
             const authorId = d.author?.id || '';
             const msgId = d.id || '';
@@ -322,12 +333,18 @@ function startDiscordGateway(testOnlyOnce) {
                     processedMsgIds = processedMsgIds.slice(-100);
                 }
 
-                // 0) Saludo "Hola" en tono ñero
+                // 0) Saludo "Hola" en tono ñero o recordatorio de modales
                 const linkMatch = content.match(/\bparcero\s+soy\s+(.+)$/i);
-                if (isGreeting && !linkMatch && !/(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content)) {
+                const hasScore = /(?<!\d)\d{1,2}\s*(?:-|a|vs|:)\s*\d{1,2}(?!\d)/i.test(content);
+                if (isGreeting && !linkMatch && !hasScore) {
                     await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
                     const activeTrn = await findTournamentSmart('');
                     await postChannelMessage(d.channel_id, buildNeroGreetingPayload(activeTrn ? activeTrn.id : 'ACTIVE'));
+                    return;
+                }
+                if (!mentionsParcero) {
+                    await firestorePatchDoc('tournamentMeta/parceroSessions', { userGamertags, processedMsgIds });
+                    await postChannelMessage(d.channel_id, MANNERS_REMINDER);
                     return;
                 }
 

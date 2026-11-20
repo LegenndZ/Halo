@@ -503,8 +503,16 @@ export default async function handler(req, res) {
         if (cmdName === 'hola') {
             const activeTrn = await findTournamentSmart('');
             const tid = activeTrn ? activeTrn.id : 'ACTIVE';
+            const bracketUrl = (tid && tid !== 'ACTIVE')
+                ? `https://halomatch.vercel.app/?torneo=${encodeURIComponent(tid)}`
+                : 'https://halomatch.vercel.app';
             return ephemeralResp(res, {
-                content: '¡Hola mi socio! 🔥 Vincule su Gamertag rápido, sosito, y repórteme el marcador pero ya, que el Bracket no se actualiza solo papá. Toque los botones de acá abajo y hagámosle pues 👇',
+                content: [
+                    '¡Buenas sosito, buena por saludar! 🫡 Ante todo los modales.',
+                    'Mire, aquí le paso la información para que vincule su Gamertag, reporte su marcador o mire el Bracket en vivo:',
+                    `🔗 **Ver Bracket:** ${bracketUrl}`,
+                    'Toque los botones de acá abajo y hagámosle pues 👇'
+                ].join('\n'),
                 components: [{
                     type: 1,
                     components: [
