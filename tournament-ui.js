@@ -522,7 +522,7 @@
                         <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-slate-200">
                             <span class="flex items-center gap-1.5">
                                 <i class="fa-brands fa-discord text-[#7289da] text-sm"></i>
-                                <span>En el chat <strong class="text-cyan-300">#torneo</strong> chatean con <strong class="text-[#facc15]">Parcero</strong> y él se encarga de actualizar el Bracket en vivo.</span>
+                                <span>En el chat <strong class="text-cyan-300">#torneo</strong> el Bot <strong class="text-[#facc15]">Parcero</strong> se encarga de actualizar el bracket solo escribiendo <strong class="text-white">Hola</strong>.</span>
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <i class="fa-solid fa-headphones text-emerald-300 text-xs"></i>
