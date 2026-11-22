@@ -18,6 +18,9 @@
         drawnPhaseMaps: null,
         winnersHistory: [],
         adminKey: '',
+        adminRole: '',
+        adminExpiresAt: null,
+        adminExpiryTimer: null,
         adminNewTournamentUnlocked: false,
         shieldClicks: [],
         currentAdminMatchId: null,
@@ -495,13 +498,18 @@
                         </div>
                     </div>
 
-                    <div id="trnAdminBar" class="hidden bg-amber-950/90 border-b border-[#c9a255] px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div id="trnAdminBar" class="hidden bg-amber-950/90 border-b border-[#c9a255] px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 text-xs">
                         <span class="font-orbitron font-bold text-amber-200 flex items-center gap-2">
                             <i class="fa-solid fa-shield-halved text-[#facc15]"></i>
-                            <span>Modo Admin Activo — Clic en cualquier llave para editar o mover equipos</span>
+                            <span id="trnAdminRoleLabel">Modo Admin Activo — Clic en cualquier llave para editar o mover equipos</span>
                         </span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" id="trnBtnAdminNewTournament" class="px-2.5 py-1 rounded bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-[10px]">➕ Crear Nuevo Torneo</button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div id="trnAdminMasterControls" class="flex flex-wrap items-center gap-2">
+                                <span id="trnPromoAdminStatus" class="px-2 py-1 rounded bg-black/40 border border-slate-600 text-[10px] font-orbitron text-slate-200">Tráiler: ...</span>
+                                <button type="button" id="trnBtnTogglePromoTrailer" class="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-100 font-orbitron font-bold text-[10px]">🎬 Tráiler</button>
+                                <button type="button" id="trnBtnPreviewTrailer" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron text-[10px]" title="Previsualizar tráiler">▶ Ver</button>
+                                <button type="button" id="trnBtnAdminNewTournament" class="px-2.5 py-1 rounded bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-[10px]">➕ Crear Nuevo Torneo</button>
+                            </div>
                             <button type="button" id="trnBtnExitAdmin" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron text-[10px]">Salir Admin</button>
                         </div>
                     </div>
@@ -591,7 +599,7 @@
                         <h3 class="font-orbitron font-bold text-sm text-[#facc15]">ACCESO ADMIN TORNEO</h3>
                         <button type="button" id="trnAdminAuthCloseBtn" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <input id="trnAdminPassInput" type="password" placeholder="Clave de administrador..." class="w-full px-3 py-2 rounded bg-[#0b0d10] border border-slate-700 text-xs text-white focus:border-[#c9a255] outline-none">
+                    <input id="trnAdminPassInput" type="password" placeholder="Clave maestra o código temporal (6 dígitos)..." class="w-full px-3 py-2 rounded bg-[#0b0d10] border border-slate-700 text-xs text-white focus:border-[#c9a255] outline-none">
                     <div id="trnAdminAuthError" class="hidden text-xs text-rose-300"></div>
                     <div class="flex justify-end gap-2">
                         <button type="button" id="trnAdminAuthCancelBtn" class="px-3 py-1.5 rounded bg-slate-800 text-xs text-slate-300">Cancelar</button>
@@ -703,7 +711,13 @@
         document.getElementById('trnBracketSearchInput').oninput = renderBracketView;
         document.getElementById('trnWinnersFilterInput').oninput = renderWinnersView;
 
-        document.getElementById('trnShieldAdminTrigger').onclick = handleShieldAdminClick;
+        const bannerHeader = document.querySelector('#trnView-bracket .hcs-header-bar');
+        if (bannerHeader) {
+            bannerHeader.style.cursor = 'pointer';
+            bannerHeader.onclick = handleShieldAdminClick;
+        } else {
+            document.getElementById('trnShieldAdminTrigger').onclick = handleShieldAdminClick;
+        }
         document.getElementById('trnBtnExitAdmin').onclick = exitTournamentAdmin;
 
         document.getElementById('trnTacCloseBtn').onclick = () => toggleModal('trnTacticalModal', false);
@@ -720,10 +734,21 @@
         document.getElementById('trnCancelCloseBtn').onclick = () => toggleModal('trnCancelBracketModal', false);
         document.getElementById('trnCancelBackBtn').onclick = () => toggleModal('trnCancelBracketModal', false);
         document.getElementById('trnConfirmCancelBtn').onclick = confirmCancelTournament;
+        const toggleTrailerBtn = document.getElementById('trnBtnTogglePromoTrailer');
+        if (toggleTrailerBtn) {
+            toggleTrailerBtn.onclick = handleAdminTogglePromoTrailer;
+        }
+        const previewTrailerBtn = document.getElementById('trnBtnPreviewTrailer');
+        if (previewTrailerBtn) {
+            previewTrailerBtn.onclick = () => {
+                if (state.adminRole !== 'master') return;
+                window.HaloTorneoPromo?.open?.();
+            };
+        }
         const newTrnBtn = document.getElementById('trnBtnAdminNewTournament');
         if (newTrnBtn) {
             newTrnBtn.onclick = () => {
-                if (!state.adminKey) return;
+                if (!state.adminKey || state.adminRole !== 'master') return;
                 state.adminNewTournamentUnlocked = true;
                 const idInp = document.getElementById('trnCfgId');
                 if (idInp) idInp.value = `TRN-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -751,7 +776,7 @@
     }
 
     function isTournamentLocked() {
-        if (state.adminKey && state.adminNewTournamentUnlocked) return false;
+        if (state.adminKey && state.adminRole === 'master' && state.adminNewTournamentUnlocked) return false;
         const params = new URLSearchParams(window.location.search);
         if (params.has('torneo') && params.get('torneo')) return true;
         if (state.activeTournament && state.activeTournament.id) return true;
@@ -795,7 +820,7 @@
                 lockedId = window.localStorage?.getItem('unsc_locked_tournament_id') || '';
             } catch (e) {}
             const urlHasTorneoParam = Boolean(new URLSearchParams(window.location.search).get('torneo'));
-            const canCancel = Boolean(activeId) && (createdId === activeId || Boolean(state.adminKey) || (!urlHasTorneoParam && lockedId === activeId));
+            const canCancel = Boolean(activeId) && (createdId === activeId || (Boolean(state.adminKey) && state.adminRole === 'master') || (!urlHasTorneoParam && lockedId === activeId));
             if (canCancel) {
                 cancelBtn.classList.remove('hidden');
                 cancelBtn.style.removeProperty('display');
@@ -1511,11 +1536,105 @@
         }
     }
 
+    function formatRemainingHoursMinutes(expiresAt) {
+        const diff = Math.max(0, Number(expiresAt || 0) - Date.now());
+        const totalMin = Math.ceil(diff / 60000);
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    async function refreshPromoAdminStatus() {
+        const badge = document.getElementById('trnPromoAdminStatus');
+        const btn = document.getElementById('trnBtnTogglePromoTrailer');
+        if (!badge || !btn || !window.HaloTorneoPromo) return;
+        const cfg = await window.HaloTorneoPromo.getPromoConfig();
+        const active = window.HaloTorneoPromo.isPromoActive(cfg);
+        btn.dataset.promoActive = active ? '1' : '0';
+        if (active) {
+            const endsAt = Number(cfg.startAt || 0) + Number(cfg.durationDays || 3) * 86400000;
+            const rem = cfg.mode === 'force_on' ? 'Siempre ON' : `Quedan ${formatRemainingHoursMinutes(endsAt)}`;
+            badge.textContent = `Tráiler: ACTIVO (${rem})`;
+            badge.className = 'px-2 py-1 rounded bg-emerald-950/70 border border-emerald-400/50 text-[10px] font-orbitron text-emerald-200';
+            btn.textContent = '🚫 Quitar Tráiler';
+            btn.className = 'px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/60 text-rose-100 font-orbitron font-bold text-[10px]';
+        } else {
+            badge.textContent = 'Tráiler: OCULTO';
+            badge.className = 'px-2 py-1 rounded bg-slate-900 border border-slate-600 text-[10px] font-orbitron text-slate-300';
+            btn.textContent = '📺 Mostrar Tráiler (3d)';
+            btn.className = 'px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/60 text-emerald-100 font-orbitron font-bold text-[10px]';
+        }
+    }
+
+    async function handleAdminTogglePromoTrailer() {
+        if (state.adminRole !== 'master' || !window.HaloTorneoPromo) return;
+        const btn = document.getElementById('trnBtnTogglePromoTrailer');
+        const currentlyActive = btn?.dataset?.promoActive === '1';
+        const nextMode = currentlyActive ? 'force_off' : 'auto';
+        if (btn) btn.disabled = true;
+        try {
+            const res = await window.HaloTorneoPromo.setPromoMode(nextMode, state.adminKey);
+            if (res.ok) {
+                notify(currentlyActive ? 'Tráiler promocional ocultado globalmente.' : 'Tráiler promocional activado por 3 días.', 'success');
+            } else {
+                notify('No se pudo actualizar el estado del tráiler.', 'error');
+            }
+            await refreshPromoAdminStatus();
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    function refreshAdminPanelUI() {
+        const bar = document.getElementById('trnAdminBar');
+        const label = document.getElementById('trnAdminRoleLabel');
+        const masterControls = document.getElementById('trnAdminMasterControls');
+        if (!bar) return;
+
+        if (!state.adminKey) {
+            bar.classList.add('hidden');
+            return;
+        }
+
+        bar.classList.remove('hidden');
+        if (state.adminRole === 'master') {
+            if (label) label.textContent = 'Admin Maestro — Control total (Llaves, Torneos y Tráiler)';
+            masterControls?.classList.remove('hidden');
+            refreshPromoAdminStatus();
+        } else {
+            const rem = state.adminExpiresAt ? formatRemainingHoursMinutes(state.adminExpiresAt) : '6h';
+            if (label) label.textContent = `Operador Temporal Bracket (Expira en ${rem}) — Solo mover equipos y marcadores`;
+            masterControls?.classList.add('hidden');
+        }
+    }
+
+    function startTempAdminExpiryWatcher() {
+        if (state.adminExpiryTimer) {
+            clearInterval(state.adminExpiryTimer);
+            state.adminExpiryTimer = null;
+        }
+        if (state.adminRole !== 'bracket_operator' || !state.adminExpiresAt) return;
+        state.adminExpiryTimer = setInterval(() => {
+            if (!state.adminKey || state.adminRole !== 'bracket_operator') {
+                clearInterval(state.adminExpiryTimer);
+                state.adminExpiryTimer = null;
+                return;
+            }
+            if (Date.now() >= state.adminExpiresAt) {
+                exitTournamentAdmin();
+                notify('Tu código temporal de 6 horas expiró. Solicita el nuevo código al administrador.', 'warning');
+                return;
+            }
+            refreshAdminPanelUI();
+        }, 30000);
+    }
+
     async function verifyAdminKey() {
         const inp = document.getElementById('trnAdminPassInput');
         const err = document.getElementById('trnAdminAuthError');
         const key = (inp?.value || '').trim();
         if (!key) return;
+        let lastErrorCode = '';
         for (const endpoint of ['/api/tournament-admin', `${LOCAL_BOT_BASE}/api/tournament/admin-verify`]) {
             try {
                 const res = await fetch(endpoint, {
@@ -1526,21 +1645,34 @@
                 const data = await res.json();
                 if (res.ok && data.ok) {
                     state.adminKey = key;
+                    state.adminRole = data.role === 'bracket_operator' ? 'bracket_operator' : 'master';
+                    state.adminExpiresAt = data.expiresAt || null;
                     toggleModal('trnAdminAuthModal', false);
-                    document.getElementById('trnAdminBar')?.classList.remove('hidden');
+                    refreshAdminPanelUI();
+                    startTempAdminExpiryWatcher();
+                    syncTournamentNavVisibility();
                     renderBracketView();
                     return;
                 }
+                if (data?.error) lastErrorCode = data.error;
             } catch (e) {}
         }
         if (err) {
-            err.textContent = 'Clave incorrecta o servidor de verificación no disponible.';
+            err.textContent = lastErrorCode === 'TEMP_CODE_EXPIRED'
+                ? 'Este código temporal de 6 horas ya expiró.'
+                : 'Clave incorrecta o servidor de verificación no disponible.';
             err.classList.remove('hidden');
         }
     }
 
     function exitTournamentAdmin() {
+        if (state.adminExpiryTimer) {
+            clearInterval(state.adminExpiryTimer);
+            state.adminExpiryTimer = null;
+        }
         state.adminKey = '';
+        state.adminRole = '';
+        state.adminExpiresAt = null;
         state.adminNewTournamentUnlocked = false;
         document.getElementById('trnAdminBar')?.classList.add('hidden');
         toggleModal('trnAdminMatchModal', false);
@@ -1554,6 +1686,11 @@
 
     function openAdminMatchModal(matchId) {
         if (!state.adminKey || !state.activeTournament) return;
+        if (state.adminRole === 'bracket_operator' && state.adminExpiresAt && Date.now() >= state.adminExpiresAt) {
+            exitTournamentAdmin();
+            notify('Tu código temporal de 6 horas expiró.', 'warning');
+            return;
+        }
         const m = state.activeTournament.bracket.matches.find(x => x.id === matchId);
         if (!m) return;
         state.currentAdminMatchId = matchId;

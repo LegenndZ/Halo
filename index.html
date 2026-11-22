@@ -125,7 +125,7 @@
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5 min-w-0">
                         <span class="font-orbitron font-black text-xs sm:text-lg tracking-wider text-white truncate">MANSALVAS <span class="text-cyan-400">TAC-BALANCER</span></span>
-                        <span id="adminActivePill" class="hidden px-2 py-0.5 rounded bg-purple-500/25 border border-purple-400 text-purple-200 font-orbitron text-[9px] font-bold shrink-0">ADMIN</span>
+                        <button id="adminActivePill" type="button" onclick="handleAdminButtonClick()" class="hidden px-2 py-0.5 rounded bg-purple-500/25 hover:bg-purple-500/40 border border-purple-400 text-purple-200 font-orbitron text-[9px] font-bold shrink-0 cursor-pointer transition" title="Abrir Centro de Mando Admin">ADMIN</button>
                     </div>
                     <span id="currentMapLabel" class="text-[10px] sm:text-[11px] font-orbitron text-cyan-300/90 block truncate">
                         CALLES (Streets • Lluvia Nocturna Neón)
@@ -785,6 +785,274 @@
             <div class="flex justify-end gap-2">
                 <button onclick="closeAdminModal()" class="px-3 py-1.5 rounded bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
                 <button onclick="verifyAdminPassword()" class="hud-btn px-4 py-1.5 bg-purple-500 hover:bg-purple-400 text-black font-orbitron font-bold text-xs">Desbloquear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 3B: CENTRO DE MANDO ADMIN (EMIL KOWALSKI UX/UI)      -->
+    <!-- ========================================================= -->
+    <style>
+        :root {
+            --ek-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --ek-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .ek-btn {
+            transition: transform 140ms var(--ek-ease-out), background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+            will-change: transform;
+        }
+        .ek-btn:active {
+            transform: scale(0.97);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .ek-card {
+                transition: border-color 180ms ease, background-color 180ms ease, transform 200ms var(--ek-ease-out);
+            }
+            .ek-card:hover {
+                border-color: rgba(201, 162, 85, 0.45);
+            }
+        }
+        .ek-modal-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 160ms var(--ek-ease-out);
+        }
+        .ek-modal-backdrop[data-open="true"] {
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 220ms var(--ek-ease-out);
+        }
+        .ek-modal-panel {
+            transform: scale(0.96) translateY(8px);
+            opacity: 0;
+            transition: transform 160ms var(--ek-ease-out), opacity 160ms var(--ek-ease-out);
+        }
+        .ek-modal-backdrop[data-open="true"] .ek-modal-panel {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            transition: transform 240ms var(--ek-ease-out), opacity 220ms var(--ek-ease-out);
+        }
+        .ek-stagger {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .ek-modal-backdrop[data-open="true"] .ek-stagger {
+            animation: ekFadeUp 260ms var(--ek-ease-out) forwards;
+        }
+        .ek-stagger-1 { animation-delay: 0ms; }
+        .ek-stagger-2 { animation-delay: 45ms; }
+        .ek-stagger-3 { animation-delay: 85ms; }
+        @keyframes ekFadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ek-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            border-radius: 9999px;
+            background: #1e293b;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            transition: background-color 200ms var(--ek-ease-out), border-color 200ms var(--ek-ease-out);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ek-switch[aria-checked="true"] {
+            background: #10b981;
+            border-color: #34d399;
+        }
+        .ek-switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+            transition: transform 200ms var(--ek-ease-out);
+        }
+        .ek-switch[aria-checked="true"] .ek-switch-thumb {
+            transform: translateX(20px);
+        }
+        .ek-switch:active .ek-switch-thumb {
+            transform: scale(0.92);
+        }
+        .ek-switch[aria-checked="true"]:active .ek-switch-thumb {
+            transform: translateX(20px) scale(0.92);
+        }
+        .ek-morph {
+            transition: filter 180ms ease, opacity 180ms ease;
+        }
+        .ek-morph.is-swapping {
+            filter: blur(2px);
+            opacity: 0.55;
+        }
+        #adminQuickRosterList::-webkit-scrollbar {
+            width: 6px;
+        }
+        #adminQuickRosterList::-webkit-scrollbar-track {
+            background: #090d14;
+            border-radius: 9999px;
+        }
+        #adminQuickRosterList::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 9999px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ek-modal-panel, .ek-stagger {
+                transform: none !important;
+                animation: none !important;
+            }
+            .ek-modal-backdrop[data-open="true"] .ek-stagger {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <div id="adminCommandCenter" data-open="false" class="ek-modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 overflow-y-auto" onclick="if(event.target===this) closeAdminCommandCenter()">
+        <div class="ek-modal-panel relative w-full max-w-3xl rounded-2xl bg-[#0b0f17] border border-slate-700/85 shadow-[0_24px_80px_rgba(0,0,0,0.78)] overflow-hidden my-auto">
+            <!-- Header -->
+            <div class="px-5 py-4 bg-[#0f1521] border-b border-slate-800 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0">
+                        <i class="fa-solid fa-shield-halved text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="font-orbitron font-extrabold text-sm sm:text-base text-white tracking-wide">CENTRO DE MANDO ADMIN</h3>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-[10px] font-semibold whitespace-nowrap">Mando Principal</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5 truncate">Control central de Tráiler, Puntos del Roster y Modo Jurado</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" onclick="exitAdminMode()" class="ek-btn px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium">
+                        Salir Admin
+                    </button>
+                    <button type="button" onclick="closeAdminCommandCenter()" aria-label="Cerrar Centro de Mando" class="ek-btn w-8 h-8 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body: 3 módulos enfocados -->
+            <div class="p-4 sm:p-5 space-y-4">
+                <!-- MÓDULO 1: TRÁILER PROMOCIONAL -->
+                <section class="ek-card ek-stagger ek-stagger-1 rounded-xl bg-[#111826] border border-slate-800 p-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-[#c9a255]/15 border border-[#c9a255]/40 flex items-center justify-center text-[#facc15] shrink-0 mt-0.5">
+                                <i class="fa-solid fa-film text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-orbitron font-bold text-xs sm:text-sm text-white">Tráiler Promocional · Modo Torneo</h4>
+                                    <span id="adminTrailerStatusPill" class="ek-morph px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap">Cargando...</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">Se reproduce al pasar el menú principal. Solo tiene la <strong>✕</strong> para cerrarlo.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 ml-auto">
+                            <span id="adminTrailerSwitchLabel" class="ek-morph text-xs font-semibold text-slate-300">...</span>
+                            <button id="adminTrailerSwitch" type="button" role="switch" aria-checked="true" onclick="toggleAdminTrailerSwitch()" class="ek-switch" aria-label="Mostrar o quitar tráiler promocional">
+                                <span class="ek-switch-thumb"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-3.5 pt-3 border-t border-slate-800/90 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="setAdminTrailerPreset('auto')" class="ek-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-medium text-slate-200">
+                                <i class="fa-regular fa-clock mr-1 text-cyan-300"></i>Reiniciar 3 días
+                            </button>
+                            <button type="button" onclick="setAdminTrailerPreset('force_on')" class="ek-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-medium text-slate-200">
+                                Siempre activo
+                            </button>
+                        </div>
+                        <button type="button" onclick="previewAdminTrailer()" class="ek-btn px-3 py-1.5 rounded-lg bg-[#c9a255]/15 hover:bg-[#c9a255]/25 border border-[#c9a255]/50 text-[#facc15] font-semibold text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-play text-[10px]"></i> Previsualizar Tráiler
+                        </button>
+                    </div>
+                </section>
+
+                <!-- GRID INFERIOR: MÓDULO 2 (ROSTER) + MÓDULO 3 (MODO JURADO) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- MÓDULO 2: PUNTOS DEL ROSTER -->
+                    <section class="ek-card ek-stagger ek-stagger-2 rounded-xl bg-[#111826] border border-slate-800 p-4 flex flex-col justify-between gap-3">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-cyan-500/15 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                                    <i class="fa-solid fa-sliders text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-orbitron font-bold text-xs sm:text-sm text-white">Puntos del Roster</h4>
+                                    <p class="text-[11px] text-slate-400">Ajuste rápido sincronizado a Firebase</p>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                <input id="adminQuickRosterSearch" type="text" oninput="renderAdminQuickRoster()" placeholder="Buscar Gamertag Spartan..." class="w-full pl-8 pr-3 py-2 rounded-lg bg-[#090d14] border border-slate-700/90 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                            </div>
+
+                            <div id="adminQuickRosterList" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
+                        </div>
+
+                        <div class="pt-2.5 border-t border-slate-800/90 flex items-center justify-between">
+                            <span id="adminRosterCountHint" class="text-[11px] text-slate-500">Cambios seguros sin borrar el Roster</span>
+                            <button type="button" onclick="closeAdminCommandCenter()" class="ek-btn text-xs font-semibold text-cyan-300 hover:text-cyan-200">
+                                Ver Roster completo →
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- MÓDULO 3: MODO JURADO (TRIBUNAL SPARTAN ONI) -->
+                    <section class="ek-card ek-stagger ek-stagger-3 rounded-xl bg-[#111826] border border-slate-800 p-4 flex flex-col justify-between gap-3">
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+                                        <i class="fa-solid fa-gavel text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-orbitron font-bold text-xs sm:text-sm text-white">Modo Jurado (Tribunal)</h4>
+                                        <p class="text-[11px] text-slate-400">Votación comunitaria +1 / -1 PT</p>
+                                    </div>
+                                </div>
+                                <span id="adminJuradoStatusPill" class="ek-morph px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap shrink-0">En espera</span>
+                            </div>
+
+                            <div class="rounded-lg bg-[#090d14] border border-slate-800 p-3 text-xs text-slate-300 space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Duración de sesión</span>
+                                    <span class="font-semibold text-white">10 minutos</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Quórum mínimo</span>
+                                    <span class="font-semibold text-white">8 Spartans</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-slate-400">Estado actual</span>
+                                    <span id="adminJuradoLiveText" class="font-semibold text-slate-300 text-right">Sin sesión activa</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <button id="adminJuradoActionBtn" type="button" onclick="launchAdminJurado()" class="ek-btn w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (10 min)
+                            </button>
+                            <p class="text-[11px] text-slate-500 text-center">Al lanzarlo, todos los jugadores ven el aviso en vivo en la barra superior.</p>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Pie informativo: separación del código temporal de 6 dígitos del Bracket -->
+                <div class="rounded-xl bg-[#090d14] border border-slate-800/90 px-3.5 py-2.5 flex items-center gap-2 text-[11px] text-slate-400">
+                    <i class="fa-solid fa-lock text-slate-500 shrink-0"></i>
+                    <span>Exclusivo del <strong class="text-slate-200">Administrador Principal</strong>. La clave temporal de 6 dígitos (Resend cada 6h) solo da acceso a mover llaves del Bracket.</span>
+                </div>
             </div>
         </div>
     </div>
@@ -2169,11 +2437,11 @@
         // =========================================================
 
         // =========================================================
-        // MODO ADMINISTRADOR (RONIN18) Y TRIBUNAL SPARTAN ONI
+        // MODO ADMINISTRADOR (CENTRO DE MANDO + TRIBUNAL SPARTAN ONI)
         // =========================================================
         window.handleAdminButtonClick = function() {
             if (isAdminMode) {
-                openTribunalModal();
+                openAdminCommandCenter();
                 return;
             }
             document.getElementById('adminPasswordInput').value = '';
@@ -2200,13 +2468,232 @@
                 const sBtn = document.getElementById('sidebarTribunalBtn');
                 if (sBtn) { sBtn.classList.remove('hidden'); sBtn.classList.add('flex'); }
                 const admLbl = document.getElementById('sidebarAdminLabel');
-                if (admLbl) admLbl.innerText = 'Panel Admin Activo (Tribunal)';
+                if (admLbl) admLbl.innerText = 'Centro de Mando Admin';
                 renderRoster();
-                showToast('Modo Administrador desbloqueado. Puedes editar perfiles o disparar el Tribunal.');
-                openTribunalModal();
+                showToast('Centro de Mando Admin desbloqueado.');
+                openAdminCommandCenter();
             } else {
                 document.getElementById('adminErrorMsg')?.classList.remove('hidden');
             }
+        };
+
+        function ekEscapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+        }
+
+        function ekMorphSwap(el, nextText, nextClass) {
+            if (!el) return;
+            el.classList.add('is-swapping');
+            setTimeout(() => {
+                el.textContent = nextText;
+                if (nextClass) el.className = nextClass;
+                el.classList.remove('is-swapping');
+            }, 110);
+        }
+
+        function formatRemainingPromoTime(endsAtMs) {
+            const diff = Math.max(0, Number(endsAtMs || 0) - Date.now());
+            const totalMin = Math.ceil(diff / 60000);
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            return h > 0 ? `${h}h ${m}m` : `${m}m`;
+        }
+
+        async function refreshAdminPromoStateUI() {
+            const sw = document.getElementById('adminTrailerSwitch');
+            const lbl = document.getElementById('adminTrailerSwitchLabel');
+            const pill = document.getElementById('adminTrailerStatusPill');
+            if (!sw || !lbl || !pill || !window.HaloTorneoPromo) return;
+
+            const cfg = await window.HaloTorneoPromo.getPromoConfig();
+            const active = window.HaloTorneoPromo.isPromoActive(cfg);
+            sw.setAttribute('aria-checked', active ? 'true' : 'false');
+            sw.dataset.promoMode = cfg.mode || 'auto';
+
+            if (active) {
+                ekMorphSwap(lbl, 'Visible', 'ek-morph text-xs font-semibold text-emerald-300');
+                if (cfg.mode === 'force_on') {
+                    ekMorphSwap(pill, 'Siempre activo (Manual)', 'ek-morph px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-[10px] font-semibold whitespace-nowrap');
+                } else {
+                    const endsAt = Number(cfg.startAt || 0) + Number(cfg.durationDays || 3) * 86400000;
+                    ekMorphSwap(pill, `Activo · Quedan ${formatRemainingPromoTime(endsAt)}`, 'ek-morph px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-[10px] font-semibold whitespace-nowrap');
+                }
+            } else {
+                ekMorphSwap(lbl, 'Oculto', 'ek-morph text-xs font-semibold text-slate-400');
+                ekMorphSwap(pill, cfg.mode === 'force_off' ? 'Oculto globalmente' : 'Expirado (3 días)', 'ek-morph px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-semibold whitespace-nowrap');
+            }
+        }
+
+        function refreshAdminJuradoStatusUI() {
+            const pill = document.getElementById('adminJuradoStatusPill');
+            const live = document.getElementById('adminJuradoLiveText');
+            const btn = document.getElementById('adminJuradoActionBtn');
+            if (!pill || !live || !btn) return;
+            const isActive = activeTribunalSession && (activeTribunalSession.status === 'open' || activeTribunalSession.status === 'tiebreaker');
+            if (isActive) {
+                const rem = activeTribunalSession.expiresAt
+                    ? Math.max(0, Math.floor((activeTribunalSession.expiresAt - Date.now()) / 1000))
+                    : 0;
+                const mm = String(Math.floor(rem / 60)).padStart(2, '0');
+                const ss = String(rem % 60).padStart(2, '0');
+                const votesCount = activeTribunalSession.votes ? Object.keys(activeTribunalSession.votes).length : 0;
+                pill.textContent = `EN VIVO · ${mm}:${ss}`;
+                pill.className = 'ek-morph px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-semibold whitespace-nowrap shrink-0';
+                live.textContent = `Sesión abierta (${votesCount} / 8 votos)`;
+                live.className = 'font-semibold text-amber-300 text-right';
+                btn.innerHTML = '<i class="fa-solid fa-up-right-from-square"></i> Abrir Tribunal en Vivo';
+            } else {
+                pill.textContent = 'En espera';
+                pill.className = 'ek-morph px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap shrink-0';
+                live.textContent = 'Sin sesión activa';
+                live.className = 'font-semibold text-slate-300 text-right';
+                btn.innerHTML = '<i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (10 min)';
+            }
+        }
+
+        window.renderAdminQuickRoster = function() {
+            const list = document.getElementById('adminQuickRosterList');
+            const countHint = document.getElementById('adminRosterCountHint');
+            if (!list) return;
+            const q = (document.getElementById('adminQuickRosterSearch')?.value || '').trim().toLowerCase();
+            const source = Array.isArray(window.roster) ? window.roster : [];
+            const filtered = source
+                .filter(p => p && p.name && (!q || String(p.name).toLowerCase().includes(q)))
+                .slice()
+                .sort((a, b) => Number(b.pts || 0) - Number(a.pts || 0));
+
+            if (countHint) {
+                countHint.textContent = `${source.length} Spartans en Roster`;
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">Sin coincidencias en el Roster</div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(p => {
+                const pts = Number(p.pts || 10);
+                const rank = typeof calculateRankFromPts === 'function' ? calculateRankFromPts(pts) : (p.rank || 'B');
+                return `
+                    <div class="flex items-center justify-between gap-2 rounded-lg bg-[#090d14] border border-slate-800 px-3 py-2">
+                        <div class="min-w-0">
+                            <div class="text-xs font-semibold text-white truncate">${ekEscapeHtml(p.name)}</div>
+                            <div class="text-[10px] text-slate-400">Rango ${ekEscapeHtml(rank)}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" data-admin-pts-id="${ekEscapeHtml(p.id)}" data-admin-pts-delta="-1" class="ek-btn w-7 h-7 rounded-md bg-slate-800 hover:bg-rose-500/25 border border-slate-700 text-slate-200 text-xs font-bold">−</button>
+                            <span class="w-14 text-center font-orbitron font-bold text-xs text-cyan-300">${pts} PT</span>
+                            <button type="button" data-admin-pts-id="${ekEscapeHtml(p.id)}" data-admin-pts-delta="1" class="ek-btn w-7 h-7 rounded-md bg-slate-800 hover:bg-emerald-500/25 border border-slate-700 text-slate-200 text-xs font-bold">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('button[data-admin-pts-id]').forEach(btn => {
+                btn.onclick = () => window.adjustAdminRosterPts(btn.dataset.adminPtsId, Number(btn.dataset.adminPtsDelta));
+            });
+        };
+
+        window.adjustAdminRosterPts = async function(playerId, delta) {
+            if (!isAdminMode || !Array.isArray(window.roster)) return;
+            const idx = window.roster.findIndex(p => String(p.id) === String(playerId));
+            if (idx === -1) return;
+            const player = window.roster[idx];
+            const nextPts = Math.max(1, Math.min(25, Number(player.pts || 10) + delta));
+            if (nextPts === Number(player.pts)) return;
+
+            player.pts = nextPts;
+            if (typeof calculateRankFromPts === 'function') {
+                player.rank = calculateRankFromPts(nextPts);
+            }
+            window.renderAdminQuickRoster();
+            renderRoster();
+            updateBalancedTeamsUI();
+            showToast(`${player.name}: ${nextPts} PTS (${player.rank}) actualizados.`);
+
+            if (typeof window.saveRosterToCloud === 'function' && typeof window.normalizeSpartanKey === 'function') {
+                await window.saveRosterToCloud(null, window.normalizeSpartanKey(player.name), player);
+            }
+        };
+
+        window.toggleAdminTrailerSwitch = async function() {
+            if (!isAdminMode || !window.HaloTorneoPromo) return;
+            const sw = document.getElementById('adminTrailerSwitch');
+            const isChecked = sw?.getAttribute('aria-checked') === 'true';
+            const nextMode = isChecked ? 'force_off' : 'auto';
+            if (sw) sw.disabled = true;
+            try {
+                const res = await window.HaloTorneoPromo.setPromoMode(nextMode);
+                if (res.ok) {
+                    showToast(nextMode === 'force_off' ? 'Tráiler promocional ocultado globalmente.' : 'Tráiler promocional activado por 3 días.');
+                } else {
+                    showToast('No se pudo actualizar el estado del tráiler en la nube.');
+                }
+                await refreshAdminPromoStateUI();
+            } finally {
+                if (sw) sw.disabled = false;
+            }
+        };
+
+        window.setAdminTrailerPreset = async function(mode) {
+            if (!isAdminMode || !window.HaloTorneoPromo) return;
+            const res = await window.HaloTorneoPromo.setPromoMode(mode);
+            if (res.ok) {
+                showToast(mode === 'force_on' ? 'Tráiler fijado como siempre visible.' : 'Temporizador del tráiler reiniciado a 3 días.');
+            } else {
+                showToast('No se pudo guardar la configuración del tráiler.');
+            }
+            await refreshAdminPromoStateUI();
+        };
+
+        window.previewAdminTrailer = function() {
+            closeAdminCommandCenter();
+            window.HaloTorneoPromo?.open?.();
+        };
+
+        window.launchAdminJurado = function() {
+            closeAdminCommandCenter();
+            openTribunalModal();
+        };
+
+        window.openAdminCommandCenter = function() {
+            if (!isAdminMode) {
+                handleAdminButtonClick();
+                return;
+            }
+            const modal = document.getElementById('adminCommandCenter');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            requestAnimationFrame(() => {
+                modal.dataset.open = 'true';
+            });
+            window.renderAdminQuickRoster();
+            refreshAdminJuradoStatusUI();
+            refreshAdminPromoStateUI();
+        };
+
+        window.closeAdminCommandCenter = function() {
+            const modal = document.getElementById('adminCommandCenter');
+            if (!modal) return;
+            modal.dataset.open = 'false';
+            setTimeout(() => {
+                if (modal.dataset.open !== 'true') {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }, 170);
+        };
+
+        window.exitAdminMode = function() {
+            isAdminMode = false;
+            document.getElementById('adminActivePill')?.classList.add('hidden');
+            const admLbl = document.getElementById('sidebarAdminLabel');
+            if (admLbl) admLbl.innerText = 'Modo Administrador';
+            updateTribunalBannerUI();
+            renderRoster();
+            closeAdminCommandCenter();
+            showToast('Sesión de administrador cerrada.');
         };
 
         function updateTribunalBannerUI() {
@@ -2940,6 +3427,183 @@
             initThreeDroneBackground();
             startHaloInfiniteBootSequence();
         });
+    </script>
+
+    <!-- ========================================================= -->
+    <!-- MODAL PROMO AUTOMÁTICO MODO TORNEO (3 DÍAS + CONTROL ADMIN) -->
+    <!-- ========================================================= -->
+    <div id="torneoPromoModal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6">
+        <div class="relative w-full max-w-4xl rounded-2xl bg-[#0b0e14] border-2 border-[#c9a255]/80 shadow-[0_0_50px_rgba(201,162,85,0.28)] overflow-hidden">
+            <button type="button" id="torneoPromoCloseBtn" onclick="window.HaloTorneoPromo?.close()" aria-label="Cerrar tráiler"
+                class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-black/80 hover:bg-rose-600 border border-white/30 text-white text-base font-bold flex items-center justify-center shadow-lg transition">
+                ✕
+            </button>
+
+            <div class="relative bg-black aspect-video w-full">
+                <video id="torneoPromoVideo" class="w-full h-full object-contain" playsinline preload="metadata" controls controlsList="nodownload">
+                    <source src="assets/torneo-promo.mp4" type="video/mp4">
+                </video>
+                <button type="button" id="torneoPromoUnmuteBtn" onclick="window.HaloTorneoPromo?.unmute()"
+                    class="hidden absolute bottom-14 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-xs shadow-xl flex items-center gap-2">
+                    <i class="fa-solid fa-volume-high"></i> Activar sonido del Sargento
+                </button>
+            </div>
+
+            <div class="px-4 py-3 bg-[#0f131b] border-t border-[#c9a255]/30 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="px-2 py-0.5 rounded bg-[#c9a255]/20 border border-[#c9a255]/50 text-[#facc15] font-orbitron font-bold text-[10px]">NUEVO MODO</span>
+                    <span class="text-slate-200 font-semibold">Torneo HCS • Bracket en vivo • Discord Parcero • Podio Winners</span>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="window.HaloTorneoPromo?.goToTorneo()"
+                        class="px-3.5 py-1.5 rounded-lg bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-xs transition shadow">
+                        🏆 Ir al Modo Torneo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function initHaloTorneoPromo() {
+            const PROMO_DOC_URL = 'https://firestore.googleapis.com/v1/projects/halomatch-d9240/databases/(default)/documents/artifacts/halomatch-d9240/public/data/tournamentMeta/promoConfig';
+            const DEFAULT_START_AT = new Date('2026-11-22T01:00:00Z').getTime();
+            const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+            let autoPlayedThisVisit = false;
+
+            function parsePromoDoc(doc) {
+                const f = doc?.fields || {};
+                const mode = f.mode?.stringValue || 'auto';
+                const startAt = Number(f.startAt?.integerValue || f.startAt?.doubleValue || DEFAULT_START_AT);
+                const durationDays = Number(f.durationDays?.integerValue || f.durationDays?.doubleValue || 3);
+                const updatedAt = Number(f.updatedAt?.integerValue || 0);
+                return { mode, startAt, durationDays, updatedAt };
+            }
+
+            async function getPromoConfig() {
+                try {
+                    const res = await fetch(`${PROMO_DOC_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                    if (res.ok) {
+                        const doc = await res.json();
+                        if (doc && doc.fields) return parsePromoDoc(doc);
+                    }
+                } catch (e) {}
+                return { mode: 'auto', startAt: DEFAULT_START_AT, durationDays: 3, updatedAt: 0 };
+            }
+
+            function isPromoActive(cfg) {
+                if (!cfg) return false;
+                if (cfg.mode === 'force_off') return false;
+                if (cfg.mode === 'force_on') return true;
+                const durMs = Math.max(1, Number(cfg.durationDays || 3)) * 24 * 60 * 60 * 1000;
+                const start = Number(cfg.startAt || DEFAULT_START_AT);
+                const now = Date.now();
+                return now >= start && now <= (start + durMs);
+            }
+
+            async function setPromoMode(mode, adminKey) {
+                const now = Date.now();
+                const payload = {
+                    mode,
+                    startAt: mode === 'auto' ? now : DEFAULT_START_AT,
+                    durationDays: 3,
+                    updatedAt: now
+                };
+                const res = await fetch(PROMO_DOC_URL, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fields: {
+                            mode: { stringValue: payload.mode },
+                            startAt: { integerValue: String(payload.startAt) },
+                            durationDays: { integerValue: String(payload.durationDays) },
+                            updatedAt: { integerValue: String(payload.updatedAt) }
+                        }
+                    })
+                });
+                return { ok: res.ok, config: payload };
+            }
+
+            function openPromoModal() {
+                const modal = document.getElementById('torneoPromoModal');
+                const video = document.getElementById('torneoPromoVideo');
+                const unmuteBtn = document.getElementById('torneoPromoUnmuteBtn');
+                if (!modal || !video) return;
+
+                if (typeof window.stopYtIntroAudio === 'function') {
+                    try { window.stopYtIntroAudio(); } catch (e) {}
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (unmuteBtn) unmuteBtn.classList.add('hidden');
+                video.currentTime = 0;
+                video.muted = false;
+                video.volume = 1;
+
+                const playPromise = video.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(() => {
+                        video.muted = true;
+                        if (unmuteBtn) unmuteBtn.classList.remove('hidden');
+                        video.play().catch(() => {});
+                    });
+                }
+            }
+
+            function closePromoModal() {
+                const modal = document.getElementById('torneoPromoModal');
+                const video = document.getElementById('torneoPromoVideo');
+                if (video) {
+                    try { video.pause(); } catch (e) {}
+                }
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+
+            function unmutePromo() {
+                const video = document.getElementById('torneoPromoVideo');
+                const unmuteBtn = document.getElementById('torneoPromoUnmuteBtn');
+                if (video) {
+                    video.muted = false;
+                    video.volume = 1;
+                    video.play().catch(() => {});
+                }
+                if (unmuteBtn) unmuteBtn.classList.add('hidden');
+            }
+
+            async function maybeAutoOpenAfterMenu() {
+                if (autoPlayedThisVisit) return;
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('torneo')) return;
+                autoPlayedThisVisit = true;
+                const cfg = await getPromoConfig();
+                if (isPromoActive(cfg)) {
+                    openPromoModal();
+                }
+            }
+
+            function goToTorneo() {
+                closePromoModal();
+                if (typeof window.openTournamentModule === 'function') {
+                    window.openTournamentModule('create');
+                }
+            }
+
+            window.HaloTorneoPromo = {
+                open: openPromoModal,
+                close: closePromoModal,
+                unmute: unmutePromo,
+                goToTorneo,
+                maybeAutoOpenAfterMenu,
+                getPromoConfig,
+                isPromoActive,
+                setPromoMode,
+                THREE_DAYS_MS
+            };
+        })();
     </script>
 
     <!-- ========================================================= -->

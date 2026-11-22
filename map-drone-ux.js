@@ -1387,6 +1387,9 @@ function fadeOutHaloIntroOverlay() {
         overlay.style.display = 'none';
         overlay.style.visibility = 'hidden';
         overlay.style.zIndex = '-1';
+        if (typeof window.HaloTorneoPromo?.maybeAutoOpenAfterMenu === 'function') {
+            window.HaloTorneoPromo.maybeAutoOpenAfterMenu();
+        }
     }, 1850);
 }
 
