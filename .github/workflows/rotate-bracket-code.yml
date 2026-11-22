@@ -1,0 +1,19 @@
+name: Rotar Clave Temporal Bracket Halo Match
+
+on:
+  schedule:
+    # Cada 6 horas exactas (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  rotate-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generar y enviar clave temporal de 6 dígitos
+        run: |
+          status=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST "https://halomatch.vercel.app/api/rotate-bracket-code" \
+            -H "x-cron-secret: ${{ secrets.CRON_ROTATE_SECRET }}")
+          echo "HTTP $status"
+          cat /tmp/resp.json
+          test "$status" -eq 200
