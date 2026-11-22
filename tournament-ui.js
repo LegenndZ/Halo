@@ -330,6 +330,10 @@
                             <span>✖</span>
                             <span>Cancelar</span>
                         </button>
+                        <a id="trnBtnDiscordBracket" href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="hidden px-2.5 py-1.5 rounded bg-[#5865F2]/25 hover:bg-[#5865F2]/40 border border-[#5865F2]/75 text-indigo-100 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition active:scale-[0.97] shrink-0" title="Ir al Discord oficial del torneo">
+                            <i class="fa-brands fa-discord text-sm"></i>
+                            <span>Discord</span>
+                        </a>
                         <div class="hidden md:block">
                             <div class="font-hcs font-bold text-base tracking-wider text-white uppercase leading-none">🏆 TORNEO HCS</div>
                             <div class="text-[11px] text-slate-400"><span id="trnTopBadge" class="text-amber-300 font-semibold">Sin torneo activo</span> • <span id="trnRealtimeBadge" class="text-emerald-300">Firestore Ready</span></div>
@@ -512,6 +516,23 @@
                             </div>
                             <button type="button" id="trnBtnExitAdmin" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron text-[10px]">Salir Admin</button>
                         </div>
+                    </div>
+
+                    <div id="trnDiscordGuideBanner" class="bg-[#101424]/95 border-b border-[#5865F2]/40 px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                        <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-slate-200">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-brands fa-discord text-[#7289da] text-sm"></i>
+                                <span>En el chat <strong class="text-cyan-300">#torneo</strong> chatean con <strong class="text-[#facc15]">Parcero</strong> y él se encarga de actualizar el Bracket en vivo.</span>
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-headphones text-emerald-300 text-xs"></i>
+                                <span>Únanse al <strong>canal de voz del color de su equipo</strong> para coordinar sus partidas.</span>
+                            </span>
+                        </div>
+                        <a href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-[#5865F2] hover:bg-[#4752C4] text-white font-orbitron font-bold text-[10px] tracking-wide flex items-center gap-1.5 transition active:scale-[0.97] shrink-0">
+                            <i class="fa-brands fa-discord"></i>
+                            <span>Ir a Discord →</span>
+                        </a>
                     </div>
 
                     <div id="trnBracketCanvasWrap" class="forerunner-arena-bg overflow-x-auto p-4 sm:p-6 min-h-[460px]">
@@ -827,6 +848,28 @@
             } else {
                 cancelBtn.classList.add('hidden');
                 cancelBtn.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        const discordBtn = document.getElementById('trnBtnDiscordBracket');
+        if (discordBtn) {
+            if (state.activeTournament?.id) {
+                discordBtn.classList.remove('hidden');
+                discordBtn.style.removeProperty('display');
+            } else {
+                discordBtn.classList.add('hidden');
+                discordBtn.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        const guideBanner = document.getElementById('trnDiscordGuideBanner');
+        if (guideBanner) {
+            if (state.activeTournament?.id) {
+                guideBanner.classList.remove('hidden');
+                guideBanner.style.removeProperty('display');
+            } else {
+                guideBanner.classList.add('hidden');
+                guideBanner.style.setProperty('display', 'none', 'important');
             }
         }
 
