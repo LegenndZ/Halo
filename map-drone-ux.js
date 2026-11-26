@@ -1037,6 +1037,7 @@ function updateMuteButtonsUI() {
             ? '<i class="fa-solid fa-volume-xmark text-rose-400"></i>'
             : '<i class="fa-solid fa-volume-high text-cyan-300"></i>';
         headerBtn.title = haloAudioMuted ? 'Activar Audio' : 'Silenciar Audio';
+        headerBtn.setAttribute('aria-label', haloAudioMuted ? 'Activar Audio' : 'Silenciar Audio');
         headerBtn.classList.toggle('border-rose-400/60', haloAudioMuted);
         headerBtn.classList.toggle('border-cyan-500/40', !haloAudioMuted);
     }
@@ -1266,6 +1267,10 @@ window.toggleHaloAudioMute = function() {
                 haloYtPlayer.mute();
                 haloYtPlayer.pauseVideo();
             } catch (e) {}
+        }
+        const promoVideo = document.getElementById('torneoPromoVideo');
+        if (promoVideo) {
+            promoVideo.muted = true;
         }
     } else {
         loadYouTubeIframeAPI();
