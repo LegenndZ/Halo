@@ -278,6 +278,16 @@
                     </div>
                 </button>
 
+                <button type="button" onclick="toggleSidebar(false); openCalloutsModal();" class="w-full p-3 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/45 text-left flex items-center gap-3 transition">
+                    <div class="w-9 h-9 rounded bg-sky-500/20 border border-sky-400 flex items-center justify-center text-sky-300 shrink-0">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div>
+                        <div class="font-orbitron font-bold text-xs text-white">Callouts de Mapas</div>
+                        <div class="text-[11px] text-sky-300">Posiciones rápidas para equipo</div>
+                    </div>
+                </button>
+
                 <button type="button" onclick="toggleSidebar(false); handleAdminButtonClick();" class="w-full p-3 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/40 text-left flex items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-purple-500/20 border border-purple-400 flex items-center justify-center text-purple-300 shrink-0">
                         <i class="fa-solid fa-shield-halved"></i>
@@ -335,6 +345,10 @@
                 <button type="button" onclick="openCoachIAModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-brain text-emerald-300"></i>
                     <span>Coach IA Gratis</span>
+                </button>
+                <button type="button" onclick="openCalloutsModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/60 text-sky-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-map-location-dot text-sky-300"></i>
+                    <span>Callouts</span>
                 </button>
                 <button type="button" onclick="openHowItWorksModal('balance')" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-100 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-circle-play text-cyan-300"></i>
@@ -1245,6 +1259,50 @@
     </div>
 
     <!-- ========================================================= -->
+    <!-- MODAL 4B: CALLOUTS DE MAPAS (GAMECOACH + GUÍA EN EQUIPO)  -->
+    <!-- ========================================================= -->
+    <div id="calloutsModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="if(event.target===this) closeCalloutsModal()">
+        <div class="hud-panel w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-5 border border-sky-400/60 max-h-[90dvh] overflow-y-auto overscroll-contain space-y-4">
+            <div class="flex items-center justify-between border-b border-sky-500/30 pb-3">
+                <div>
+                    <span class="text-[10px] font-orbitron text-sky-400 tracking-widest uppercase block">COMUNICACIÓN TÁCTICA EN EQUIPO</span>
+                    <h3 class="font-orbitron font-bold text-base sm:text-lg text-white"><i class="fa-solid fa-map-location-dot text-sky-300 mr-2"></i>CALLOUTS DE MAPAS</h3>
+                </div>
+                <button type="button" onclick="closeCalloutsModal()" aria-label="Cerrar Callouts" class="ek-btn w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <ol class="space-y-2.5 text-xs sm:text-sm text-slate-200 list-none">
+                <li class="p-3 rounded-xl bg-[#051324] border border-sky-500/30 flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400 text-sky-300 font-orbitron font-bold text-xs flex items-center justify-center shrink-0">1</span>
+                    <div>Abres el link oficial de mapas: <a href="https://gamecoach.gg/games/haloinfinite" target="_blank" rel="noopener noreferrer" class="underline text-sky-300 break-all">https://gamecoach.gg/games/haloinfinite</a></div>
+                </li>
+                <li class="p-3 rounded-xl bg-[#051324] border border-sky-500/30 flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400 text-sky-300 font-orbitron font-bold text-xs flex items-center justify-center shrink-0">2</span>
+                    <div><strong>Eliges el mapa</strong> que vas a jugar en Halo Infinite.</div>
+                </li>
+                <li class="p-3 rounded-xl bg-[#051324] border border-sky-500/30 flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400 text-sky-300 font-orbitron font-bold text-xs flex items-center justify-center shrink-0">3</span>
+                    <div>Seleccionas la opción <strong>Callouts</strong> para ver cada zona marcada sobre el mapa.</div>
+                </li>
+            </ol>
+
+            <div class="p-3.5 rounded-xl bg-emerald-950/35 border border-emerald-400/45 text-xs sm:text-sm text-emerald-100 leading-relaxed">
+                <i class="fa-solid fa-headset text-emerald-300 mr-1.5"></i>
+                <strong>¡Suerte con tu comunicación en equipo!</strong> Recuerda usar <strong>palabras cortas</strong> para comunicar de forma rápida y ágil una posición a tus compañeros.
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
+                <button type="button" onclick="closeCalloutsModal()" class="ek-btn min-h-[42px] px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-orbitron font-bold text-xs">Cerrar</button>
+                <a href="https://gamecoach.gg/games/haloinfinite" target="_blank" rel="noopener noreferrer" class="ek-btn min-h-[42px] px-5 py-2 rounded-lg bg-sky-400 hover:bg-sky-300 text-black font-orbitron font-black text-xs inline-flex items-center justify-center gap-2 shadow">
+                    <span>Abrir Callouts en GameCoach →</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
     <!-- MODAL 5: COACH IA SPARTAN PRO (ANÁLISIS + PLAN 3 DÍAS)    -->
     <!-- ========================================================= -->
     <div id="coachIAModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
@@ -2073,6 +2131,16 @@
                 try { vid.pause(); } catch (e) {}
                 if (btn) btn.innerHTML = '<i class="fa-solid fa-play text-[10px]"></i> <span>Ver Video</span>';
             }
+        };
+
+        window.openCalloutsModal = function() {
+            const m = document.getElementById('calloutsModal');
+            if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        };
+
+        window.closeCalloutsModal = function() {
+            const m = document.getElementById('calloutsModal');
+            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
         };
 
         window.openHowItWorksModal = function(initialTab) {
