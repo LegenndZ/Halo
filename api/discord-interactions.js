@@ -522,6 +522,36 @@ export default async function handler(req, res) {
                 }]
             });
         }
+        if (cmdName === 'jugar') {
+            const rawMode = String(getOpt('modo') || '4v4').toLowerCase();
+            const maxSlots = rawMode === '2v2' ? 4 : (rawMode === '3v3' ? 6 : 8);
+            const modeLabel = maxSlots === 4 ? '2v2' : (maxSlots === 6 ? '3v3' : '4v4');
+            const initialPlayers = userId ? [`<@${userId}>`] : [];
+            return res.status(200).json({
+                type: 4,
+                data: {
+                    embeds: [{
+                        title: `🎮 Partida Personalizada ${modeLabel} • Halo Match`,
+                        color: 0x06b6d4,
+                        description: [
+                            `Armando lobby **${modeLabel}** para jugar parejos.`,
+                            '',
+                            `**Anotados (${initialPlayers.length}/${maxSlots}):**`,
+                            initialPlayers.length ? initialPlayers.map((m, idx) => `${idx + 1}. ${m}`).join('\n') : '_Nadie todavía_'
+                        ].join('\n'),
+                        footer: { text: 'Al completar cupos, entren a halomatch.vercel.app para balancear equipos' }
+                    }],
+                    components: [{
+                        type: 1,
+                        components: [
+                            { type: 2, style: 3, label: 'Me apunto', emoji: { name: '✋' }, custom_id: `lfg_join:${maxSlots}:${modeLabel}` },
+                            { type: 2, style: 4, label: 'Salirme', emoji: { name: '🚪' }, custom_id: `lfg_leave:${maxSlots}:${modeLabel}` },
+                            { type: 2, style: 5, label: 'Balancear en Halo Match', url: 'https://halomatch.vercel.app' }
+                        ]
+                    }]
+                }
+            });
+        }
         return ephemeralResp(res, { content: '⚠️ Comando no reconocido.' });
     }
 
@@ -543,6 +573,50 @@ export default async function handler(req, res) {
         const customId = String((interaction.data && interaction.data.custom_id) || '');
         const parts = customId.split(':');
         const actionType = parts[0];
+
+        if (actionType === 'lfg_join' || actionType === 'lfg_leave') {
+            const maxSlots = Math.max(4, Math.min(16, Number(parts[1] || 8)));
+            const modeLabel = String(parts[2] || '4v4');
+            const prevDesc = String((interaction.message && interaction.message.embeds && interaction.message.embeds[0] && interaction.message.embeds[0].description) || '');
+            const mentions = [...new Set((prevDesc.match(/<@\d+>/g) || []))];
+            const selfTag = userId ? `<@${userId}>` : '';
+
+            if (actionType === 'lfg_join' && selfTag && !mentions.includes(selfTag)) {
+                if (mentions.length >= maxSlots) {
+                    return ephemeralResp(res, { content: `⚠️ El lobby **${modeLabel}** ya completó los ${maxSlots} cupos.` });
+                }
+                mentions.push(selfTag);
+            } else if (actionType === 'lfg_leave' && selfTag) {
+                const idx = mentions.indexOf(selfTag);
+                if (idx > -1) mentions.splice(idx, 1);
+            }
+
+            const statusLine = mentions.length >= maxSlots
+                ? `🔥 **¡LOBBY LLENO (${mentions.length}/${maxSlots})!** Pasen a **halomatch.vercel.app** para equilibrar los equipos.`
+                : `Armando lobby **${modeLabel}** para jugar parejos.`;
+
+            return updateMessageResp(res, {
+                embeds: [{
+                    title: `🎮 Partida Personalizada ${modeLabel} • Halo Match`,
+                    color: mentions.length >= maxSlots ? 0x10b981 : 0x06b6d4,
+                    description: [
+                        statusLine,
+                        '',
+                        `**Anotados (${mentions.length}/${maxSlots}):**`,
+                        mentions.length ? mentions.map((m, idx) => `${idx + 1}. ${m}`).join('\n') : '_Nadie todavía_'
+                    ].join('\n'),
+                    footer: { text: 'Al completar cupos, entren a halomatch.vercel.app para balancear equipos' }
+                }],
+                components: [{
+                    type: 1,
+                    components: [
+                        { type: 2, style: 3, label: 'Me apunto', emoji: { name: '✋' }, custom_id: `lfg_join:${maxSlots}:${modeLabel}` },
+                        { type: 2, style: 4, label: 'Salirme', emoji: { name: '🚪' }, custom_id: `lfg_leave:${maxSlots}:${modeLabel}` },
+                        { type: 2, style: 5, label: 'Balancear en Halo Match', url: 'https://halomatch.vercel.app' }
+                    ]
+                }]
+            });
+        }
 
         if (actionType === 'parcero_link') {
             return openLinkModalResp(res, parts[1] || 'ACTIVE');

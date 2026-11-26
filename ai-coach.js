@@ -1601,20 +1601,29 @@ ${plan.configAdvice}
                 ${haloBulletsHtml}
             </ul>
 
-            <!-- Barra de Exportación Rápida (WhatsApp / PNG HD / PDF) -->
+            <!-- Barra de Exportación Rápida (Tarjeta Viral / WhatsApp / PNG HD / PDF) -->
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-cyan-400/20">
-                <span class="text-[10px] font-orbitron text-slate-400 uppercase"><i class="fa-solid fa-bolt text-cyan-300 mr-1"></i>Acciones Rápidas y Exportación</span>
+                <span class="text-[10px] font-orbitron text-slate-400 uppercase"><i class="fa-solid fa-bolt text-cyan-300 mr-1"></i>Comparte tu Expediente Spartan</span>
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <button type="button" onclick="copyCoachReportToWhatsApp()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-xs flex items-center gap-1.5">
+                    <button type="button" onclick="window.shareCoachSpartanCard()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-2 bg-gradient-to-r from-[#c9a255] to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-orbitron font-black text-xs flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-share-nodes text-xs"></i> Tarjeta Viral
+                    </button>
+                    <button type="button" onclick="copyCoachReportToWhatsApp()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-black text-xs flex items-center gap-1.5">
                         <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
                     </button>
-                    <button type="button" onclick="downloadCoachReportVisualPNG()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-black font-orbitron font-black text-xs flex items-center gap-1.5">
+                    <button type="button" onclick="downloadCoachReportVisualPNG()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-orbitron font-black text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-image text-xs"></i> PNG HD
                     </button>
-                    <button type="button" onclick="downloadCoachReportCleanHTML()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-1.5 bg-amber-400/20 hover:bg-amber-400/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-xs flex items-center gap-1.5">
+                    <button type="button" onclick="downloadCoachReportCleanHTML()" class="flex-1 sm:flex-initial justify-center hud-btn px-3 py-2 bg-amber-400/20 hover:bg-amber-400/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-file-arrow-down text-xs"></i> PDF / HTML
                     </button>
                 </div>
+            </div>
+
+            <!-- Invitación directa a comunidad Discord -->
+            <div class="rounded-lg bg-[#5865F2]/15 border border-[#5865F2]/45 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="text-slate-200"><i class="fa-brands fa-discord text-[#7289da] mr-1.5"></i>¿Quieres probar este plan en <strong>4v4 parejos o Torneos</strong>?</span>
+                <a href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-[#5865F2] hover:bg-[#4752C4] text-white font-orbitron font-bold text-[10px]">Ir al Discord →</a>
             </div>
         </div>
 
@@ -1821,6 +1830,168 @@ window.copyCoachReportToWhatsApp = function() {
     if (typeof window.showToast === 'function') {
         window.showToast('¡Expediente completo del Coach IA V2 copiado para WhatsApp!');
     }
+};
+
+window.shareCoachSpartanCard = function() {
+    const stats = window._lastCoachStats;
+    const plan = window._lastCoachPlan;
+    if (!stats || !plan) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('Primero genera el análisis de un Spartan.');
+        }
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const W = 1080;
+    const H = 1350;
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#040914');
+    bg.addColorStop(0.5, '#071a33');
+    bg.addColorStop(1, '#030811');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle tactical grid
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 45) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 45) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // Frame border
+    ctx.strokeStyle = '#c9a255';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(28, 28, W - 56, H - 56);
+
+    // Header pill
+    ctx.fillStyle = 'rgba(201, 162, 85, 0.16)';
+    ctx.fillRect(64, 68, W - 128, 66);
+    ctx.strokeStyle = 'rgba(201, 162, 85, 0.65)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(64, 68, W - 128, 66);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 24px Orbitron, sans-serif';
+    ctx.fillText('HALO MATCH  //  EXPEDIENTE COACH IA', 92, 110);
+
+    // Gamertag + Rank Badge
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 58px Orbitron, sans-serif';
+    ctx.fillText(String(stats.gamertag || 'SPARTAN').toUpperCase().slice(0, 18), 64, 220);
+
+    const primaryRole = plan.roleInfo?.primaryRole;
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 28px Orbitron, sans-serif';
+    ctx.fillText(`RANGO ${stats.rank}  •  ${stats.pts} PTS  •  ${primaryRole ? primaryRole.shortTitle.toUpperCase() : 'SPARTAN'}`, 64, 272);
+
+    // Accent bar
+    ctx.fillStyle = '#c9a255';
+    ctx.fillRect(64, 304, W - 128, 4);
+
+    // 4 Big KPI boxes
+    const kpis = [
+        { lbl: 'K/D RANKED', val: fmtOptShort(stats.kd), sub: `Meta: ${plan.targetGodKd}`, col: '#38bdf8' },
+        { lbl: 'ARENA CSR', val: fmtOptShort(stats.csr), sub: plan.arenaLeagueName || 'Ranked Arena', col: '#10b981' },
+        { lbl: 'DAÑO / PARTIDA', val: fmtOptShort(stats.dmgPerMatch), sub: 'Promedio por juego', col: '#facc15' },
+        { lbl: 'PRECISIÓN', val: fmtOptShort(stats.acc, '%'), sub: stats.hsPct !== null ? `${stats.hsPct}% Headshot` : 'Telemetría real', col: '#c084fc' }
+    ];
+    const bw = 458;
+    const bh = 185;
+    kpis.forEach((k, i) => {
+        const colIdx = i % 2;
+        const rowIdx = Math.floor(i / 2);
+        const bx = 64 + colIdx * (bw + 36);
+        const by = 342 + rowIdx * (bh + 28);
+
+        ctx.fillStyle = 'rgba(4, 18, 36, 0.92)';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx, by, bw, bh);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 20px Orbitron, sans-serif';
+        ctx.fillText(k.lbl, bx + 26, by + 44);
+
+        ctx.fillStyle = k.col;
+        ctx.font = '900 54px Orbitron, sans-serif';
+        ctx.fillText(k.val, bx + 26, by + 114);
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '600 22px Rajdhani, sans-serif';
+        ctx.fillText(String(k.sub).slice(0, 32), bx + 26, by + 156);
+    });
+
+    // Focus / Plan card
+    const drawBox = (yPos, title, text, accent) => {
+        ctx.fillStyle = 'rgba(5, 22, 43, 0.95)';
+        ctx.fillRect(64, yPos, W - 128, 175);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(64, yPos, W - 128, 175);
+        ctx.fillStyle = accent;
+        ctx.fillRect(64, yPos, 10, 175);
+
+        ctx.font = 'bold 22px Orbitron, sans-serif';
+        ctx.fillText(title, 94, yPos + 42);
+
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '600 26px Rajdhani, sans-serif';
+        const lines = wrapCanvasLines(ctx, text, W - 180).slice(0, 3);
+        lines.forEach((ln, idx) => ctx.fillText(ln, 94, yPos + 84 + idx * 34));
+    };
+
+    drawBox(780, 'FORTALEZA PRINCIPAL', plan.strengths || 'Desempeño sólido en duelos 4v4.', '#10b981');
+    drawBox(980, 'ENFOQUE DEL PLAN DE 3 DÍAS', plan.weakness || plan.activeFocusLabel, '#facc15');
+
+    // Viral CTA Footer
+    ctx.fillStyle = 'rgba(88, 101, 242, 0.22)';
+    ctx.fillRect(64, 1185, W - 128, 105);
+    ctx.strokeStyle = 'rgba(114, 137, 218, 0.65)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(64, 1185, W - 128, 105);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px Orbitron, sans-serif';
+    ctx.fillText('MIDETE GRATIS EN: halomatch.vercel.app', 92, 1230);
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = 'bold 22px Rajdhani, sans-serif';
+    ctx.fillText('Torneos HCS + Discord Oficial: discord.gg/3K4PCc3YU', 92, 1268);
+
+    const safeName = String(stats.gamertag || 'Spartan').replace(/[^a-z0-9]/gi, '_');
+    const filename = `Tarjeta_Spartan_${safeName}.png`;
+
+    canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        try {
+            const file = new File([blob], filename, { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: `Expediente Spartan — ${stats.gamertag}`,
+                    text: `Mira mi tarjeta de Coach IA en Halo Match (${stats.rank} • ${stats.pts} PTS). Pruébalo gratis en https://halomatch.vercel.app`,
+                    files: [file]
+                });
+                return;
+            }
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        if (typeof window.showToast === 'function') {
+            window.showToast(`¡Tarjeta viral de ${stats.gamertag} descargada! Compártela en WhatsApp o Discord.`);
+        }
+    }, 'image/png');
 };
 
 function wrapCanvasLines(ctx, text, maxWidth) {

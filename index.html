@@ -10,7 +10,19 @@
     <meta name="apple-mobile-web-app-title" content="Halo Match">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon-64.png">
-    <title>UNSC Tac-Balancer | Halo Infinite Matchmaker</title>
+    <title>Halo Match — Balanceador, Torneos HCS y Coach IA | Halo Infinite</title>
+    <meta name="description" content="Arma partidas personalizadas 4v4, 3v3 y 2v2 totalmente parejas en Halo Infinite, organiza torneos HCS con Bracket en vivo en Discord con Parcero Bot y obtén tu análisis gratis con Coach IA.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://halomatch.vercel.app/">
+    <meta property="og:title" content="Halo Match — Balanceador, Torneos HCS y Coach IA">
+    <meta property="og:description" content="Equilibra escuadras al instante, lanza torneos con Bracket en vivo en Discord y mejora tu K/D gratis con Coach IA.">
+    <meta property="og:image" content="https://halomatch.vercel.app/assets/og-halomatch.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Halo Match — Balanceador, Torneos HCS y Coach IA">
+    <meta name="twitter:description" content="Equilibra escuadras al instante, lanza torneos con Bracket en vivo en Discord y mejora tu K/D gratis con Coach IA.">
+    <meta name="twitter:image" content="https://halomatch.vercel.app/assets/og-halomatch.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -58,7 +70,7 @@
             </h2>
 
             <button type="button" onclick="event.stopPropagation(); skipHaloIntroNow()" class="mt-7 px-6 py-2.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-300/70 text-white font-orbitron font-bold text-xs tracking-[0.2em] uppercase shadow-[0_0_25px_rgba(0,229,255,0.35)] transition">
-                <i class="fa-solid fa-play mr-2 text-cyan-300"></i><span id="haloIntroAudioHint">ENTRAR AL ROSTER</span>
+                <i class="fa-solid fa-play mr-2 text-cyan-300"></i><span id="haloIntroAudioHint">ENTRAR A HALO MATCH</span>
             </button>
 
             <div class="w-56 sm:w-72 h-1 bg-slate-800/90 rounded-full overflow-hidden mt-4 border border-cyan-500/30">
@@ -69,7 +81,7 @@
         <!-- Pie de la Intro con firma en Verde Neón Halo Infinite -->
         <div class="relative z-10 w-full text-center pb-5 px-4">
             <span class="font-orbitron font-black text-xs sm:text-sm tracking-[0.22em] uppercase halo-neon-green-sig">
-                Desing By Legennd Zr
+                Design By Legennd Zr
             </span>
         </div>
     </div>
@@ -97,18 +109,23 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- BANNER FLOTANTE EN VIVO DEL TRIBUNAL SPARTAN ONI          -->
+    <!-- BANNER FLOTANTE EN VIVO Y CONCLUSIÓN DEL TRIBUNAL ONI     -->
     <!-- ========================================================= -->
     <div id="liveTribunalBanner" class="hidden relative z-30 bg-gradient-to-r from-amber-950/95 via-amber-900/90 to-amber-950/95 border-b border-amber-400/60 px-3 py-2 text-xs">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                <span class="font-orbitron font-bold text-amber-300 uppercase">⚖️ TRIBUNAL SPARTAN ABIERTO EN VIVO</span>
-                <span class="text-amber-100 hidden sm:inline">• Vota +1 PT y -1 PT (Tiempo restante: <strong id="bannerTribunalCountdown">10:00</strong>)</span>
+            <div class="flex items-center gap-2 min-w-0">
+                <span id="bannerTribunalPulse" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0"></span>
+                <span id="bannerTribunalTitle" class="font-orbitron font-bold text-amber-300 uppercase">⚖️ TRIBUNAL EN VIVO</span>
+                <span id="bannerTribunalMeta" class="text-amber-100 truncate">• <strong id="bannerTribunalCountdown">04:00</strong> • <strong id="bannerTribunalVotes">0/8</strong> redes</span>
             </div>
-            <button type="button" onclick="openTribunalModal()" class="hud-btn px-3 py-1 bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-[11px] uppercase">
-                Ir a Votar Ahora
-            </button>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button id="bannerTribunalActionBtn" type="button" onclick="openTribunalModal()" class="ek-btn px-3 py-1 rounded bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-[11px] uppercase">
+                    Votar Ahora
+                </button>
+                <button id="bannerTribunalDismissBtn" type="button" onclick="dismissTribunalConclusionBanner()" class="hidden ek-btn w-7 h-7 rounded bg-black/40 hover:bg-black/70 text-slate-200 flex items-center justify-center" aria-label="Cerrar conclusión">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -171,8 +188,8 @@
             </div>
         </div>
 
-        <!-- Barra de Control de Mapas del Dron 3D + Telemetría HUD UNSC -->
-        <div class="max-w-7xl mx-auto pt-2 mt-2 border-t border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
+        <!-- Barra de Control de Mapas del Dron 3D + Telemetría HUD UNSC (Oculta en UI, funcional en segundo plano) -->
+        <div class="hidden max-w-7xl mx-auto pt-2 mt-2 border-t border-cyan-500/20 items-center justify-between gap-2">
             <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 <span class="text-[10px] font-orbitron text-slate-400 uppercase mr-1 shrink-0"><i class="fa-solid fa-drone mr-1 text-cyan-400"></i>Dron 3D:</span>
                 <button id="mapBtn-streets" type="button" onclick="setDroneMap('streets')" class="map-btn shrink-0 px-2.5 py-1 rounded text-xs font-bold transition bg-cyan-500/25 text-white border border-cyan-300">Calles</button>
@@ -251,13 +268,13 @@
                     </div>
                 </a>
 
-                <button id="sidebarTribunalBtn" type="button" onclick="toggleSidebar(false); openTribunalModal();" class="hidden w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left items-center gap-3 transition">
+                <button id="sidebarTribunalBtn" type="button" onclick="toggleSidebar(false); openTribunalModal();" class="flex w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
                         <i class="fa-solid fa-gavel"></i>
                     </div>
                     <div>
                         <div class="font-orbitron font-bold text-xs text-white">Tribunal Spartan ONI</div>
-                        <div class="text-[11px] text-amber-300">Votación comunitaria +1 / -1</div>
+                        <div class="text-[11px] text-amber-300">Votación comunitaria • 4 min • 1/día</div>
                     </div>
                 </button>
 
@@ -294,7 +311,7 @@
         </div>
 
         <div class="border-t border-cyan-500/20 pt-3 text-center">
-            <span class="font-orbitron font-bold text-[11px] halo-neon-green-sig block">Desing By Legennd Zr</span>
+            <span class="font-orbitron font-bold text-[11px] halo-neon-green-sig block">Design By Legennd Zr</span>
             <span class="text-[10px] text-slate-400">UNSC Tac-Balancer • Halo Infinite</span>
         </div>
     </aside>
@@ -302,7 +319,33 @@
     <!-- ========================================================= -->
     <!-- CONTENIDO PRINCIPAL: ROSTER OFICIAL + SIMULADOR ESCUADRAS -->
     <!-- ========================================================= -->
-    <main id="mainGridContainer" class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-2.5 sm:px-6 py-4 sm:py-5 grid grid-cols-1 gap-5 sm:gap-6 pb-24 lg:pb-8 transition-all duration-300">
+    <main id="mainGridContainer" class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-2.5 sm:px-6 py-4 sm:py-5 grid grid-cols-1 gap-4 sm:gap-6 pb-24 lg:pb-8 transition-all duration-300">
+
+        <!-- BARRA DE ACCESOS RÁPIDOS MOBILE-FIRST (DESCUBRIMIENTO INMEDIATO) -->
+        <nav id="mobileQuickActionBar" aria-label="Accesos rápidos de Halo Match" class="col-span-full w-full overflow-x-auto no-scrollbar pb-0.5" style="touch-action: pan-x;">
+            <div class="flex items-center gap-2 min-w-max">
+                <button type="button" onclick="openTournamentModule('create')" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <span>🏆</span>
+                    <span>Torneo HCS</span>
+                </button>
+                <button type="button" onclick="openTribunalModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-300/60 text-amber-100 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-gavel text-amber-300"></i>
+                    <span>Tribunal</span>
+                </button>
+                <button type="button" onclick="openCoachIAModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-brain text-emerald-300"></i>
+                    <span>Coach IA Gratis</span>
+                </button>
+                <button type="button" onclick="openHowItWorksModal('balance')" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-100 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-circle-play text-cyan-300"></i>
+                    <span>¿Cómo Funciona?</span>
+                </button>
+                <a href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-[#5865F2]/25 hover:bg-[#5865F2]/40 border border-[#5865F2]/75 text-indigo-100 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-brands fa-discord text-sm"></i>
+                    <span>Discord + Parcero</span>
+                </a>
+            </div>
+        </nav>
 
         <!-- COLUMNA 1: ROSTER OFICIAL MANSALVAS -->
         <section id="rosterSectionCol" class="w-full flex flex-col gap-4">
@@ -354,6 +397,23 @@
 
                 <!-- Lista de Spartans Agrupados por Rango -->
                 <div id="rosterContainer" class="space-y-4"></div>
+
+                <!-- Micro-Banner Comunitario Discord + Parcero -->
+                <div class="rounded-xl bg-gradient-to-r from-[#5865F2]/20 via-[#0d1629] to-cyan-950/40 border border-[#5865F2]/50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#5865F2]/30 border border-[#7289da] flex items-center justify-center text-indigo-200 shrink-0 mt-0.5">
+                            <i class="fa-brands fa-discord text-base"></i>
+                        </div>
+                        <div>
+                            <div class="font-orbitron font-bold text-xs text-white">¿Buscas partidas 4v4 parejas, torneos o voz por equipo?</div>
+                            <p class="text-xs text-slate-300 mt-0.5 leading-snug">Entra al Discord oficial, escribe <strong class="text-cyan-300">Hola</strong> en <strong class="text-white">#torneo</strong> para usar a <strong class="text-[#facc15]">Parcero Bot</strong> y únete al canal de voz de tu color.</p>
+                        </div>
+                    </div>
+                    <a href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="ek-btn min-h-[40px] px-4 py-2 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-orbitron font-bold text-xs flex items-center justify-center gap-2 shrink-0">
+                        <i class="fa-brands fa-discord"></i>
+                        <span>Entrar al Discord →</span>
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -1036,11 +1096,11 @@
                             <div class="rounded-lg bg-[#090d14] border border-slate-800 p-3 text-xs text-slate-300 space-y-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-slate-400">Duración de sesión</span>
-                                    <span class="font-semibold text-white">10 minutos</span>
+                                    <span class="font-semibold text-white">4 minutos (1/día)</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-slate-400">Quórum mínimo</span>
-                                    <span class="font-semibold text-white">8 Spartans</span>
+                                    <span class="font-semibold text-white">8 redes distintas</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="text-slate-400">Estado actual</span>
@@ -1051,7 +1111,7 @@
 
                         <div class="space-y-2">
                             <button id="adminJuradoActionBtn" type="button" onclick="launchAdminJurado()" class="ek-btn w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg">
-                                <i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (10 min)
+                                <i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (4 min)
                             </button>
                             <p class="text-[11px] text-slate-500 text-center">Al lanzarlo, todos los jugadores ven el aviso en vivo en la barra superior.</p>
                         </div>
@@ -1068,30 +1128,118 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL 4: ¿CÓMO FUNCIONA?                                  -->
+    <!-- MODAL 4: ¿CÓMO FUNCIONA? (GUÍA INTERACTIVA MOBILE-FIRST)  -->
     <!-- ========================================================= -->
-    <div id="howItWorksModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="hud-panel max-w-xl w-full p-5 sm:p-6 border border-cyan-400/50 my-8">
-            <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
-                <h3 class="font-orbitron font-bold text-lg text-cyan-300"><i class="fa-solid fa-circle-info mr-2"></i>¿CÓMO FUNCIONA EL SISTEMA?</h3>
-                <button onclick="closeHowItWorksModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+    <div id="howItWorksModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onclick="if(event.target===this) closeHowItWorksModal()">
+        <div class="hud-panel w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 border border-cyan-400/50 max-h-[92dvh] overflow-y-auto overscroll-contain space-y-4">
+            <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3">
+                <div>
+                    <span class="text-[10px] font-orbitron text-cyan-400 tracking-widest uppercase block">GUÍA RÁPIDA • HALO MATCH</span>
+                    <h3 class="font-orbitron font-bold text-base sm:text-lg text-white"><i class="fa-solid fa-circle-info text-cyan-300 mr-2"></i>¿CÓMO FUNCIONA EL SISTEMA?</h3>
+                </div>
+                <button type="button" onclick="closeHowItWorksModal()" aria-label="Cerrar guía" class="ek-btn w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
+
+            <!-- Video Explicativo Rápido Bajo Demanda -->
+            <div class="rounded-xl bg-[#041122] border border-[#c9a255]/50 overflow-hidden">
+                <div class="p-3 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-[#c9a255]/20 border border-[#c9a255]/60 text-[#facc15] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-film text-xs"></i>
+                        </span>
+                        <div>
+                            <div class="font-orbitron font-bold text-xs text-white">Tráiler Modo Torneo &amp; Discord (22s)</div>
+                            <div class="text-[11px] text-slate-300">Mira cómo funcionan las partidas, el Bracket y Parcero</div>
+                        </div>
+                    </div>
+                    <button id="howItWorksVideoBtn" type="button" onclick="toggleHowItWorksVideo()" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg bg-[#c9a255] hover:bg-[#dfb868] text-black font-orbitron font-bold text-[11px] flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-play text-[10px]"></i> <span>Ver Video</span>
+                    </button>
+                </div>
+                <div id="howItWorksVideoWrap" class="hidden border-t border-[#c9a255]/30 bg-black aspect-video w-full">
+                    <video id="howItWorksVideoEl" class="w-full h-full object-contain" controls playsinline preload="none">
+                        <source src="assets/torneo-promo.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+
+            <!-- 5 Pestañas Deslizables en Celular -->
+            <div class="overflow-x-auto no-scrollbar pb-1" style="touch-action: pan-x;">
+                <div class="flex items-center gap-1.5 min-w-max">
+                    <button type="button" data-hiw-tab="balance" onclick="switchHowItWorksTab('balance')" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border">⚖️ Balanceador</button>
+                    <button type="button" data-hiw-tab="torneo" onclick="switchHowItWorksTab('torneo')" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border">🏆 Torneo</button>
+                    <button type="button" data-hiw-tab="coach" onclick="switchHowItWorksTab('coach')" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border">🧠 Coach IA</button>
+                    <button type="button" data-hiw-tab="discord" onclick="switchHowItWorksTab('discord')" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border">💬 Discord + Parcero</button>
+                    <button type="button" data-hiw-tab="tribunal" onclick="switchHowItWorksTab('tribunal')" class="ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border">⚖️ Tribunal</button>
+                </div>
+            </div>
+
+            <!-- Contenido Dinámico de Pestañas -->
             <div class="space-y-3 text-xs sm:text-sm text-slate-200 leading-relaxed">
-                <div class="p-3 rounded bg-[#051324] border border-cyan-500/30">
-                    <strong class="font-orbitron text-cyan-300 block mb-1">1. Equilibrio Matemático de Escuadras (4v4 o 3v3)</strong>
-                    Selecciona a los 8 (o 6) Spartans que van a jugar. El algoritmo evalúa todas las combinaciones posibles y divide automáticamente los equipos <span class="text-cyan-300 font-bold">UNSC Eagle</span> y <span class="text-rose-400 font-bold">Banished Cobra</span> con la menor diferencia de puntos posible.
+                <div data-hiw-panel="balance" class="p-4 rounded-xl bg-[#051324] border border-cyan-500/35 space-y-3">
+                    <strong class="font-orbitron text-cyan-300 block">1. Equilibrio Matemático + Lotería de Mapas (2v2 / 3v3 / 4v4)</strong>
+                    <p>Elige 4, 6 u 8 jugadores del Roster. El algoritmo evalúa todas las combinaciones posibles y divide a <span class="text-cyan-300 font-bold">UNSC Eagle</span> y <span class="text-rose-400 font-bold">Banished Cobra</span> con la menor diferencia de puntos posible, además de sortear mapa oficial y modo sin repetir.</p>
+                    <div class="text-xs text-slate-300 bg-black/30 rounded-lg p-2.5 border border-cyan-500/20">
+                        ✅ <strong>Escáner de Triple Análisis:</strong> Al reclutar un jugador nuevo cruza <em>SpartanRecord</em>, <em>HaloDataHive</em> y <em>Halo Tracker</em> automáticamente y bloquea duplicados.
+                    </div>
+                    <button type="button" onclick="closeHowItWorksModal()" class="ek-btn min-h-[42px] w-full sm:w-auto px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-bold text-xs">
+                        Ir a Armar Partida →
+                    </button>
                 </div>
-                <div class="p-3 rounded bg-[#051324] border border-amber-500/30">
-                    <strong class="font-orbitron text-amber-300 block mb-1">2. Tribunal Spartan ONI (Ajuste Justo Post-Partida)</strong>
-                    Cuando el Administrador activa el Tribunal (10 minutos), todos los Spartans del Roster ven el aviso en vivo. Si votan mínimo <strong>8 jugadores</strong> (sin poder votar por sí mismos), el jugador con más votos para subir gana <strong>+1 PT</strong> y el más votado para bajar recibe <strong>-1 PT</strong> automáticamente. Si hay empate en el primer puesto, se habilita una ronda relámpago de desempate.
+
+                <div data-hiw-panel="torneo" class="hidden p-4 rounded-xl bg-[#051324] border border-amber-500/35 space-y-3">
+                    <strong class="font-orbitron text-amber-300 block">2. Modo Torneo HCS + Bracket en Vivo + Podio Winners</strong>
+                    <p>Organiza torneos de 2 a 16 equipos (Simple o Doble Eliminación). Cada equipo recibe color oficial, emblema y canal de voz en Discord. Los ganadores entran directo al historial oficial de <strong>Winners</strong>.</p>
+                    <div class="text-xs text-slate-300 bg-black/30 rounded-lg p-2.5 border border-amber-500/20">
+                        🔗 Puedes compartir el link directo <code>?torneo=TRN-XXXX</code> por WhatsApp o Discord para que todos sigan las llaves en vivo desde el celular.
+                    </div>
+                    <button type="button" onclick="closeHowItWorksModal(); openTournamentModule('create');" class="ek-btn min-h-[42px] w-full sm:w-auto px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-bold text-xs">
+                        🏆 Abrir Modo Torneo →
+                    </button>
                 </div>
-                <div class="p-3 rounded bg-[#051324] border border-emerald-500/30">
-                    <strong class="font-orbitron text-emerald-300 block mb-1">3. Escáner de Triple Análisis (SpartanRecord + HaloDataHive + Halo Tracker) y Escudo Anti-Clones</strong>
-                    Al reclutar un nuevo Spartan, el sistema realiza un triple cruce en paralelo consultando su Service Record en <em>SpartanRecord.com</em>, <em>HaloDataHive</em> y <em>Halo Tracker</em> para determinar su rango exacto con máxima confiabilidad, e impide registrar nombres duplicados o similares.
+
+                <div data-hiw-panel="coach" class="hidden p-4 rounded-xl bg-[#051324] border border-emerald-500/35 space-y-3">
+                    <strong class="font-orbitron text-emerald-300 block">3. Coach IA Spartan PRO Gratis (Para cualquier jugador)</strong>
+                    <p>No necesitas estar en el Roster para usarlo: escribe cualquier Gamertag de Xbox/Halo Infinite y en segundos audita tus estadísticas reales (KDR, CSR, Daño, Precisión, CTF/Oddball/Zones) y te entrega un <strong>Plan de 3 días</strong>.</p>
+                    <div class="text-xs text-slate-300 bg-black/30 rounded-lg p-2.5 border border-emerald-500/20">
+                        📸 Incluye botón <strong>Compartir Tarjeta Spartan</strong> para publicar tu expediente en estados de WhatsApp o Discord con un toque.
+                    </div>
+                    <button type="button" onclick="closeHowItWorksModal(); openCoachIAModal();" class="ek-btn min-h-[42px] w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-black font-orbitron font-bold text-xs">
+                        🧠 Probar Coach IA Gratis →
+                    </button>
+                </div>
+
+                <div data-hiw-panel="discord" class="hidden p-4 rounded-xl bg-[#0a1224] border border-[#5865F2]/50 space-y-3">
+                    <strong class="font-orbitron text-indigo-300 block">4. Discord Oficial + Bot Parcero en 4 Pasos</strong>
+                    <ol class="space-y-2 text-xs text-slate-200 list-none">
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80"><strong class="text-indigo-300">Paso 1:</strong> Entra al grupo oficial en Discord (<span class="underline text-cyan-300">discord.gg/3K4PCc3YU</span>).</li>
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80"><strong class="text-cyan-300">Paso 2:</strong> Abre el canal de texto <strong class="text-white">#torneo</strong> y escribe <strong class="text-[#facc15]">Hola</strong>.</li>
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80"><strong class="text-emerald-300">Paso 3:</strong> <strong>Parcero</strong> te responde al instante con botones para vincular tu Gamertag y reportar el marcador (actualiza el Bracket en vivo).</li>
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80"><strong class="text-amber-300">Paso 4:</strong> Únete al <strong>canal de voz del color de tu equipo</strong> o usa <code>/jugar</code> para armar partidas personalizadas rápidas.</li>
+                    </ol>
+                    <a href="https://discord.gg/3K4PCc3YU" target="_blank" rel="noopener noreferrer" class="ek-btn min-h-[42px] w-full sm:w-auto px-4 py-2 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-orbitron font-bold text-xs inline-flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-discord"></i> Entrar al Discord Oficial →
+                    </a>
+                </div>
+
+                <div data-hiw-panel="tribunal" class="hidden p-4 rounded-xl bg-[#051324] border border-amber-500/35 space-y-3">
+                    <strong class="font-orbitron text-amber-300 block">5. Tribunal Spartan ONI (Ajuste Justo por Votación Comunitaria)</strong>
+                    <p>Cualquier jugador o el Administrador puede activar el Tribunal <strong>máximo 1 vez al día</strong>. Durante <strong>4 minutos</strong> aparece un aviso en vivo en la pantalla de todos para votar.</p>
+                    <ul class="space-y-1.5 text-xs text-slate-200 list-none">
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80">🛡️ <strong>Anti-trampa por red diferente:</strong> Se necesitan mínimo <strong>8 votos desde 8 redes/IPs distintas</strong> (si varios celulares usan el mismo Wi-Fi, bloquea el voto repetido).</li>
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80">📊 <strong>Consenso final:</strong> El más votado para subir gana <strong>+1 PT</strong> y el más votado para bajar recibe <strong>-1 PT</strong>. Al terminar los 4 minutos, todos ven la conclusión en pantalla.</li>
+                        <li class="p-2 rounded bg-black/35 border border-slate-700/80">⚖️ <strong>Sin quórum o empate exacto:</strong> Si votan menos de 8 redes o hay empate exacto, <strong>no se ajusta ningún punto</strong> y se pide hacer el Tribunal otro día.</li>
+                    </ul>
+                    <button type="button" onclick="closeHowItWorksModal(); openTribunalModal();" class="ek-btn min-h-[42px] w-full sm:w-auto px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-bold text-xs">
+                        ⚖️ Abrir Tribunal ahora →
+                    </button>
                 </div>
             </div>
-            <div class="mt-5 text-right">
-                <button onclick="closeHowItWorksModal()" class="hud-btn px-5 py-2 bg-cyan-500 text-black font-orbitron font-bold text-xs">Entendido</button>
+
+            <div class="pt-1 flex justify-end">
+                <button type="button" onclick="closeHowItWorksModal()" class="ek-btn min-h-[40px] px-5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-orbitron font-bold text-xs">Cerrar</button>
             </div>
         </div>
     </div>
@@ -1897,11 +2045,52 @@
             'D':  'CADETE DE ACADEMIA'
         };
 
-        window.openHowItWorksModal = function() {
-            const m = document.getElementById('howItWorksModal');
-            if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        window.switchHowItWorksTab = function(tabId) {
+            const activeTab = tabId || 'balance';
+            document.querySelectorAll('#howItWorksModal [data-hiw-tab]').forEach(btn => {
+                const isAct = btn.dataset.hiwTab === activeTab;
+                btn.className = isAct
+                    ? 'ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border bg-cyan-500 text-black border-cyan-300 shadow'
+                    : 'ek-btn min-h-[38px] px-3 py-1.5 rounded-lg font-orbitron font-bold text-[11px] border bg-slate-900/90 text-slate-300 border-slate-700 hover:border-cyan-500/50';
+            });
+            document.querySelectorAll('#howItWorksModal [data-hiw-panel]').forEach(panel => {
+                panel.classList.toggle('hidden', panel.dataset.hiwPanel !== activeTab);
+            });
         };
+
+        window.toggleHowItWorksVideo = function() {
+            const wrap = document.getElementById('howItWorksVideoWrap');
+            const vid = document.getElementById('howItWorksVideoEl');
+            const btn = document.getElementById('howItWorksVideoBtn');
+            if (!wrap || !vid) return;
+            const opening = wrap.classList.contains('hidden');
+            wrap.classList.toggle('hidden', !opening);
+            if (opening) {
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-eye-slash text-[10px]"></i> <span>Ocultar</span>';
+                vid.currentTime = 0;
+                vid.play().catch(() => {});
+            } else {
+                try { vid.pause(); } catch (e) {}
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-play text-[10px]"></i> <span>Ver Video</span>';
+            }
+        };
+
+        window.openHowItWorksModal = function(initialTab) {
+            const m = document.getElementById('howItWorksModal');
+            if (m) {
+                window.switchHowItWorksTab(initialTab || 'balance');
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
+        };
+
         window.closeHowItWorksModal = function() {
+            const wrap = document.getElementById('howItWorksVideoWrap');
+            const vid = document.getElementById('howItWorksVideoEl');
+            const btn = document.getElementById('howItWorksVideoBtn');
+            if (vid) { try { vid.pause(); } catch (e) {} }
+            if (wrap) wrap.classList.add('hidden');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-play text-[10px]"></i> <span>Ver Video</span>';
             const m = document.getElementById('howItWorksModal');
             if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
         };
@@ -2549,7 +2738,7 @@
                 const votesCount = activeTribunalSession.votes ? Object.keys(activeTribunalSession.votes).length : 0;
                 pill.textContent = `EN VIVO · ${mm}:${ss}`;
                 pill.className = 'ek-morph px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-semibold whitespace-nowrap shrink-0';
-                live.textContent = `Sesión abierta (${votesCount} / 8 votos)`;
+                live.textContent = `Sesión abierta (${votesCount} / 8 redes)`;
                 live.className = 'font-semibold text-amber-300 text-right';
                 btn.innerHTML = '<i class="fa-solid fa-up-right-from-square"></i> Abrir Tribunal en Vivo';
             } else {
@@ -2557,7 +2746,7 @@
                 pill.className = 'ek-morph px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap shrink-0';
                 live.textContent = 'Sin sesión activa';
                 live.className = 'font-semibold text-slate-300 text-right';
-                btn.innerHTML = '<i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (10 min)';
+                btn.innerHTML = '<i class="fa-solid fa-gavel"></i> Lanzar Modo Jurado (4 min)';
             }
         }
 
@@ -2706,36 +2895,153 @@
             showToast('Sesión de administrador cerrada.');
         };
 
+        let _tribunalFinalizingId = '';
+        let _tribunalCanStartToday = true;
+
+        window.dismissTribunalConclusionBanner = function() {
+            if (activeTribunalSession?.id) {
+                try {
+                    sessionStorage.setItem('halo_dismissed_tribunal_verdict', activeTribunalSession.id);
+                } catch (e) {}
+            }
+            document.getElementById('liveTribunalBanner')?.classList.add('hidden');
+        };
+
+        async function autoFinalizeExpiredTribunal(sessionId) {
+            if (!sessionId || _tribunalFinalizingId === sessionId) return;
+            _tribunalFinalizingId = sessionId;
+            try {
+                const res = await fetch('/api/tribunal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'finalize' })
+                });
+                const data = await res.json().catch(() => null);
+                if (data && data.session) {
+                    activeTribunalSession = data.session;
+                    if (data.session.verdict?.applied && typeof window.pullLatestCloudRosterBeforeWrite === 'function') {
+                        try {
+                            const latest = await window.pullLatestCloudRosterBeforeWrite();
+                            if (Array.isArray(latest) && latest.length > 0 && typeof window.deduplicateRosterList === 'function') {
+                                window.roster = window.deduplicateRosterList(latest);
+                                renderRoster();
+                                updateBalancedTeamsUI();
+                            }
+                        } catch (e) {}
+                    }
+                    updateTribunalBannerUI();
+                    renderTribunalModalContent();
+                    if (data.session.verdict?.summary) {
+                        showToast('⚖️ ' + data.session.verdict.summary);
+                    }
+                }
+            } catch (e) {
+                _tribunalFinalizingId = '';
+            }
+        }
+
+        window.syncTribunalStatusFromServer = async function() {
+            try {
+                const res = await fetch('/api/tribunal?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) return null;
+                const data = await res.json();
+                _tribunalCanStartToday = data.canStartToday !== false;
+                if (data.session) {
+                    activeTribunalSession = data.session;
+                    updateTribunalBannerUI();
+                    const modal = document.getElementById('tribunalModal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        renderTribunalModalContent();
+                    }
+                }
+                return data;
+            } catch (e) {
+                return null;
+            }
+        };
+
         function updateTribunalBannerUI() {
             const banner = document.getElementById('liveTribunalBanner');
+            const pulse = document.getElementById('bannerTribunalPulse');
+            const titleEl = document.getElementById('bannerTribunalTitle');
+            const metaEl = document.getElementById('bannerTribunalMeta');
+            const actionBtn = document.getElementById('bannerTribunalActionBtn');
+            const dismissBtn = document.getElementById('bannerTribunalDismissBtn');
             const hBtn = document.getElementById('headerTribunalBtn');
             const sBtn = document.getElementById('sidebarTribunalBtn');
-            const isActive = activeTribunalSession && (activeTribunalSession.status === 'open' || activeTribunalSession.status === 'tiebreaker');
 
-            if (isActive) {
-                banner?.classList.remove('hidden');
+            if (sBtn) { sBtn.classList.remove('hidden'); sBtn.classList.add('flex'); }
+
+            const isOpen = activeTribunalSession && activeTribunalSession.status === 'open';
+            const isClosedWithVerdict = activeTribunalSession && activeTribunalSession.status === 'closed' && activeTribunalSession.verdict;
+            let dismissedId = '';
+            try { dismissedId = sessionStorage.getItem('halo_dismissed_tribunal_verdict') || ''; } catch (e) {}
+            const showVerdictBanner = Boolean(isClosedWithVerdict && activeTribunalSession.id !== dismissedId);
+
+            if (isOpen) {
+                const voteCount = activeTribunalSession.votes ? Object.keys(activeTribunalSession.votes).length : 0;
+                const remMs = Math.max(0, Number(activeTribunalSession.expiresAt || 0) - Date.now());
+                const remSec = Math.floor(remMs / 1000);
+                const mm = String(Math.floor(remSec / 60)).padStart(2, '0');
+                const ss = String(remSec % 60).padStart(2, '0');
+
+                if (banner) {
+                    banner.className = 'relative z-30 bg-gradient-to-r from-amber-950/95 via-amber-900/90 to-amber-950/95 border-b border-amber-400/70 px-3 py-2 text-xs';
+                }
+                if (pulse) { pulse.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0'; pulse.classList.remove('hidden'); }
+                if (titleEl) { titleEl.textContent = '⚖️ TRIBUNAL EN VIVO'; titleEl.className = 'font-orbitron font-bold text-amber-300 uppercase'; }
+                if (metaEl) {
+                    metaEl.innerHTML = `• <strong id="bannerTribunalCountdown">${mm}:${ss}</strong> • <strong id="bannerTribunalVotes">${voteCount}/8</strong> redes`;
+                }
+                if (actionBtn) { actionBtn.textContent = 'Votar Ahora'; actionBtn.className = 'ek-btn px-3 py-1 rounded bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-[11px] uppercase'; }
+                dismissBtn?.classList.add('hidden');
                 if (hBtn) { hBtn.classList.remove('hidden'); hBtn.classList.add('inline-flex'); }
-                if (sBtn) { sBtn.classList.remove('hidden'); sBtn.classList.add('flex'); }
+
+                if (remMs <= 0) {
+                    autoFinalizeExpiredTribunal(activeTribunalSession.id);
+                }
+
                 if (!tribunalTimerInterval) {
                     tribunalTimerInterval = setInterval(() => {
-                        if (!activeTribunalSession || !activeTribunalSession.expiresAt) return;
-                        const rem = Math.max(0, Math.floor((activeTribunalSession.expiresAt - Date.now()) / 1000));
-                        const m = String(Math.floor(rem / 60)).padStart(2, '0');
-                        const s = String(rem % 60).padStart(2, '0');
+                        if (!activeTribunalSession || activeTribunalSession.status !== 'open') return;
+                        const rMs = Math.max(0, Number(activeTribunalSession.expiresAt || 0) - Date.now());
+                        const rSec = Math.floor(rMs / 1000);
+                        const m = String(Math.floor(rSec / 60)).padStart(2, '0');
+                        const s = String(rSec % 60).padStart(2, '0');
                         const cd = document.getElementById('bannerTribunalCountdown');
                         if (cd) cd.innerText = `${m}:${s}`;
+                        if (rMs <= 0) {
+                            autoFinalizeExpiredTribunal(activeTribunalSession.id);
+                        }
                     }, 1000);
                 }
+            } else if (showVerdictBanner) {
+                const v = activeTribunalSession.verdict;
+                if (banner) {
+                    banner.className = v.applied
+                        ? 'relative z-30 bg-gradient-to-r from-emerald-950/95 via-slate-900/95 to-emerald-950/95 border-b border-emerald-400/70 px-3 py-2 text-xs'
+                        : 'relative z-30 bg-gradient-to-r from-slate-950/95 via-slate-900/95 to-slate-950/95 border-b border-amber-400/60 px-3 py-2 text-xs';
+                }
+                pulse?.classList.add('hidden');
+                if (titleEl) {
+                    titleEl.textContent = v.applied ? '⚖️ CONCLUSIÓN DEL TRIBUNAL' : '⚖️ TRIBUNAL FINALIZADO';
+                    titleEl.className = v.applied ? 'font-orbitron font-bold text-emerald-300 uppercase' : 'font-orbitron font-bold text-amber-300 uppercase';
+                }
+                if (metaEl) metaEl.textContent = `• ${v.summary || 'Sesión finalizada.'}`;
+                if (actionBtn) { actionBtn.textContent = 'Ver Detalle'; actionBtn.className = 'ek-btn px-3 py-1 rounded bg-cyan-400 hover:bg-cyan-300 text-black font-orbitron font-black text-[11px] uppercase'; }
+                dismissBtn?.classList.remove('hidden');
+                if (!isAdminMode && hBtn) { hBtn.classList.add('hidden'); hBtn.classList.remove('inline-flex'); }
             } else {
                 banner?.classList.add('hidden');
-                if (!isAdminMode) {
-                    if (hBtn) { hBtn.classList.add('hidden'); hBtn.classList.remove('inline-flex'); }
-                    if (sBtn) { sBtn.classList.add('hidden'); sBtn.classList.remove('flex'); }
+                if (!isAdminMode && hBtn) {
+                    hBtn.classList.add('hidden');
+                    hBtn.classList.remove('inline-flex');
                 }
             }
         }
 
         window.onTribunalCloudUpdate = function(data) {
+            if (!data) return;
             activeTribunalSession = data;
             try {
                 window['local' + 'Storage'].setItem(window.TRIBUNAL_BACKUP_KEY || 'mansalvas_halo_tribunal_v4_backup', JSON.stringify(data));
@@ -2747,16 +3053,14 @@
             }
         };
 
-        window.openTribunalModal = function() {
-            const isActive = activeTribunalSession && (activeTribunalSession.status === 'open' || activeTribunalSession.status === 'tiebreaker' || activeTribunalSession.status === 'closed');
-            if (!isAdminMode && !isActive) {
-                handleAdminButtonClick();
-                return;
-            }
+        window.openTribunalModal = async function() {
             const modal = document.getElementById('tribunalModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
             renderTribunalModalContent();
+            await window.syncTribunalStatusFromServer();
         };
 
         window.closeTribunalModal = function() {
@@ -2766,22 +3070,30 @@
         };
 
         window.startNewTribunalSession = async function() {
-            if (!isAdminMode) return;
-            activeTribunalSession = {
-                id: 'trib-' + Date.now(),
-                status: 'open',
-                startedAt: Date.now(),
-                expiresAt: Date.now() + 10 * 60 * 1000,
-                votes: {},
-                verdict: null
-            };
-            myTribunalVoterId = '';
-            myTribunalPlusTargetId = '';
-            myTribunalMinusTargetId = '';
-            updateTribunalBannerUI();
-            renderTribunalModalContent();
-            if (window.saveTribunalToCloud) await window.saveTribunalToCloud(activeTribunalSession);
-            showToast('⚡ Tribunal Spartan abierto por 10 minutos para todo el Roster.');
+            const initName = document.getElementById('tribunalInitiatorInp')?.value?.trim() || (isAdminMode ? 'Admin Principal' : 'Comunidad');
+            try {
+                const res = await fetch('/api/tribunal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start', initiatorName: initName })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    showToast(data?.message || 'No se pudo iniciar el Tribunal hoy.');
+                    await window.syncTribunalStatusFromServer();
+                    return;
+                }
+                activeTribunalSession = data.session;
+                _tribunalCanStartToday = false;
+                myTribunalVoterId = '';
+                myTribunalPlusTargetId = '';
+                myTribunalMinusTargetId = '';
+                updateTribunalBannerUI();
+                renderTribunalModalContent();
+                showToast('⚡ Tribunal abierto por 4 minutos para todo el Roster.');
+            } catch (e) {
+                showToast('Error de conexión al iniciar el Tribunal.');
+            }
         };
 
         window.submitMyTribunalVote = async function() {
@@ -2798,75 +3110,41 @@
                 showToast('El jugador que sube +1 PT y el que baja -1 PT deben ser distintos.');
                 return;
             }
-            if (!activeTribunalSession.votes) activeTribunalSession.votes = {};
-            if (activeTribunalSession.votes[myTribunalVoterId]) {
-                showToast('Este Spartan ya emitió su voto en esta sesión.');
-                return;
+
+            const voterObj = (window.roster || []).find(p => String(p.id) === String(myTribunalVoterId));
+            try {
+                const res = await fetch('/api/tribunal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'vote',
+                        voterId: myTribunalVoterId,
+                        voterName: voterObj ? voterObj.name : myTribunalVoterId,
+                        plusId: myTribunalPlusTargetId,
+                        minusId: myTribunalMinusTargetId
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    showToast(data?.message || 'No se pudo registrar tu voto.');
+                    return;
+                }
+                activeTribunalSession = data.session;
+                updateTribunalBannerUI();
+                renderTribunalModalContent();
+                showToast(`✅ Voto válido registrado (${data.voteCount}/8 redes distintas).`);
+            } catch (e) {
+                showToast('Error de conexión al registrar tu voto.');
             }
-
-            activeTribunalSession.votes[myTribunalVoterId] = {
-                voterId: myTribunalVoterId,
-                plusId: myTribunalPlusTargetId,
-                minusId: myTribunalMinusTargetId,
-                ts: Date.now()
-            };
-
-            if (window.saveTribunalToCloud) await window.saveTribunalToCloud(activeTribunalSession);
-            renderTribunalModalContent();
-            showToast('✅ Voto registrado y sellado en el Tribunal.');
         };
 
         window.finalizeTribunalByAdmin = async function() {
             if (!isAdminMode || !activeTribunalSession) return;
-            const votesList = Object.values(activeTribunalSession.votes || {});
-            if (votesList.length < 8) {
-                showToast(`Se requieren mínimo 8 votos para validar el Tribunal (actuales: ${votesList.length}).`);
+            if (Date.now() < Number(activeTribunalSession.expiresAt || 0)) {
+                showToast('El Tribunal dura 4 minutos completos antes de cerrarse.');
                 return;
             }
-
-            const plusCounts = {};
-            const minusCounts = {};
-            votesList.forEach(v => {
-                plusCounts[v.plusId] = (plusCounts[v.plusId] || 0) + 1;
-                minusCounts[v.minusId] = (minusCounts[v.minusId] || 0) + 1;
-            });
-
-            const topPlus = Object.entries(plusCounts).sort((a, b) => b[1] - a[1]);
-            const topMinus = Object.entries(minusCounts).sort((a, b) => b[1] - a[1]);
-
-            const winnerPlusId = topPlus[0]?.[0];
-            const winnerMinusId = topMinus[0]?.[0];
-
-            const plusPlayer = window.roster.find(p => p.id === winnerPlusId);
-            const minusPlayer = window.roster.find(p => p.id === winnerMinusId);
-
-            if (plusPlayer) {
-                plusPlayer.pts = Math.min(25, plusPlayer.pts + 1);
-                plusPlayer.rank = calculateRankFromPts(plusPlayer.pts);
-                plusPlayer.tribunalDelta = Math.max(-5, Math.min(5, (Number(plusPlayer.tribunalDelta) || 0) + 1));
-            }
-            if (minusPlayer) {
-                minusPlayer.pts = Math.max(1, minusPlayer.pts - 1);
-                minusPlayer.rank = calculateRankFromPts(minusPlayer.pts);
-                minusPlayer.tribunalDelta = Math.max(-5, Math.min(5, (Number(minusPlayer.tribunalDelta) || 0) - 1));
-            }
-
-            activeTribunalSession.status = 'closed';
-            activeTribunalSession.verdict = {
-                plusName: plusPlayer ? plusPlayer.name : 'N/A',
-                plusNewPts: plusPlayer ? plusPlayer.pts : 0,
-                minusName: minusPlayer ? minusPlayer.name : 'N/A',
-                minusNewPts: minusPlayer ? minusPlayer.pts : 0,
-                totalVotes: votesList.length
-            };
-
-            renderRoster();
-            updateBalancedTeamsUI();
-            updateTribunalBannerUI();
-            renderTribunalModalContent();
-            if (window.saveRosterToCloud) await window.saveRosterToCloud();
-            if (window.saveTribunalToCloud) await window.saveTribunalToCloud(activeTribunalSession);
-            showToast('⚖️ Veredicto oficial aplicado en el Roster.');
+            await autoFinalizeExpiredTribunal(activeTribunalSession.id);
         };
 
         window.renderTribunalModalContent = function() {
@@ -2875,86 +3153,106 @@
 
             const votesObj = (activeTribunalSession && activeTribunalSession.votes) ? activeTribunalSession.votes : {};
             const voteCount = Object.keys(votesObj).length;
+            const todayCO = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+            const ranToday = Boolean(activeTribunalSession && activeTribunalSession.lastRunDateCO === todayCO);
 
-            if (!activeTribunalSession || (activeTribunalSession.status !== 'open' && activeTribunalSession.status !== 'closed')) {
+            if (!activeTribunalSession || activeTribunalSession.status !== 'open') {
+                const v = activeTribunalSession?.status === 'closed' ? activeTribunalSession.verdict : null;
+                let verdictHtml = '';
+                if (v) {
+                    if (v.applied) {
+                        verdictHtml = `
+                            <div class="p-4 rounded-xl bg-[#041528] border-2 border-emerald-400/60 space-y-3 text-center mb-3">
+                                <div class="text-xs font-orbitron text-emerald-300 font-bold uppercase">CONCLUSIÓN OFICIAL DEL TRIBUNAL (${v.totalVotes} REDES)</div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div class="p-3 rounded bg-emerald-950/40 border border-emerald-400/50">
+                                        <div class="text-xs text-emerald-300 font-bold">SUBE +1 PUNTO (${v.plusVotes || 0} votos)</div>
+                                        <div class="font-orbitron font-black text-lg text-white">${ekEscapeHtml(v.plusName)}</div>
+                                        <div class="text-xs text-emerald-200">Nuevo Nivel: ${v.plusNewPts} PTS</div>
+                                    </div>
+                                    <div class="p-3 rounded bg-rose-950/40 border border-rose-400/50">
+                                        <div class="text-xs text-rose-300 font-bold">BAJA -1 PUNTO (${v.minusVotes || 0} votos)</div>
+                                        <div class="font-orbitron font-black text-lg text-white">${ekEscapeHtml(v.minusName)}</div>
+                                        <div class="text-xs text-rose-200">Nuevo Nivel: ${v.minusNewPts} PTS</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        verdictHtml = `
+                            <div class="p-4 rounded-xl bg-[#091220] border border-amber-400/60 text-center space-y-1.5 mb-3">
+                                <div class="text-xs font-orbitron text-amber-300 font-bold uppercase">CONCLUSIÓN DEL TRIBUNAL</div>
+                                <p class="text-xs sm:text-sm text-slate-200">${ekEscapeHtml(v.summary)}</p>
+                            </div>
+                        `;
+                    }
+                }
+
                 body.innerHTML = `
-                    <div class="p-4 rounded bg-[#041122] border border-amber-400/40 text-center space-y-3">
-                        <p class="text-xs sm:text-sm text-slate-200">El Tribunal está cerrado en este momento. Solo el Administrador puede disparar la sesión de 10 minutos para que voten mínimo 8 Spartans.</p>
-                        ${isAdminMode ? `
-                            <button onclick="startNewTribunalSession()" class="hud-btn px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-xs uppercase shadow">
-                                ⚡ Disparar Tribunal para Todo el Roster (10 Min)
-                            </button>
-                        ` : ''}
+                    ${verdictHtml}
+                    <div class="p-4 rounded-xl bg-[#041122] border border-amber-400/40 text-center space-y-3">
+                        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                            Cualquier jugador puede iniciar el Tribunal <strong>máximo 1 vez al día</strong>. Dura <strong>4 minutos</strong> y requiere mínimo <strong>8 votos desde redes diferentes</strong> (sin trampa de varios celulares en el mismo Wi-Fi).
+                        </p>
+                        ${ranToday ? `
+                            <div class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-amber-200 font-semibold">
+                                🔒 El Tribunal de hoy ya se realizó. Vuelvan a activarlo mañana.
+                            </div>
+                        ` : `
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 max-w-md mx-auto">
+                                <input id="tribunalInitiatorInp" type="text" placeholder="Tu Gamertag (opcional)..." class="px-3 py-2 rounded-lg bg-[#051324] border border-cyan-500/40 text-xs text-white focus:outline-none focus:border-amber-400 flex-1">
+                                <button type="button" onclick="startNewTribunalSession()" class="ek-btn min-h-[42px] px-5 py-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-xs uppercase shadow">
+                                    ⚡ Activar Tribunal (4 Min)
+                                </button>
+                            </div>
+                        `}
                     </div>
                 `;
                 return;
             }
 
-            if (activeTribunalSession.status === 'closed' && activeTribunalSession.verdict) {
-                const v = activeTribunalSession.verdict;
-                body.innerHTML = `
-                    <div class="p-4 rounded bg-[#041528] border-2 border-emerald-400/60 space-y-3 text-center">
-                        <div class="text-xs font-orbitron text-emerald-300 font-bold uppercase">VEREDICTO OFICIAL APLICADO (${v.totalVotes} VOTOS)</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="p-3 rounded bg-emerald-950/40 border border-emerald-400/50">
-                                <div class="text-xs text-emerald-300 font-bold">SUBE +1 PUNTO</div>
-                                <div class="font-orbitron font-black text-lg text-white">${v.plusName}</div>
-                                <div class="text-xs text-emerald-200">Nuevo Nivel: ${v.plusNewPts} PTS</div>
-                            </div>
-                            <div class="p-3 rounded bg-rose-950/40 border border-rose-400/50">
-                                <div class="text-xs text-rose-300 font-bold">BAJA -1 PUNTO</div>
-                                <div class="font-orbitron font-black text-lg text-white">${v.minusName}</div>
-                                <div class="text-xs text-rose-200">Nuevo Nivel: ${v.minusNewPts} PTS</div>
-                            </div>
-                        </div>
-                        ${isAdminMode ? `
-                            <button onclick="startNewTribunalSession()" class="hud-btn px-4 py-2 bg-amber-400 text-black font-orbitron font-bold text-xs mt-2">
-                                Iniciar Nueva Sesión
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                return;
-            }
-
+            const remSec = Math.max(0, Math.floor((Number(activeTribunalSession.expiresAt || 0) - Date.now()) / 1000));
+            const mm = String(Math.floor(remSec / 60)).padStart(2, '0');
+            const ss = String(remSec % 60).padStart(2, '0');
             const sortedRoster = [...(window.roster || [])].sort((a, b) => a.name.localeCompare(b.name));
+
             body.innerHTML = `
                 <div class="space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded bg-amber-500/10 border border-amber-400/40">
-                        <span class="font-orbitron font-bold text-xs text-amber-300">Votos registrados: ${voteCount} / 8 mínimo</span>
-                        ${isAdminMode ? `
-                            <button onclick="finalizeTribunalByAdmin()" ${voteCount < 8 ? 'disabled' : ''} class="hud-btn px-3.5 py-1.5 ${voteCount >= 8 ? 'bg-emerald-400 text-black' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} font-orbitron font-bold text-xs">
-                                Cerrar y Aplicar Consenso
-                            </button>
-                        ` : ''}
+                    <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-400/40">
+                        <div>
+                            <span class="font-orbitron font-bold text-xs text-amber-300 block">Votos válidos: ${voteCount} / 8 redes distintas</span>
+                            <span class="text-[11px] text-slate-300">Iniciado por ${ekEscapeHtml(activeTribunalSession.initiatedBy || 'Comunidad')} • Cierra en <strong>${mm}:${ss}</strong></span>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 text-[10px] font-bold">🛡️ 1 voto por red</span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-[10px] font-orbitron text-cyan-300 uppercase mb-1">1. Tu Perfil Spartan</label>
-                            <select onchange="myTribunalVoterId=this.value; renderTribunalModalContent();" class="w-full p-2 rounded bg-[#051324] border border-cyan-500/40 text-xs text-white">
+                            <select onchange="myTribunalVoterId=this.value; renderTribunalModalContent();" class="w-full p-2.5 rounded-lg bg-[#051324] border border-cyan-500/40 text-xs text-white">
                                 <option value="">-- ¿Quién eres? --</option>
-                                ${sortedRoster.map(p => `<option value="${p.id}" ${myTribunalVoterId === p.id ? 'selected' : ''} ${votesObj[p.id] ? 'disabled' : ''}>${p.name} ${votesObj[p.id] ? '(Ya votó 🔒)' : ''}</option>`).join('')}
+                                ${sortedRoster.map(p => `<option value="${p.id}" ${myTribunalVoterId === p.id ? 'selected' : ''} ${votesObj[p.id] ? 'disabled' : ''}>${ekEscapeHtml(p.name)} ${votesObj[p.id] ? '(Ya votó 🔒)' : ''}</option>`).join('')}
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-orbitron text-emerald-300 uppercase mb-1">2. Subir +1 Punto a:</label>
-                            <select onchange="myTribunalPlusTargetId=this.value;" class="w-full p-2 rounded bg-[#051324] border border-emerald-500/40 text-xs text-white">
+                            <select onchange="myTribunalPlusTargetId=this.value;" class="w-full p-2.5 rounded-lg bg-[#051324] border border-emerald-500/40 text-xs text-white">
                                 <option value="">-- Elegir Spartan (+1 PT) --</option>
-                                ${sortedRoster.filter(p => p.id !== myTribunalVoterId).map(p => `<option value="${p.id}" ${myTribunalPlusTargetId === p.id ? 'selected' : ''}>${p.name} (${p.pts} PTS)</option>`).join('')}
+                                ${sortedRoster.filter(p => p.id !== myTribunalVoterId).map(p => `<option value="${p.id}" ${myTribunalPlusTargetId === p.id ? 'selected' : ''}>${ekEscapeHtml(p.name)} (${p.pts} PTS)</option>`).join('')}
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-orbitron text-rose-300 uppercase mb-1">3. Bajar -1 Punto a:</label>
-                            <select onchange="myTribunalMinusTargetId=this.value;" class="w-full p-2 rounded bg-[#051324] border border-rose-500/40 text-xs text-white">
+                            <select onchange="myTribunalMinusTargetId=this.value;" class="w-full p-2.5 rounded-lg bg-[#051324] border border-rose-500/40 text-xs text-white">
                                 <option value="">-- Elegir Spartan (-1 PT) --</option>
-                                ${sortedRoster.filter(p => p.id !== myTribunalVoterId).map(p => `<option value="${p.id}" ${myTribunalMinusTargetId === p.id ? 'selected' : ''}>${p.name} (${p.pts} PTS)</option>`).join('')}
+                                ${sortedRoster.filter(p => p.id !== myTribunalVoterId).map(p => `<option value="${p.id}" ${myTribunalMinusTargetId === p.id ? 'selected' : ''}>${ekEscapeHtml(p.name)} (${p.pts} PTS)</option>`).join('')}
                             </select>
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button onclick="submitMyTribunalVote()" class="hud-btn px-5 py-2 bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                        <span>Si hay menos de 8 redes distintas o empate exacto, no se ajusta ningún punto.</span>
+                        <button type="button" onclick="submitMyTribunalVote()" class="ek-btn min-h-[42px] w-full sm:w-auto px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-black text-xs">
                             Confirmar y Sellar Mi Voto
                         </button>
                     </div>
@@ -3436,6 +3734,7 @@
             } catch (e) {}
             initThreeDroneBackground();
             startHaloInfiniteBootSequence();
+            window.syncTribunalStatusFromServer?.();
         });
     </script>
 
