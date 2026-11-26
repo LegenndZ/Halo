@@ -195,9 +195,6 @@ async function findTournamentSmart(trnIdRaw) {
     if (activeList.length > 0) {
         return activeList.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
     }
-    if (validAll.length > 0) {
-        return validAll.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
-    }
     return null;
 }
 
