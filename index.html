@@ -289,6 +289,16 @@
                     </div>
                 </button>
 
+                <button type="button" onclick="toggleSidebar(false); openHallOfFameModal();" class="w-full p-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-left flex items-center gap-3 transition">
+                    <div class="w-9 h-9 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <div class="font-orbitron font-bold text-xs text-white">Salón de la Fama</div>
+                        <div class="text-[11px] text-amber-300">Spartans que apoyan el proyecto</div>
+                    </div>
+                </button>
+
                 <button type="button" onclick="toggleSidebar(false); handleAdminButtonClick();" class="w-full p-3 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/40 text-left flex items-center gap-3 transition">
                     <div class="w-9 h-9 rounded bg-purple-500/20 border border-purple-400 flex items-center justify-center text-purple-300 shrink-0">
                         <i class="fa-solid fa-shield-halved"></i>
@@ -350,6 +360,10 @@
                 <button type="button" onclick="openCalloutsModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/60 text-sky-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-map-location-dot text-sky-300"></i>
                     <span>Callouts</span>
+                </button>
+                <button type="button" onclick="openHallOfFameModal()" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/65 text-amber-200 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-crown text-amber-300"></i>
+                    <span>Salón de la Fama</span>
                 </button>
                 <button type="button" onclick="openHowItWorksModal('balance')" class="ek-btn min-h-[40px] px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-100 font-orbitron font-bold text-xs flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-circle-play text-cyan-300"></i>
@@ -673,63 +687,142 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL DE APOYO COMUNITARIO / DONACIONES                   -->
+    <!-- MODAL DE APOYO COMUNITARIO (WOMPI + LLAVE + SALÓN FAMA)   -->
     <!-- ========================================================= -->
     <div id="donateModal" onclick="if(event.target===this) closeDonateModal()" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="hud-panel max-w-md w-full p-5 sm:p-6 border border-amber-400/45 shadow-[0_0_30px_rgba(251,191,36,0.12)] my-8">
+        <div class="hud-panel max-w-md w-full p-5 sm:p-6 border border-cyan-400/45 shadow-[0_0_35px_rgba(0,229,255,0.14)] my-6 max-h-[92dvh] overflow-y-auto overscroll-contain">
             <div class="flex items-center justify-between border-b border-cyan-500/25 pb-3 mb-4">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded bg-amber-500/15 border border-amber-400/50 flex items-center justify-center text-amber-300">
+                    <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-400/50 flex items-center justify-center text-amber-300 shrink-0">
                         <i class="fa-solid fa-hand-holding-heart"></i>
                     </div>
                     <div>
                         <h3 class="font-orbitron font-bold text-sm sm:text-base text-amber-200 tracking-wide">APOYAR EL PROYECTO</h3>
-                        <p class="text-[11px] text-cyan-300/80">Comunidad Halo Infinite • Mansalvas</p>
+                        <p class="text-[11px] text-cyan-300/80">Wompi & Llave • Salón de la Fama</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeDonateModal()" class="w-8 h-8 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Cerrar">
+                <button type="button" onclick="closeDonateModal()" aria-label="Cerrar" class="ek-btn w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <div class="p-3.5 rounded-lg bg-[#041020]/90 border border-cyan-500/25 text-xs sm:text-sm text-slate-200 leading-relaxed">
+            <div class="p-3.5 rounded-xl bg-[#041020]/90 border border-cyan-500/25 text-xs sm:text-sm text-slate-200 leading-relaxed">
                 <p>
-                    Gracias por hacer parte de estas partidas, Spartans. <strong class="text-amber-200 font-semibold">Este proyecto nació y se mantiene por puro amor y pasión a Halo Infinite</strong>, pensado para que nuestras noches de juego sigan siendo justas, competitivas y memorables.
+                    Gracias por hacer parte de estas partidas, Spartans. <strong class="text-amber-200 font-semibold">Halo Match nació por pura pasión a Halo Infinite</strong> y siempre será 100% gratuito.
                 </p>
-                <p class="mt-2 text-[11px] text-slate-400">
-                    Su uso siempre será 100% gratuito. Si deseas aportar voluntariamente para servidores y mejoras, aquí tienes las opciones:
+                <p class="mt-1.5 text-[11px] text-slate-400">
+                    Si deseas aportar voluntariamente para servidores y torneos, deja tu <strong class="text-cyan-200">Gamertag o Nombre</strong> para grabarlo en el <strong class="text-amber-200">Salón de la Fama</strong>.
                 </p>
             </div>
 
-            <div class="mt-4">
-                <button id="btnToggleDonateMethods" type="button" onclick="toggleDonateMethods()" class="w-full hud-btn px-4 py-2.5 bg-gradient-to-r from-amber-500/20 to-cyan-500/20 hover:from-amber-500/30 hover:to-cyan-500/30 border border-amber-400/50 text-amber-200 font-orbitron font-bold text-xs flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-chevron-down text-[10px]" id="donateMethodsChevron"></i>
-                    <span id="donateMethodsBtnLabel">Ver opciones de apoyo</span>
-                </button>
+            <!-- PASO 1: GAMERTAG O NOMBRE OBLIGATORIO -->
+            <div class="mt-4 p-3.5 rounded-xl bg-[#041122] border border-cyan-500/35 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <label for="donateGamertagInput" class="text-[11px] font-orbitron font-bold uppercase tracking-wider text-cyan-300">
+                        1. Tu Gamertag o Nombre <span class="text-amber-300">*</span>
+                    </label>
+                    <span class="text-[10px] text-amber-300/90 font-semibold"><i class="fa-solid fa-crown mr-1"></i>Salón de la Fama</span>
+                </div>
+                <input id="donateGamertagInput" type="text" maxlength="36" oninput="clearDonateGamertagError()" placeholder="Ej: Legennd Zr o tu nombre..." class="w-full px-3 py-2.5 rounded-lg bg-[#030b16] border border-cyan-500/40 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-300">
+                <input id="donateMessageInput" type="text" maxlength="100" placeholder="Mensaje corto opcional (ej: ¡Por más partidas parejas!)" class="w-full px-3 py-2 rounded-lg bg-[#030b16] border border-slate-700/80 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400/70">
+                <p id="donateGamertagError" class="hidden text-[11px] text-rose-300 font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Escribe tu Gamertag o Nombre primero para poder incluirte en el Salón de la Fama.
+                </p>
+            </div>
 
-                <div id="donateMethodsContainer" class="hidden space-y-3 mt-3 pt-3 border-t border-cyan-500/20">
-                    <!-- Colombia: Llave -->
-                    <div class="p-3 rounded-lg bg-[#05162b] border border-cyan-500/35 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <span class="block text-[10px] font-orbitron uppercase tracking-wider text-cyan-300">Colombia • Llave de donación</span>
-                            <span class="block font-orbitron font-bold text-sm text-white mt-0.5 select-all">@3105643224</span>
+            <!-- PASO 2: CANALES DE APOYO (WOMPI + LLAVE) -->
+            <div class="mt-3.5 space-y-2.5">
+                <span class="block text-[11px] font-orbitron font-bold uppercase tracking-wider text-slate-300">
+                    2. Elige cómo apoyar
+                </span>
+
+                <!-- Canal Principal: Wompi -->
+                <div class="p-3.5 rounded-xl bg-gradient-to-br from-[#061c36] to-[#041224] border border-cyan-400/55 shadow-[0_0_20px_rgba(0,229,255,0.1)] space-y-2.5">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-[11px] font-orbitron font-extrabold uppercase tracking-wider text-cyan-300">Wompi • Bancolombia</span>
+                                <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-[9px] font-orbitron font-bold uppercase">Recomendado</span>
+                            </div>
+                            <p class="text-[11px] text-slate-300 mt-1">PSE, Nequi, Bancolombia, Daviplata y tarjetas en línea.</p>
                         </div>
-                        <button type="button" onclick="copyDonationKey()" class="shrink-0 px-3 py-1.5 rounded bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition">
-                            <i class="fa-regular fa-copy"></i> Copiar
-                        </button>
+                        <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                            <i class="fa-solid fa-shield-halved text-sm"></i>
+                        </div>
                     </div>
+                    <button type="button" onclick="startWompiSupport()" class="ek-btn w-full min-h-[42px] px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-400 to-sky-400 hover:from-cyan-300 hover:to-sky-300 text-black font-orbitron font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(0,229,255,0.28)]">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Apoyar con Wompi →</span>
+                    </button>
+                </div>
 
-                    <!-- Internacional: PayPal -->
-                    <div class="p-3 rounded-lg bg-[#05162b] border border-amber-400/35 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <span class="block text-[10px] font-orbitron uppercase tracking-wider text-amber-300">Internacional • PayPal</span>
-                            <span class="block text-xs text-slate-300 mt-0.5">Aporte seguro en línea</span>
+                <!-- Canal Colombia: Llave -->
+                <div class="p-3 rounded-xl bg-[#05162b] border border-amber-400/40 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <span class="block text-[10px] font-orbitron uppercase tracking-wider text-amber-300">Colombia • Llave Bre-B / Nequi</span>
+                        <span class="block font-orbitron font-bold text-sm text-white mt-0.5 select-all">@3105643224</span>
+                        <span class="block text-[10px] text-slate-400">Exige Gamertag arriba para el Salón de la Fama</span>
+                    </div>
+                    <button type="button" onclick="copyDonationKeyWithGamertag()" class="ek-btn shrink-0 min-h-[38px] px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> Copiar Llave
+                    </button>
+                </div>
+            </div>
+
+            <p class="mt-3 text-[11px] text-slate-400 text-center">
+                <i class="fa-solid fa-circle-check text-cyan-400/80 mr-1"></i>Tu Gamertag aparecerá en el Salón de la Fama apenas se confirme tu aporte.
+            </p>
+
+            <!-- Vista previa del Salón de la Fama -->
+            <div class="mt-4 pt-3.5 border-t border-cyan-500/20 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-orbitron font-bold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-crown text-amber-300"></i> Salón de la Fama
+                    </span>
+                    <button type="button" onclick="closeDonateModal(); openHallOfFameModal();" class="ek-btn text-[11px] font-orbitron font-bold text-cyan-300 hover:text-cyan-200">
+                        Ver Salón completo →
+                    </button>
+                </div>
+                <div id="donateHofPreview" class="space-y-1.5">
+                    <div class="text-[11px] text-slate-400 py-2 text-center">Cargando Spartans honorarios...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: SALÓN DE LA FAMA (SPARTANS QUE APOYAN EL PROYECTO) -->
+    <!-- ========================================================= -->
+    <div id="hallOfFameModal" onclick="if(event.target===this) closeHallOfFameModal()" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="hud-panel w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 border border-amber-400/50 shadow-[0_0_35px_rgba(251,191,36,0.14)] max-h-[92dvh] overflow-y-auto overscroll-contain space-y-4">
+            <div class="flex items-center justify-between border-b border-amber-400/25 pb-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
+                        <i class="fa-solid fa-crown text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="font-orbitron font-bold text-sm sm:text-base text-amber-200 tracking-wide">SALÓN DE LA FAMA</h3>
+                            <span id="hofTotalBadge" class="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-200 text-[10px] font-orbitron font-bold whitespace-nowrap">0 Spartans</span>
                         </div>
-                        <a href="https://www.paypal.com/ncp/payment/UKHADMUCVADKC" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3 py-1.5 rounded bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-orbitron font-bold text-[11px] flex items-center gap-1.5 transition">
-                            <i class="fa-brands fa-paypal"></i> Ir a PayPal
-                        </a>
+                        <p class="text-[11px] text-cyan-300/85">Comunidad Halo Match que sostiene este proyecto</p>
                     </div>
                 </div>
+                <button type="button" onclick="closeHallOfFameModal()" aria-label="Cerrar Salón de la Fama" class="ek-btn w-9 h-9 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="hofListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div class="col-span-full text-center text-xs text-slate-400 py-6">Cargando Salón de la Fama...</div>
+            </div>
+
+            <div class="pt-3 border-t border-cyan-500/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                <span class="text-[11px] text-slate-400">¿Aportaste por Wompi o Llave? Tu Gamertag queda inmortalizado aquí.</span>
+                <button type="button" onclick="closeHallOfFameModal(); openDonateModal();" class="ek-btn min-h-[42px] px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-black font-orbitron font-black text-xs flex items-center justify-center gap-2 shrink-0 shadow">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>Apoyar y entrar al Salón</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1132,6 +1225,49 @@
                         </div>
                     </section>
                 </div>
+
+                <!-- MÓDULO 4: SALÓN DE LA FAMA (WOMPI + LLAVE) -->
+                <section class="ek-card ek-stagger rounded-xl bg-[#111826] border border-slate-800 p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+                                <i class="fa-solid fa-crown text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-orbitron font-bold text-xs sm:text-sm text-white">Salón de la Fama (Wompi y Llave)</h4>
+                                    <span id="adminHofPendingBadge" class="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap">0 pendientes</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">Aprueba en 1 clic cuando confirmes el aporte o agrégalo manualmente.</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="loadHallOfFameData(true)" class="ek-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-cyan-300">
+                            <i class="fa-solid fa-rotate mr-1"></i>Actualizar
+                        </button>
+                    </div>
+
+                    <div id="adminHofPendingList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+
+                    <div class="pt-2.5 border-t border-slate-800/90 space-y-2">
+                        <span class="block text-[11px] font-semibold text-slate-300">Agregar manualmente al Salón de la Fama</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                            <input id="adminHofManualTag" type="text" maxlength="36" placeholder="Gamertag o Nombre..." class="sm:col-span-4 px-2.5 py-1.5 rounded-lg bg-[#090d14] border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                            <select id="adminHofManualChannel" class="sm:col-span-3 px-2.5 py-1.5 rounded-lg bg-[#090d14] border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-cyan-400">
+                                <option value="wompi">Wompi</option>
+                                <option value="llave">Llave @3105643224</option>
+                            </select>
+                            <input id="adminHofManualMsg" type="text" maxlength="100" placeholder="Mensaje opcional..." class="sm:col-span-3 px-2.5 py-1.5 rounded-lg bg-[#090d14] border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                            <button type="button" onclick="adminAddManualHof()" class="ek-btn sm:col-span-2 px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-orbitron font-extrabold text-[11px]">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2.5 border-t border-slate-800/90 space-y-1.5">
+                        <span class="block text-[11px] font-semibold text-slate-400">Publicados actualmente en el Salón</span>
+                        <div id="adminHofApprovedList" class="space-y-1.5 max-h-32 overflow-y-auto pr-1"></div>
+                    </div>
+                </section>
 
                 <!-- Pie informativo: separación del código temporal de 6 dígitos del Bracket -->
                 <div class="rounded-xl bg-[#090d14] border border-slate-800/90 px-3.5 py-2.5 flex items-center gap-2 text-[11px] text-slate-400">
@@ -2939,6 +3075,9 @@
             window.renderAdminQuickRoster();
             refreshAdminJuradoStatusUI();
             refreshAdminPromoStateUI();
+            if (typeof window.loadHallOfFameData === 'function') {
+                window.loadHallOfFameData(true);
+            }
         };
 
         window.closeAdminCommandCenter = function() {
@@ -3329,18 +3468,315 @@
             `;
         };
 
+        const WOMPI_PAYMENT_URL = 'https://checkout.wompi.co/l/VPOS_eb77aV';
+        let _hofState = { approved: [], pending: [], loaded: false };
+
+        function escapeHofText(val) {
+            return String(val || '').replace(/[&<>"']/g, (s) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[s]));
+        }
+
+        window.clearDonateGamertagError = function() {
+            const errEl = document.getElementById('donateGamertagError');
+            const inp = document.getElementById('donateGamertagInput');
+            if (errEl) errEl.classList.add('hidden');
+            if (inp) {
+                inp.classList.remove('border-rose-400', 'ring-2', 'ring-rose-500/40');
+            }
+        };
+
+        function validateDonateGamertag() {
+            const inp = document.getElementById('donateGamertagInput');
+            const msgInp = document.getElementById('donateMessageInput');
+            const errEl = document.getElementById('donateGamertagError');
+            const gamertag = (inp?.value || '').replace(/\s+/g, ' ').trim();
+            const message = (msgInp?.value || '').replace(/\s+/g, ' ').trim();
+
+            if (gamertag.length < 2) {
+                if (errEl) errEl.classList.remove('hidden');
+                if (inp) {
+                    inp.classList.add('border-rose-400', 'ring-2', 'ring-rose-500/40');
+                    inp.focus();
+                }
+                showToast('Escribe tu Gamertag o Nombre primero para el Salón de la Fama.', 'error');
+                return null;
+            }
+            window.clearDonateGamertagError();
+            return { gamertag, message };
+        }
+
+        function registerHallOfFamePending(gamertag, message, channel) {
+            return fetch('/api/hall-of-fame', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'register',
+                    gamertag,
+                    message,
+                    channel
+                })
+            }).then((r) => r.json()).catch(() => null);
+        }
+
+        window.startWompiSupport = function() {
+            const payload = validateDonateGamertag();
+            if (!payload) return;
+
+            // Abrir Wompi de forma síncrona dentro del clic para evitar bloqueos de popup en móvil/iOS
+            window.open(WOMPI_PAYMENT_URL, '_blank', 'noopener,noreferrer');
+
+            registerHallOfFamePending(payload.gamertag, payload.message, 'wompi').then(() => {
+                showToast(`¡Gracias ${payload.gamertag}! Wompi abierto y tu Gamertag quedó registrado para el Salón de la Fama.`, 'success');
+            });
+        };
+
+        window.copyDonationKeyWithGamertag = function() {
+            const payload = validateDonateGamertag();
+            if (!payload) return;
+
+            const key = '@3105643224';
+            const afterCopy = () => {
+                registerHallOfFamePending(payload.gamertag, payload.message, 'llave').then(() => {
+                    showToast(`Llave @3105643224 copiada. ¡${payload.gamertag} quedó registrado para el Salón de la Fama!`, 'success');
+                });
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(key).then(afterCopy).catch(afterCopy);
+            } else {
+                afterCopy();
+            }
+        };
+
+        window.copyDonationKey = window.copyDonationKeyWithGamertag;
+
+        function getHofChannelBadgeHtml(channel) {
+            if (channel === 'llave') {
+                return '<span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/45 text-amber-200 text-[9px] font-orbitron font-bold uppercase whitespace-nowrap">Llave</span>';
+            }
+            return '<span class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/45 text-cyan-200 text-[9px] font-orbitron font-bold uppercase whitespace-nowrap">Wompi</span>';
+        }
+
+        function renderHallOfFameViews() {
+            const approved = Array.isArray(_hofState.approved) ? _hofState.approved : [];
+            const totalBadge = document.getElementById('hofTotalBadge');
+            if (totalBadge) {
+                totalBadge.textContent = `${approved.length} ${approved.length === 1 ? 'Spartan' : 'Spartans'}`;
+            }
+
+            const previewEl = document.getElementById('donateHofPreview');
+            if (previewEl) {
+                if (approved.length === 0) {
+                    previewEl.innerHTML = '<div class="p-2.5 rounded-lg bg-[#041020] border border-cyan-500/20 text-[11px] text-slate-400 text-center">Sé el primer Spartan en inaugurar el Salón de la Fama de Halo Match.</div>';
+                } else {
+                    previewEl.innerHTML = approved.slice(0, 3).map((item) => `
+                        <div class="px-3 py-2 rounded-lg bg-[#041020] border border-amber-400/30 flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-amber-300 text-xs shrink-0"></i>
+                                <span class="font-orbitron font-bold text-xs text-white truncate">${escapeHofText(item.gamertag)}</span>
+                            </div>
+                            ${getHofChannelBadgeHtml(item.channel)}
+                        </div>
+                    `).join('');
+                }
+            }
+
+            const listEl = document.getElementById('hofListContainer');
+            if (listEl) {
+                if (approved.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="col-span-full p-6 rounded-xl bg-[#041020] border border-amber-400/25 text-center space-y-2">
+                            <i class="fa-solid fa-crown text-2xl text-amber-300/80"></i>
+                            <div class="font-orbitron font-bold text-sm text-amber-200">El Salón de la Fama espera a su primer Spartan</div>
+                            <p class="text-xs text-slate-400">Apoya por Wompi o Llave @3105643224 dejando tu Gamertag para aparecer aquí.</p>
+                        </div>
+                    `;
+                } else {
+                    listEl.innerHTML = approved.map((item, idx) => `
+                        <div class="p-3.5 rounded-xl bg-gradient-to-br from-[#06182d] to-[#040f1d] border ${idx === 0 ? 'border-amber-400/60 shadow-[0_0_16px_rgba(251,191,36,0.12)]' : 'border-cyan-500/30'} flex flex-col justify-between gap-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0 flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-400/45 text-amber-300 flex items-center justify-center shrink-0 text-xs">
+                                        <i class="fa-solid ${idx === 0 ? 'fa-crown' : 'fa-medal'}"></i>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <div class="font-orbitron font-bold text-xs sm:text-sm text-white truncate">${escapeHofText(item.gamertag)}</div>
+                                        <div class="text-[10px] text-slate-400">${escapeHofText(item.dateLabel || 'Spartan Honorario')}</div>
+                                    </div>
+                                </div>
+                                ${getHofChannelBadgeHtml(item.channel)}
+                            </div>
+                            ${item.message ? `<p class="text-[11px] text-cyan-100/85 italic border-t border-cyan-500/15 pt-1.5">"${escapeHofText(item.message)}"</p>` : ''}
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function renderAdminHallOfFame() {
+            const pending = Array.isArray(_hofState.pending) ? _hofState.pending : [];
+            const approved = Array.isArray(_hofState.approved) ? _hofState.approved : [];
+
+            const badge = document.getElementById('adminHofPendingBadge');
+            if (badge) {
+                badge.textContent = `${pending.length} ${pending.length === 1 ? 'pendiente' : 'pendientes'}`;
+                badge.className = pending.length > 0
+                    ? 'px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-200 text-[10px] font-semibold whitespace-nowrap'
+                    : 'px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold whitespace-nowrap';
+            }
+
+            const pList = document.getElementById('adminHofPendingList');
+            if (pList) {
+                if (pending.length === 0) {
+                    pList.innerHTML = '<div class="text-[11px] text-slate-500 py-2">No hay registros pendientes por aprobar.</div>';
+                } else {
+                    pList.innerHTML = pending.map((item) => `
+                        <div class="p-2.5 rounded-lg bg-[#090d14] border border-amber-400/35 flex flex-wrap items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-orbitron font-bold text-xs text-white truncate">${escapeHofText(item.gamertag)}</span>
+                                    ${getHofChannelBadgeHtml(item.channel)}
+                                </div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">${escapeHofText(item.dateLabel || '')}${item.message ? ` • "${escapeHofText(item.message)}"` : ''}</div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="adminApproveHof('${escapeHofText(item.id)}')" class="ek-btn px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/60 text-emerald-200 font-orbitron font-bold text-[10px]">
+                                    <i class="fa-solid fa-check mr-1"></i>Aprobar
+                                </button>
+                                <button type="button" onclick="adminDeleteHof('${escapeHofText(item.id)}')" class="ek-btn px-2 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 border border-rose-400/50 text-rose-200 text-[10px]" title="Descartar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            const aList = document.getElementById('adminHofApprovedList');
+            if (aList) {
+                if (approved.length === 0) {
+                    aList.innerHTML = '<div class="text-[11px] text-slate-500 py-1">Aún no hay Spartans aprobados.</div>';
+                } else {
+                    aList.innerHTML = approved.map((item) => `
+                        <div class="px-2.5 py-1.5 rounded-lg bg-[#090d14] border border-slate-800 flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex items-center gap-2">
+                                <span class="font-orbitron font-bold text-xs text-amber-200 truncate">${escapeHofText(item.gamertag)}</span>
+                                ${getHofChannelBadgeHtml(item.channel)}
+                            </div>
+                            <button type="button" onclick="adminDeleteHof('${escapeHofText(item.id)}')" class="ek-btn px-2 py-1 rounded bg-slate-800 hover:bg-rose-500/25 border border-slate-700 hover:border-rose-400/50 text-slate-300 hover:text-rose-200 text-[10px]" title="Quitar del Salón">
+                                Quitar
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        window.loadHallOfFameData = async function(includePending = false) {
+            try {
+                const url = `/api/hall-of-fame?t=${Date.now()}${includePending ? '&includePending=1' : ''}`;
+                const res = await fetch(url, { cache: 'no-store' });
+                const data = await res.json();
+                if (data && data.ok) {
+                    _hofState = {
+                        approved: Array.isArray(data.approved) ? data.approved : [],
+                        pending: includePending && Array.isArray(data.pending) ? data.pending : _hofState.pending,
+                        loaded: true
+                    };
+                    renderHallOfFameViews();
+                    if (includePending) renderAdminHallOfFame();
+                }
+            } catch (e) {}
+        };
+
+        window.adminApproveHof = async function(id) {
+            try {
+                const res = await fetch('/api/hall-of-fame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'approve', id })
+                });
+                const data = await res.json();
+                if (data && data.ok) {
+                    _hofState = { approved: data.approved || [], pending: data.pending || [], loaded: true };
+                    renderHallOfFameViews();
+                    renderAdminHallOfFame();
+                    showToast('¡Spartan aprobado en el Salón de la Fama!', 'success');
+                }
+            } catch (e) {
+                showToast('No se pudo aprobar en este momento.', 'error');
+            }
+        };
+
+        window.adminDeleteHof = async function(id) {
+            try {
+                const res = await fetch('/api/hall-of-fame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id })
+                });
+                const data = await res.json();
+                if (data && data.ok) {
+                    _hofState = { approved: data.approved || [], pending: data.pending || [], loaded: true };
+                    renderHallOfFameViews();
+                    renderAdminHallOfFame();
+                    showToast('Registro actualizado.', 'info');
+                }
+            } catch (e) {
+                showToast('No se pudo eliminar en este momento.', 'error');
+            }
+        };
+
+        window.adminAddManualHof = async function() {
+            const tagInp = document.getElementById('adminHofManualTag');
+            const chInp = document.getElementById('adminHofManualChannel');
+            const msgInp = document.getElementById('adminHofManualMsg');
+            const gamertag = (tagInp?.value || '').replace(/\s+/g, ' ').trim();
+            if (gamertag.length < 2) {
+                showToast('Escribe el Gamertag o Nombre del Spartan.', 'error');
+                tagInp?.focus();
+                return;
+            }
+            try {
+                const res = await fetch('/api/hall-of-fame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'add_approved',
+                        gamertag,
+                        channel: chInp?.value || 'wompi',
+                        message: (msgInp?.value || '').trim()
+                    })
+                });
+                const data = await res.json();
+                if (data && data.ok) {
+                    if (tagInp) tagInp.value = '';
+                    if (msgInp) msgInp.value = '';
+                    _hofState = { approved: data.approved || [], pending: data.pending || [], loaded: true };
+                    renderHallOfFameViews();
+                    renderAdminHallOfFame();
+                    showToast(`¡${gamertag} agregado al Salón de la Fama!`, 'success');
+                } else {
+                    showToast(data?.error || 'No se pudo agregar.', 'error');
+                }
+            } catch (e) {
+                showToast('Error al agregar al Salón de la Fama.', 'error');
+            }
+        };
+
         window.openDonateModal = function() {
             const modal = document.getElementById('donateModal');
-            const methods = document.getElementById('donateMethodsContainer');
-            const label = document.getElementById('donateMethodsBtnLabel');
-            const chevron = document.getElementById('donateMethodsChevron');
-            if (methods) methods.classList.add('hidden');
-            if (label) label.textContent = 'Ver opciones de apoyo';
-            if (chevron) chevron.className = 'fa-solid fa-chevron-down text-[10px]';
+            window.clearDonateGamertagError();
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             }
+            window.loadHallOfFameData(false);
         };
 
         window.closeDonateModal = function() {
@@ -3351,26 +3787,20 @@
             }
         };
 
-        window.toggleDonateMethods = function() {
-            const methods = document.getElementById('donateMethodsContainer');
-            const label = document.getElementById('donateMethodsBtnLabel');
-            const chevron = document.getElementById('donateMethodsChevron');
-            if (!methods) return;
-            const isHidden = methods.classList.toggle('hidden');
-            if (label) label.textContent = isHidden ? 'Ver opciones de apoyo' : 'Ocultar opciones de apoyo';
-            if (chevron) chevron.className = isHidden ? 'fa-solid fa-chevron-down text-[10px]' : 'fa-solid fa-chevron-up text-[10px]';
+        window.openHallOfFameModal = function() {
+            const modal = document.getElementById('hallOfFameModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            window.loadHallOfFameData(false);
         };
 
-        window.copyDonationKey = function() {
-            const key = '@3105643224';
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(key).then(() => {
-                    showToast('Llave @3105643224 copiada. ¡Gracias por tu apoyo, Spartan!', 'success');
-                }).catch(() => {
-                    showToast(`Llave de donación: ${key}`, 'info');
-                });
-            } else {
-                showToast(`Llave de donación: ${key}`, 'info');
+        window.closeHallOfFameModal = function() {
+            const modal = document.getElementById('hallOfFameModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
         };
 
